@@ -12,12 +12,12 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity gpu is 
   Port  ( clk,rst : in std_logic;
-          adress : in std_logic_vector (20 downto 0);
-          data_in : in std_logic_vector (3 downto 0);
+          --adress : in std_logic_vector (20 downto 0);
+          --data_in : in std_logic_vector (3 downto 0);
           vga_red, vga_green : out std_logic_vector (2 downto 0);
           vga_blue : out std_logic_vector (2 downto 1);
           hsync, vsync : out std_logic;
-          data_ut : out std_logic_vector (3 downto 0));
+          --data_ut : out std_logic_vector (3 downto 0));
 end gpu;
 
 architecture Behavioral of gpu is
@@ -46,6 +46,7 @@ architecture Behavioral of gpu is
   --       "0110000000010000",
   --       "0110000000010001");
   --signal mem: mem_t := grr;
+  signal video : std_logic;
 begin
   -- GPU clock, 25MHz from 100MHz
   process(clk) begin
@@ -85,26 +86,39 @@ begin
       if rst='1' then
         yctr <= "0000000000";
       elsif xctr=799 and pixel=0 then
-       if yctr=520 then
-         yctr <= "0000000000";
-       else
-         yctr <= yctr + 1;
-       end if;
-       --
-       if yctr=490 then
-         vs <= '0';
-       elsif  yctr=492 then
-         vs <= '1';
-       end if;
+        if yctr=520 then
+          yctr <= "0000000000";
+        else
+          yctr <= yctr + 1;
+        end if;
+        --
+        if yctr=490 then
+          vs <= '0';
+        elsif  yctr=492 then
+          vs <= '1';
+        end if;
       end if;
     end if;
   end process;
   hsync <= hs;
   vsync <= vs;
   
-  vga_red(2 downto 0) <= ('0' & '0' & '0');
-  vga_green(2 downto 0) <= ('1' & '1' & '1');
-  vga_blue(2 downto 1) <= ('0' & '0');
+  --video
+  process(clk) begin
+    if rising_edge(clk) then
+      if pixel=3 then
+        if xctr<640 and yctr<480 then
+          video <= '1';
+        else
+          video <= '0';
+        end if;
+      end if;
+    end if;
+  end process
+
+  vga_red(2 downto 0) <= (video & video & video);
+  vga_green(2 downto 0) <= (video & video & video);
+  vga_blue(2 downto 1) <= (video & video);
 
   -- W/R GPU Memory.
   -- process(clk) begin
