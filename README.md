@@ -1,0 +1,1 @@
+# tsea83-aktakurvan
