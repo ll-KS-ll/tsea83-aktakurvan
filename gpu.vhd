@@ -14,10 +14,10 @@ entity gpu is
   Port  ( clk,rst : in std_logic;
           --adress : in std_logic_vector (20 downto 0);
           --data_in : in std_logic_vector (3 downto 0);
+          --data_ut : out std_logic_vector (3 downto 0);
           vga_red, vga_green : out std_logic_vector (2 downto 0);
           vga_blue : out std_logic_vector (2 downto 1);
-          hsync, vsync : out std_logic;
-          --data_ut : out std_logic_vector (3 downto 0));
+          hsync, vsync : out std_logic);
 end gpu;
 
 architecture Behavioral of gpu is
@@ -114,7 +114,7 @@ begin
         end if;
       end if;
     end if;
-  end process
+  end process;
 
   vga_red(2 downto 0) <= (video & video & video);
   vga_green(2 downto 0) <= (video & video & video);
