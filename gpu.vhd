@@ -21,7 +21,7 @@ entity gpu is
 end gpu;
 
 architecture Behavioral of gpu is
-  signal pixel : std_logic_vector(1 downto 0) := "00";
+  signal pixelclk : std_logic_vector(1 downto 0) := "00";
   signal xctr,yctr : std_logic_vector(9 downto 0) := "0000000000";
 
   signal hs : std_logic := '1';
@@ -46,15 +46,17 @@ architecture Behavioral of gpu is
   --       "0110000000010000",
   --       "0110000000010001");
   --signal mem: mem_t := grr;
-  signal video : std_logic;
+  signal redv : std_logic;
+  signal greenv : std_logic;
+  signal bluev : std_logic;
 begin
   -- GPU clock, 25MHz from 100MHz
   process(clk) begin
      if rising_edge(clk) then
        if rst='1' then
-         pixel <= "00";
+         pixelclk <= "00";
        else
-         pixel <= pixel + 1;
+         pixelclk <= pixelclk + 1;
        end if;
      end if;
   end process;
@@ -64,7 +66,7 @@ begin
     if rising_edge(clk) then
       if rst='1' then
          xctr <= "0000000000";
-      elsif pixel=3 then
+      elsif pixelclk=3 then
        if xctr=799 then
          xctr <= "0000000000";
        else
@@ -85,7 +87,7 @@ begin
     if rising_edge(clk) then
       if rst='1' then
         yctr <= "0000000000";
-      elsif xctr=799 and pixel=0 then
+      elsif xctr=799 and pixelclk=0 then
         if yctr=520 then
           yctr <= "0000000000";
         else
@@ -106,25 +108,33 @@ begin
   --video
   process(clk) begin
     if rising_edge(clk) then
-      if pixel=3 then
-        if xctr<640 and yctr<480 then
-          video <= '1';
+      if pixelclk=3 then
+        if xctr=0,1 or xctr=639,638 or yctr=0,1 or yctr=479,478 then
+          redv<='0';
+          bluev<='1';
+          greenv<='0';
+        elsif xctr<638 and yctr<478 then
+          redv<='1';
+          bluev<='1';
+          greenv<='1';
         else
-          video <= '0';
+          redv<='0';
+          bluev<='0';
+          greenv<='0';
         end if;
       end if;
     end if;
   end process;
 
-  vga_red(2 downto 0) <= (video & video & video);
-  vga_green(2 downto 0) <= (video & video & video);
-  vga_blue(2 downto 1) <= (video & video);
+  vga_red(2 downto 0) <= (redv & redv & redv);
+  vga_green(2 downto 0) <= (greenv & greenv & greenv);
+  vga_blue(2 downto 1) <= (bluev & bluev);
 
   -- W/R GPU Memory.
   -- process(clk) begin
   --  if rising_edge(clk) then
   --    if wea='0' then
-  --      mem(conv_integer(addra)) <= dataina;
+  --      mem(conv_integer(addra)) <= dataina;l
   --    end if;
   --    if web='0' then
   --      mem(conv_integer(addrb)) <= datainb;
