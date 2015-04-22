@@ -23,8 +23,10 @@ architecture arch of cpu is
 	signal IR : std_logic_vector(31 downto 0) := x"00000000";
 	signal PC : std_logic_vector(20 downto 0) := x"0000"; -- PC is the same size as ASR.
 	signal ASR : std_logic_vector(20 downto 0); -- 21 bits, expand to 32 for simplicity?
-	signal AR, HR : std_logic_vector(31 downto 0) := x"00000000"; 
-	
+	signal AR, HR : std_logic_vector(31 downto 0) := x"00000000";
+    signal buss : std_logic_vector(31 downto 0) := x"00000000";  -- buss used inside computer
+
+
 	signal GR0, GR1, GR2, GR3 : std_logic_vector(31 downto 0) := x"00000000";
 	signal GR4, GR5, GR6, GR7 : std_logic_vector(31 downto 0) := x"00000000";
 	signal GR8, GR9, GR10, GR11 : std_logic_vector(31 downto 0) := x"00000000";
@@ -35,8 +37,7 @@ architecture arch of cpu is
 
 	-- Instructions
 	alias OP : std_logic_vector(4 downto 0) is IR(31 downto 27);
-	alias GRx : std_logic_vector(1 downto 0) is IR(26 downto 25);
-	alias GRx2 : std_logic_vector(1 downto 0) is IR(24 downto 23);
+	alias GRx : std_logic_vector(1 downto 0) is IR(26 downto 23);
 	alias M : std_logic_vector(1 downto 0) is IR(22 downto 21);
 	alias ADR : std_logic_vector(20 downto 0) is IR (20 downto 0);
 
@@ -103,24 +104,29 @@ begin
 		if rising_edge(clk) then
 			case ALU is
 				-- Completed
+                -- NOP
 				when "0000" =>	-- NOP, do nothinhg.
 				
 				-- Completed
-				when "0001" => AR <= bus_in;
+                -- AR = buss
+				when "0001" => AR <= buss;
 				
 				-- Completed
-				when "0010" => AR <= not bus_in;
+                -- AR = buss'
+				when "0010" => AR <= not buss;
 				
 				-- Completed
+                -- AR = 0
 				when "0011" => AR <= x"00000000";
 											 Z <= '1';
 											 N <= '0';
 				
 				-- TODO: Add code for flags.
-				when "0100" => AR <= AR + bus_in;
+                -- AR = AR + buss
+				when "0100" => AR <= AR + buss;
 											 -- Z <= '1' when AR=0 else '0';
 											 -- N <= '1' when AR(31)='1' else '0';
-											 if (AR + bus_in)=0 then Z <= '1';
+											 if (AR + buss)=0 then Z <= '1';
 																				else Z <= '0';
 											 end if;
 											 if AR(31)='1' then N <= '1'; -- broken
@@ -128,10 +134,11 @@ begin
 											 end if;
 				
 				-- TODO: Add code for flags.
-				when "0101" => AR <= AR - bus_in;
+                -- AR = AR - buss
+				when "0101" => AR <= AR - buss;
 											 --Z <= '1' when AR=0 else '0';
 											 --N <= '1' when AR(31)='1' else '0';
-											 if (AR - bus_in)=0 then Z <= '1';
+											 if (AR - buss)=0 then Z <= '1';
 											 				 else Z <= '0';
 											 end if;
 											 if AR(31)='1' then N <= '1'; -- broken
@@ -139,31 +146,35 @@ begin
 											 end if;
 
 				-- Completed
-				when "0110" => AR <= AR and bus_in;
+                -- AR = AR & buss
+				when "0110" => AR <= AR and buss;
 											 --Z <= '1' when AR=0 else '0';
 											 --N <= '1' when AR(31)='1' else '0';
-											 if (AR and bus_in)=0 then Z <= '1';
+											 if (AR and buss)=0 then Z <= '1';
 											 				 else Z <= '0';
 											 end if;
-											 if (AR(31) and bus_in(31))='1' then N <= '1';
+											 if (AR(31) and buss(31))='1' then N <= '1';
 											 							 								else N <= '0';
 											 end if;
 
 				-- Completed
+                -- AR = AR or buss
 				when "0111" => AR <= AR or bus_in;
 											 --Z <= '1' when AR=0 else '0';
 											 --N <= '1' when AR(31)='1' else '0';
-											 if (AR or bus_in)=0 then Z <= '1';
+											 if (AR or buss)=0 then Z <= '1';
 											 									 else Z <= '0';
 											 end if;
-											 if (AR(31) or bus_in(31))='1' then N <= '1';
+											 if (AR(31) or buss(31))='1' then N <= '1';
 											 														 else N <= '0';
 											 end if;
 
 				-- Completed
-				when "0111" => AR <= AR + bus_in; -- No flags.
+                -- AR = AR + buss (no flags)
+				when "0111" => AR <= AR + bus_in;
 				
 				-- Completed
+                -- Logic shift left
 				when "1001" => AR(31 downto 0) <= AR(30 downto 0) & '0'; -- Shift Left Logic.
 											 --Z <= '1' when AR(30 downto 0)=0 else '0';
 											 --N <= '1' when AR(30)='1' else '0';
@@ -178,7 +189,7 @@ begin
 				-- Unusefull
 				when "1010" => -- ARHR << 1  Not usefull for us. 
 				
-				-- Unusefull
+				-- Unusefull?
 				when "1011" => -- AR >> 1 (arithmetic). Not usefull for us.
 				
 				-- Unusefull
@@ -274,13 +285,13 @@ begin
 		if rising_edge(clk) then
 			case TB is 
 				when "000" => -- Nope  
-				when "001" => bus_out <= IR;
-				when "010" => -- bus_out <= PM:
-				when "011" => bus_out <= PC;
-				when "100" => bus_out <= AR;
-				when "101" => bus_out <= HR;
-				when "110" => bus_out <= GRx;
-				when "111" => bus_out <= "0000" & uIR;
+				when "001" => buss <= IR;
+				when "010" => buss <= bus_in:
+				when "011" => buss <= PC;
+				when "100" => buss <= AR;
+				when "101" => buss <= HR;
+                when "110" => -- handled in another process
+				when others => buss <= "0000" & uIR; -- 111
 			end case ;
 		end if;
 	end process;
@@ -288,15 +299,15 @@ begin
 	-- FB
 	process(clk) begin
 		if rising_edge(clk) then
-			case TB is 
+			case FB is 
 				when "000" => -- Nope  
-				when "001" => IR <= bus_in;
-				when "010" => -- PM <= bus_in;
-				when "011" => PC <= bus_in;
+				when "001" => IR <= buss;
+				when "010" => bus_out <= buss;
+				when "011" => PC <= buss;
 				when "100" => -- undefined
-				when "101" => HR <= bus_in;
-				when "110" => GRx <= bus_in;
-				when "111" => ASR <= bus_in;
+				when "101" => HR <= buss;
+                when "110" => -- handled in another process 
+				when others => ASR <= buss; -- 111
 			end case ;
 		end if;
 	end process;
@@ -311,5 +322,48 @@ begin
 	end process;
 
 	-- Mux for all GR
+    -- Dependent: GRx    
+    -- GRx = 0000 gives GR0
+    process(clk) begin
+        if rising_edge(clk) then
+            if TB="110" then
+                case GRx is
+                    when "0000" => buss <= GR0;
+                    when "0001" => buss <= GR1;
+                    when "0010" => buss <= GR2;
+                    when "0011" => buss <= GR3;
+                    when "0100" => buss <= GR4;
+                    when "0101" => buss <= GR5;
+                    when "0110" => buss <= GR6;
+                    when "0111" => buss <= GR7;
+                    when "1000" => buss <= GR8;
+                    when "1001" => buss <= GR9;
+                    when "1010" => buss <= GR10;
+                    when "1011" => buss <= GR11;
+                    when "1100" => buss <= GR12;
+                    when "1101" => buss <= GR13;
+                    when "1110" => buss <= GR14;
+                    when others => buss <= GR15;
+            elsif FB="110" then
+                case GRx is
+                    when "0000" => GR0 <= buss;
+                    when "0001" => GR1 <= buss;
+                    when "0010" => GR2 <= buss;
+                    when "0011" => GR3 <= buss;
+                    when "0100" => GR4 <= buss;
+                    when "0101" => GR5 <= buss;
+                    when "0110" => GR6 <= buss;
+                    when "0111" => GR7 <= buss;
+                    when "1000" => GR8 <= buss; 
+                    when "1001" => GR9 <= buss;
+                    when "1010" => GR10 <= buss;
+                    when "1011" => GR11 <= buss;
+                    when "1100" => GR12 <= buss;
+                    when "1101" => GR13 <= buss;
+                    when "1110" => GR14 <= buss;
+                    when others => GR15 <= buss;
+            end if;
+        end if;       
+    end process;
 
 end architecture ; -- arch
