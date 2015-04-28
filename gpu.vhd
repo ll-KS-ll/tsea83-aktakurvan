@@ -15,6 +15,7 @@ entity gpu is
           --adress : in std_logic_vector (20 downto 0);
           --data_in : in std_logic_vector (3 downto 0);
           --data_ut : out std_logic_vector (3 downto 0);
+          --bus_in : in std_logic_vector(31 downto 0);
           vga_red, vga_green : out std_logic_vector (2 downto 0);
           vga_blue : out std_logic_vector (2 downto 1);
           hsync, vsync : out std_logic);
@@ -51,6 +52,7 @@ architecture Behavioral of gpu is
       x"00",
       x"FF"); -- White
   signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
+  
   -- GPU RAM
   type ram_t is array (0 to 239) of std_logic_vector (1279 downto 0);
   signal gpu_memory: ram_t := ((others=> (others=>'1'))); -- Init every bit in memory to 1. 
