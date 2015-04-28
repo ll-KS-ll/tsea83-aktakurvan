@@ -18,7 +18,7 @@ end uart;
 architecture Behavioral of uart is
     signal txd1,txd2 : std_logic; --insignalsvippor
     signal sp,lp : std_logic; --shiftpulse, loadpulse
-    signal idle : std_logic; -- if running or not
+    signal running : std_logic; -- if running or not
     signal pulsenr : std_logic_vector(3 downto 0) := B"0000"; --current pulse number
     signal clknr : std_logic_vector(9 downto 0) := B"0000000000"; --current clk number
     signal shiftreg : std_logic_vector(9 downto 0) := B"0_0000_0000_0"; -- 10 bit skiftregister
@@ -45,11 +45,10 @@ end process;
 --uart controller
 process(clk) begin
     if rising_edge(clk) then
-        if idle='1' then --uart is running        
+        if running='1' then --uart is running        
             if rst='1' then --reset uart
-                sp, lp <= '0';
+                running <= '0';
             elsif pulsenr/=ENDPULSE then --recieve the 8 data bits
-                --lp <= '0';
                 clknr <= clknr+1;
                 if clknr=MIDCLK then --shift in data bit
                     sp <= '1';
@@ -61,13 +60,14 @@ process(clk) begin
                 end if;
             elsif pulsenr=ENDPULSE and clknr=ENDCLK then -- send out data
                 lp <= '1';
-                idle <= '0';
+                running <= '0';
             else
+                sp <= '0';
                 clknr <= clknr+1;
             end if;
         else --uart is idle
             if rx2='0' then --startbit is recieved
-                idle <= '1'
+                running <= '1'
                 clknr <= clknr+1;
             else
                 sp, lp, idle <= '0';
