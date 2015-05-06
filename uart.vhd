@@ -12,7 +12,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity uart is
     port ( clk,rst,txd : in std_logic;
-           datareg : out std_logic_vector(7 downto 0);
+           uartOut : out std_logic_vector(7 downto 0);
             seg : out std_logic_vector(7 downto 0);
             an : out std_logic_vector(3 downto 0));
 end uart;
@@ -96,9 +96,9 @@ begin
     process (clk) begin
         if rising_edge(clk) then
             if rst='1' then
-                datareg <= (others => '0');
+                uartOut <= (others => '0');
             elsif lp='1' then
-                datareg(7 downto 0) <= shiftreg(8 downto 1); -- set dataregister
+                uartOut(7 downto 0) <= shiftreg(8 downto 1); -- set dataregister
             end if;
         end if;
     end process;
