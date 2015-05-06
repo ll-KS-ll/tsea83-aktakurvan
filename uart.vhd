@@ -20,7 +20,7 @@ architecture Behavioral of uart is
     signal sp,lp : std_logic; --shiftpulse, loadpulse
     signal running : std_logic; -- if running or not
     signal pulsenr : std_logic_vector(3 downto 0) := B"0000"; --current pulse number
-    signal clknr : std_logic_vector(9 downto 0) := B"0000000000"; --current clk number
+    signal clknr : std_logic_vector(9 downto 0) := B"00000_00000"; --current clk number
     signal shiftreg : std_logic_vector(9 downto 0) := B"0_0000_0000_0"; -- 10 bit skiftregister
     signal datareg : std_logic_vector(7 downto 0) := B"0000_0000"; -- 8 bit dataregister
 begin
@@ -99,3 +99,8 @@ process (clk) begin
         end if;
     end if;
 end process;
+
+
+-- leddriver from lab4 (uart), used for testing the uart implementation
+    led: leddriver port map(clk, rst, seg, an, "000000_000000" & datareg(3 downto 0);
+end Behavioral;
