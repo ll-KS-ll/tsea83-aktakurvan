@@ -4,49 +4,53 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE ieee.numeric_std.ALL;
 
-ENTITY lab_tb IS
-END lab_tb;
+ENTITY tb IS
+END tb;
 
-ARCHITECTURE behavior OF lab_tb IS 
+ARCHITECTURE behavior OF tb IS 
 
   -- Component Declaration
-  COMPONENT lab
+  COMPONENT CPU
     PORT(
-      clk,rst : IN std_logic;
-		vgaRed,vgaGreen :OUT std_logic_vector(2 downto 0);
-		vgaBlue :OUT std_logic_vector(2 downto 1);      
-		ca,cb,cc,cd,ce,cf,cg,dp, Hsync,Vsync: OUT std_logic;       
-      an : OUT std_logic_vector(3 downto 0)
-      );
+      clk, rst : in std_logic;
+        bus_in : in std_logic_vector (31 downto 0);
+        bus_out : out std_logic_vector (31 downto 0)
+    );
   END COMPONENT;
+
+  COMPONENT GPU
+    PORT(
+      clk,rst : in std_logic;
+      --adress : in std_logic_vector (20 downto 0);
+      --data_in : in std_logic_vector (3 downto 0);
+      --data_ut : out std_logic_vector (3 downto 0);
+      vga_red, vga_green : out std_logic_vector (2 downto 0);
+      vga_blue : out std_logic_vector (2 downto 1);
+      Hsync, Vsync : out std_logic);
+    );
+  END COMPONENT;    
 
   SIGNAL clk : std_logic := '0';
   SIGNAL rst : std_logic := '0';
-  SIGNAL ca,cb,cc,cd,ce,cf,cg,dp,Hsync,Vsync : std_logic;
-  SIGNAL an :  std_logic_vector(3 downto 0);
-  signal tb_running : boolean := true;
-  signal vgaRed, vgaGreen : STD_LOGIC_VECTOR (2 downto 0);
-  signal vgaBlue : STD_LOGIC_VECTOR (2 downto 1);
+  SIGNAL Hsync,Vsync : std_logic;
+  SIGNAL bus_in :  std_logic_vector(31 downto 0);
+  SIGNAL bus_out : std_logic_vector(31 downto 0);
+  -- SIGNAL tb_running : boolean := true;
+  SIGNAL vgaRed, vgaGreen : STD_LOGIC_VECTOR (2 downto 0);
+  SIGNAL vgaBlue : STD_LOGIC_VECTOR (2 downto 1);
 BEGIN
 
   -- Component Instantiation
   uut: lab PORT MAP(
     clk => clk,
     rst => rst,
-	 vgaRed => vgaRed,
-	 vgaGreen => vgaGreen,
+    bus_in => bus_in,
+    bus_out => bus_out,
+    vgaRed => vgaRed,
+    vgaGreen => vgaGreen,
     vgaBlue => vgaBlue,
-	 Hsync => Hsync,
-	 Vsync => Vsync,
-    ca => ca,
-    cb => cb,     
-    cc => cc,  
-    cd => cd,
-    ce => ce,
-    cf => cf,
-    cg => cg,
-    dp => dp,
-    an => an);
+    Hsync => Hsync,
+    Vsync => Vsync);
 
 
   -- 100 MHz system clock
