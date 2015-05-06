@@ -22,8 +22,8 @@ end cpu;
 architecture arch of cpu is 
 	-- CPU registers
 	signal IR : std_logic_vector(31 downto 0) := x"00000000";
-	signal PC : std_logic_vector(20 downto 0) := x"0000"; -- PC is the same size as ASR.
-	signal ASR : std_logic_vector(20 downto 0); -- 21 bits, expand to 32 for simplicity?
+	signal PC : std_logic_vector(20 downto 0) := '0' & x"00000"; -- PC is the same size as ASR.
+	signal ASR : std_logic_vector(20 downto 0) := '0' & x"00000"; -- 21 bits, expand to 32 for simplicity?
 	signal AR : std_logic_vector(32 downto 0) := '0' & x"00000000"; -- bit 32 is carry-flag
 
   signal buss : std_logic_vector(31 downto 0) := x"00000000";  -- buss used inside computer
@@ -149,7 +149,7 @@ begin
 											 end if;
 
         -- AR = AR + buss (no flags)
-				when "0111" => AR(31 downto 0) <= AR(31 downto 0) + bus_in(31 downto 0);
+				when "1000" => AR(31 downto 0) <= AR(31 downto 0) + bus_in(31 downto 0);
 				
         -- Logic shift left (Z, C flags)
 				when "1001" => AR(31 downto 0) <= AR(30 downto 0) & '0';
@@ -227,9 +227,11 @@ begin
 											 					else uPC <= uPC + 1;
 											 end if;
 
-				when "1010" => if C='0' then uPC <= uADR;
+				when "1101" => if C='0' then uPC <= uADR;
 											 					else uPC <= uPC + 1;
 											 end if;
+
+				when "1110" => -- Undefined
 
 				when "1011" => -- Undefined
 
