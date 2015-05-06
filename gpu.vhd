@@ -21,42 +21,48 @@ entity gpu is
 end gpu;
 
 architecture Behavioral of gpu is
-  signal pixelclk : std_logic_vector(1 downto 0) := "00";
+  -- VGA
+  signal mod_4 : std_logic_vector(1 downto 0) := "00";
   signal xctr,yctr : std_logic_vector(9 downto 0) := "0000000000";
-
   signal hs : std_logic := '1';
   signal vs : std_logic := '1';
+  -- Memmory
+  alias mem_row : std_logic_vector(8 downto 0) is yctr(9 downto 1);
+  alias mem_col : std_logic_vector(8 downto 0) is xctr(9 downto 1);
+  signal pixel : std_logic_vector(8 downto 0) := "000000000";
   
-  --type ram_t is array of (0 to 15) of std_logic_vector (7 downto 0);
-  --constant grr : mem_t :=
-  --      ("0000000000000000",
-  --       "0000000000000000",
-  --       "0000000000000000",
-  --       "0000000000000110",
-  --       "1000100001100000",
-  --       "0110000000010000",
-  --       "0110000000010001",
-  --       "0000000000000000",
-  --       "0000000000000000",
-  --       "0000000000000000",
-  --       "0000000000000110",
-  --       "1000100001100000",
-  --       "0110000000010000",
-  --       "0110000000010001",
-  --       "0110000000010000",
-  --       "0110000000010001");
-  --signal mem: mem_t := grr;
-  signal redv : std_logic;
-  signal greenv : std_logic;
-  signal bluev : std_logic;
+  -- Color palette
+  type color_t is array (0 to 15) of std_logic_vector (7 downto 0);
+  constant colors : color_t := -- "rrrgggbb"
+    ( x"00", -- Black
+      x"E0", -- Red
+      x"03", -- Blue
+      x"FC", -- Yellow
+      x"1C", -- Green/Lime
+      x"1F", -- Aqua
+      x"E3", -- Magenta
+      x"00",  
+      x"00",
+      x"00",
+      x"00",
+      x"00",
+      x"00",
+      x"00",
+      x"00",
+      x"FF"); -- White
+  signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
+  -- GPU RAM
+  type ram_t is array (0 to 239) of std_logic_vector (1279 downto 0);
+  signal gpu_memory: ram_t := ((others=> (others=>'1'))); -- Init every bit in memory to 1. 
+  
 begin
   -- GPU clock, 25MHz from 100MHz
   process(clk) begin
      if rising_edge(clk) then
        if rst='1' then
-         pixelclk <= "00";
+         mod_4 <= "00";
        else
-         pixelclk <= pixelclk + 1;
+         mod_4 <= mod_4 + 1;
        end if;
      end if;
   end process;
@@ -66,12 +72,12 @@ begin
     if rising_edge(clk) then
       if rst='1' then
          xctr <= "0000000000";
-      elsif pixelclk=3 then
-       if xctr=799 then
-         xctr <= "0000000000";
-       else
-         xctr <= xctr + 1;
-       end if;
+      elsif mod_4=3 then
+        if xctr=799 then
+          xctr <= "0000000000";
+        else
+          xctr <= xctr + 1;
+        end if;
       end if;
       -- 
       if xctr=656 then
@@ -87,7 +93,7 @@ begin
     if rising_edge(clk) then
       if rst='1' then
         yctr <= "0000000000";
-      elsif xctr=799 and pixelclk=0 then
+      elsif xctr=799 and mod_4=0 then
         if yctr=520 then
           yctr <= "0000000000";
         else
@@ -105,31 +111,29 @@ begin
   hsync <= hs;
   vsync <= vs;
   
-  --video
+  -- Memory
   process(clk) begin
     if rising_edge(clk) then
-      if pixelclk=3 then
-        if xctr=0,1 or xctr=639,638 or yctr=0,1 or yctr=479,478 then
-          redv<='0';
-          bluev<='1';
-          greenv<='0';
-        elsif xctr<638 and yctr<478 then
-          redv<='1';
-          bluev<='1';
-          greenv<='1';
+      if mod_4=3 then
+        if xctr<640 and yctr<480 then
+          pixel <= mem_col(6 downto 0) & "00"; -- pixel position 
+          video <= gpu_memory(conv_integer(mem_row))(conv_integer(pixel+3) downto conv_integer(pixel));
         else
-          redv<='0';
-          bluev<='0';
-          greenv<='0';
+          video <= "0000";
         end if;
       end if;
     end if;
   end process;
 
-  vga_red(2 downto 0) <= (redv & redv & redv);
-  vga_green(2 downto 0) <= (greenv & greenv & greenv);
-  vga_blue(2 downto 1) <= (bluev & bluev);
-
+  -- Color
+  process(clk) begin
+    if rising_edge(clk) then
+      vga_red(2 downto 0) <= colors(conv_integer(video))(7 downto 5);
+      vga_green(2 downto 0) <= colors(conv_integer(video))(4 downto 2);
+      vga_blue(2 downto 1) <= colors(conv_integer(video))(1 downto 0);
+    end if;
+  end process;
+  
   -- W/R GPU Memory.
   -- process(clk) begin
   --  if rising_edge(clk) then
