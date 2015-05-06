@@ -30,6 +30,8 @@ ARCHITECTURE behavior OF tb IS
     );
   END COMPONENT;    
 
+  -- Internal signals
+
   SIGNAL clk : std_logic := '0';
   SIGNAL rst : std_logic := '0';
   SIGNAL Hsync,Vsync : std_logic;
@@ -41,22 +43,17 @@ ARCHITECTURE behavior OF tb IS
 BEGIN
 
   -- Component Instantiation
-  uut: lab PORT MAP(
-    clk => clk,
-    rst => rst,
-    bus_in => bus_in,
-    bus_out => bus_out,
-    vgaRed => vgaRed,
-    vgaGreen => vgaGreen,
-    vgaBlue => vgaBlue,
-    Hsync => Hsync,
-    Vsync => Vsync);
+    
+    -- ALU 
+    alu0: alu PORT MAP(clk,rst,bus_in,bus_out);
 
+    -- GPU
+    gpu0: gpu PORT MAP(clk, rst, vgaRed, vgaGreen, vgaBlue, Hsync, Vsync);
 
   -- 100 MHz system clock
   clk_gen : process
   begin
-    while tb_running loop
+    while true loop -- while tb_running loop
       clk <= '0';
       wait for 5 ns;
       clk <= '1';
