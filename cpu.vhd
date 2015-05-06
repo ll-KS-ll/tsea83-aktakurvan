@@ -79,26 +79,26 @@ architecture arch of cpu is
 begin 
 	-- K1 - Go to asembler instruction.
 	with OP select
-	K1 <=	x"00" when "00000", -- Change x"0000" to instruction in uMem.
-				x"00" when "00001",
-				x"00" when "00010",
-				x"00" when "00011",
-				x"00" when "00100",
-				x"00" when "00101",
-				x"00" when "00110",
-				x"00" when "00111",
-				x"00" when "01000",
-				x"00" when "01001",
+	K1 <=	x"0A" when "00000", -- ADD,     Change x"0000" to instruction in uMem.
+				x"0D" when "00001", -- SUB
+				x"10" when "00010", -- AND
+				x"13" when "00011", -- BRA
+				x"16" when "00100", -- BNE
+				x"1A" when "00101", -- HALT
+				x"1E" when "00110", -- INC
+				x"21" when "00111", -- DEC
+				x"2A" when "01000", -- LOAD
+				x"2B" when "01001", -- STORE
 				x"00" when "01010",
 				x"00" when "01011",
 				x"00"	when others;
 
 	-- K2 - Choose adressing method.
 	with M select
-	K2 <=	x"00" when "00",  -- Change x"0000" to adressing method in uMem.
-				x"00" when "01",
-				x"00" when "10",
-				x"00" when "11";
+	K2 <=	x"03" when "00", -- EA Direkt,   Change x"0000" to adressing method in uMem.
+				x"04" when "01", -- EA Imidiate
+				x"05" when "10", -- EA Indirekt
+				x"08" when "11"; -- EA Indexerad
 	
 	-- ALU
 	process(clk) begin  
