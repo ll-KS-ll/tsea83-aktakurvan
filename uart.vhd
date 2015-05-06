@@ -16,6 +16,14 @@ entity uart is
 end uart;
 
 architecture Behavioral of uart is
+    -- leddriver used for testing, temporary
+    component leddriver
+    Port ( clk,rst : in  STD_LOGIC;
+           seg : out  STD_LOGIC_VECTOR(7 downto 0);
+           an : out  STD_LOGIC_VECTOR (3 downto 0);
+           value : in  STD_LOGIC_VECTOR (15 downto 0));
+    end component;
+    
     signal txd1,txd2 : std_logic; --insignalsvippor
     signal sp,lp : std_logic; --shiftpulse, loadpulse
     signal running : std_logic; -- if running or not
