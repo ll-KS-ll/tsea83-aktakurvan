@@ -18,6 +18,9 @@ entity gpu is
           vga_red, vga_green : out std_logic_vector (2 downto 0);
           vga_blue : out std_logic_vector (2 downto 1);
           hsync, vsync : out std_logic);
+          -- temp names, used for communicating between gpu and cpu
+          gpu_handshake : inout std_logic_vector(2 downto 0);
+          dbus : inout std_logic_vector(31 downto 0);
 end gpu;
 
 architecture Behavioral of gpu is
