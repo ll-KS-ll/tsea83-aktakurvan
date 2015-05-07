@@ -154,7 +154,7 @@ begin
         -- dbus control
         process(clk) begin
             if rising_edge(clk) then
-                case TB is
+                case TB is -- To dbus controller
                     when "000" => -- NOP
                     when "001" => dbus <= IR;
                     when "010" => -- Tell memory to move PM to dbus
@@ -164,7 +164,7 @@ begin
                     when "110" => -- Tell GR to move GRx to dbus
                     when others => dbus <= X"0" & uIR;
                 end case;
-                case FB is
+                case FB is -- From dbus controller
                     when "000" =>
                     -- cont
                 end case
