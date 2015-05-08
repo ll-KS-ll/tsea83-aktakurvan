@@ -121,9 +121,9 @@ architecture arch of alu is
             if rising_edge(clk) then
                 case alu_dbus
                     when "00" => ;-- NOP
-                    when "01" => dbus <= AR;
-                    when "10" =>  ;-- NOP
-                    when others =>; -- NOP;
+                    when "01" =>    dbus    <= AR;
+                    when "10" =>    HR      <= dbus;
+                    when others =>  dbus    <= HR;
                 end case;
             end if;
         end process;

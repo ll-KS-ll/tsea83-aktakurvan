@@ -140,6 +140,13 @@ begin
             end if;
         end process;
 
+        -- uIR
+        process(clk) begin
+            if rising_edge(clk) then
+                uIR <=  uMem(uPC);
+            end if;
+        end process;
+
         -- PC
         process(clk) begin
             if rising_edge(clk) then
@@ -150,6 +157,9 @@ begin
         end process;
 
         -- Control signals
+        -- ####### IMPORTANT ########
+        -- Setting alu_dbus and greg_dbus to '0' when its being set to '1' in the same
+        -- clockcycle might cause issues. Be aware!
         process(clk) begin
             if rising_edge(clk) then
                 
@@ -179,10 +189,11 @@ begin
                     when "010" => ;-- Tell memory to move PM to dbus
                     when "011" => dbus <= PC;
                     when "100" => contr_alu(5 downto 4)     <= "01"; -- Tells ALU to move from AR to dbus! 
-                                alu_dbus <= '1';
-                    when "101" => ;-- dbus <= HR (We have HR but not enough contr signals.)
+                                  alu_dbus                  <= '1';
+                    when "101" => contr_alu(5 downto 4)     <= "11";-- dbus <= HR 
+                                  alu_dbus                  <= '1';
                     when "110" => contr_greg(5 downto 4)    <= "01";-- Tells General Registers to move GRx to dbus
-                                greg_dbus <= '1'; 
+                                  greg_dbus                 <= '1'; 
                     when others => dbus <= X"0" & uIR;
                 end case;
                 case FB is -- From dbus controller
@@ -191,9 +202,10 @@ begin
                     when "010" => ;-- From dbus to memory
                     when "011" => PC <= dbus;
                     when "100" => ;-- NOP
-                    when "101" => ;-- HR <= dbus (we have HR but not enough contr signals
+                    when "101" => contr_alu(5 downto 4)     <= "10"; -- HR <= dbus 
+                                  alu_dbus                  <= '1';
                     when "110" => contr_greg(5 downto 4)    <= "10"; -- Tells General Registers to move from dbus to GRx
-                                greg_dbus <= '1';
+                                  greg_dbus                 <= '1';
                     when others => ;--Tell areg to move from dbus to ASR
                 end case
             end if;
