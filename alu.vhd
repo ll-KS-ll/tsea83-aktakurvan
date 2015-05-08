@@ -13,10 +13,10 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 -- ALU
 entity alu is
         port(
-            clk, rst        : in std_logic;
-            dbus            : inout std_logic_vector(31 downto 0);
-            contr_alu       : in std_logic_vector(5 downto 0); -- Needs to be six so we can tel AUu when to move to dbus
-            Z, C, L         : inout std_logic
+            clk, rst        : in         std_logic;
+            dbus            : inout      std_logic_vector(31 downto 0);
+            contr_alu       : in         std_logic_vector(5 downto 0); -- Needs to be six so we can tel AUu when to move to dbus
+            Z, C, L         : inout      std_logic
             );
 end alu;
 
@@ -117,14 +117,17 @@ architecture arch of alu is
         end process;
 
         -- dbus controller
+        -- If more signals are added we can use HR aswell
         process(clk) begin
             if rising_edge(clk) then
                 case alu_dbus
                     when "00" => -- NOP
                     when "01" => dbus <= AR;
+                                contr_alu(5 downto 4) <= "00"; -- Reset so it doesn't move again.
                     when "10" => AR <= dbus;
                     when others => -- NOP;
                 end case;
             end if;
         end process;
                                 
+end architecture;

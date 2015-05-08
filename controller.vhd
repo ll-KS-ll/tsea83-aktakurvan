@@ -18,7 +18,8 @@ entity controller is
             -- Finish these, vectors are not final size
             contr_areg      : out       std_logic_vector(1 downto 0);
             contr_alu       : out       std_logic_vector(5 downto 0);
-            contr_memory    : out       std_logic_vector(1 downto 0)
+            contr_memory    : out       std_logic_vector(1 downto 0);
+            contr_greg      : out       std_logic_vector(5 downto 0);
             Z, C, L         : inout     std_logic;
             );
 end controller;
@@ -147,7 +148,8 @@ begin
         -- Control signals
         process(clk) begin
             if rising_edge(clk) then
-                contr_alu(3 downto 0) <= ALU(3 downto 0);
+                contr_alu(3 downto 0)   <= ALU(3 downto 0);
+                contr_greg(3 downto 0)  <= GRx(3 downto 0);
             end if;
         end process;
 
@@ -155,22 +157,26 @@ begin
         process(clk) begin
             if rising_edge(clk) then
                 case TB is -- To dbus controller
-                    when "000" => -- NOP
+                    when "000" => ;-- NOP
                     when "001" => dbus <= IR;
-                    when "010" => -- Tell memory to move PM to dbus
+                    when "010" => ;-- Tell memory to move PM to dbus
                     when "011" => dbus <= PC;
-                    when "100" => contr_alu(5 downto 4) <= "01"; 
-                    when "101" => -- dbus <= HR (we dont have HR)
-                    when "110" => -- Tell GR to move GRx to dbus
+                    when "100" => contr_alu(5 downto 4)     <= "01"; -- Tells ALU to move from AR to dbus! 
+                    when "101" => ;-- dbus <= HR (We have HR but not enough contr signals.)
+                    when "110" => contr_greg(5 downto 4)    <= "01";-- Tells General Registers to move GRx to dbus
                     when others => dbus <= X"0" & uIR;
                 end case;
                 case FB is -- From dbus controller
-                    when "000" =>
-                    -- cont
+                    when "000" => ;-- NOP
+                    when "001" => IR <= dbus;
+                    when "010" => ;-- From dbus to memory
+                    when "011" => PC <= dbus;
+                    when "100" => contr_alu(5 downto 4)     <= "10"; -- Tells ALU to move from dbus to AR!
+                    when "101" => ;-- HR <= dbus (we have HR but not enough contr signals
+                    when "110" => contr_greg(5 downto 4)    <= "10"; -- Tells General Registers to move from dbus to GRx
+                    when others => ;--Tell areg to move from dbus to ASR
                 end case
             end if;
         end Process
                                     
-
-
-
+end architecture;
