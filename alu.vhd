@@ -22,11 +22,11 @@ end alu;
 
 architecture arch of alu is
         -- Registers
-        signal AR           : std_logic_vector(31 downto 0)     := X"0000_0000";
-        signal HR           : std_logic_vector(31 downto 0)     := X"0000_0000";
+        signal AR           : std_logic_vector(32 downto 0)     := X"0000_0000";
+        signal HR           : std_logic_vector(32 downto 0)     := X"0000_0000";
 
-        -- Bus control
-        alias alu_dbus      : std_logic_vector(1 downto 0)      is contr_alu(5 downto 4);
+        -- Dbus control
+        alias alu_dbus      : std_logic_vector(1 downto 0)      is contr_alu(5 downto 4);      
         -- Alu control
         alias c_alu         : std_logic_vector(3 downto 0)      is contr_alu(3 downto 0);
         
@@ -91,7 +91,7 @@ architecture arch of alu is
                     -- Increment AR (Z, C)
                     when "1010" => AR <= AR+1;
                                 -- Set Z flag
-                                Z <= '1'; -- Why?
+                                Z <= '0';
                                 -- Set C flag
                                 if AR(31 downto 0)=X"FFFF_FFFF" then C <= '1';
                                 else C <= '0';
@@ -117,17 +117,15 @@ architecture arch of alu is
         end process;
 
         -- dbus controller
-        -- If more signals are added we can use HR aswell
         process(clk) begin
             if rising_edge(clk) then
                 case alu_dbus
-                    when "00" => -- NOP
+                    when "00" => ;-- NOP
                     when "01" => dbus <= AR;
-                                contr_alu(5 downto 4) <= "00"; -- Reset so it doesn't move again.
-                    when "10" => AR <= dbus;
-                    when others => -- NOP;
+                    when "10" =>  ;-- NOP
+                    when others =>; -- NOP;
                 end case;
             end if;
         end process;
                                 
-end architecture;
+end architecture alu;

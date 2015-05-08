@@ -44,12 +44,16 @@ architecture arch of controller is
         --alias 
         alias ALU           : std_logic_vector(3 downto 0)      is uIR(25 downto 22);
         alias TB            : std_logic_vector(2 downto 0)      is uIR(21 downto 19); 
-        alias FB            : std_logic_vector(2 downto 0)      is uIR(18 downto 16); -- Needs to be used in a process
+        alias FB            : std_logic_vector(2 downto 0)      is uIR(18 downto 16); 
 		alias S             : std_logic                         is uIR(15);
         alias P             : std_logic                         is uIR(14);           -- When '1' PC++
 		alias LC            : std_logic_vector(1 downto 0)      is uIR(13 downto 12);
 		alias SEQ           : std_logic_vector(3 downto 0)      is uIR(11 downto 8);
 		alias uADR          : std_logic_vector(7 downto 0)      is uIR(7 downto 0); 
+
+        -- dbus reset signals
+        signal alu_dbus     : std_logic                         := '0';
+        signal greg_dbus    : std_logic                         := '0';
 
         -- uMem
 	    type uMem_t is array(63 downto 0) of std_logic_vector(27 downto 0); -- Expand to 32 for simplicity.
@@ -148,8 +152,21 @@ begin
         -- Control signals
         process(clk) begin
             if rising_edge(clk) then
-                contr_alu(3 downto 0)   <= ALU(3 downto 0);
-                contr_greg(3 downto 0)  <= GRx(3 downto 0);
+                
+                --ALU
+                contr_alu(3 downto 0)       <= ALU(3 downto 0);
+                if alu_dbus='1' then
+                    contr_alu(5 downto 4)   <= "00";
+                    alu_dbus                <= '0';
+                end if;
+
+                --General Registers
+                contr_greg(3 downto 0)      <= GRx(3 downto 0);
+                if greg_dbus='1' then
+                    contr_greg(5 downto 4)  <= "00";
+                    greg_dbus               <= '0';
+                end if;
+
             end if;
         end process;
 
@@ -162,8 +179,10 @@ begin
                     when "010" => ;-- Tell memory to move PM to dbus
                     when "011" => dbus <= PC;
                     when "100" => contr_alu(5 downto 4)     <= "01"; -- Tells ALU to move from AR to dbus! 
+                                alu_dbus <= '1';
                     when "101" => ;-- dbus <= HR (We have HR but not enough contr signals.)
                     when "110" => contr_greg(5 downto 4)    <= "01";-- Tells General Registers to move GRx to dbus
+                                greg_dbus <= '1'; 
                     when others => dbus <= X"0" & uIR;
                 end case;
                 case FB is -- From dbus controller
@@ -171,12 +190,13 @@ begin
                     when "001" => IR <= dbus;
                     when "010" => ;-- From dbus to memory
                     when "011" => PC <= dbus;
-                    when "100" => contr_alu(5 downto 4)     <= "10"; -- Tells ALU to move from dbus to AR!
+                    when "100" => ;-- NOP
                     when "101" => ;-- HR <= dbus (we have HR but not enough contr signals
                     when "110" => contr_greg(5 downto 4)    <= "10"; -- Tells General Registers to move from dbus to GRx
+                                greg_dbus <= '1';
                     when others => ;--Tell areg to move from dbus to ASR
                 end case
             end if;
         end Process
                                     
-end architecture;
+end architecture controller;

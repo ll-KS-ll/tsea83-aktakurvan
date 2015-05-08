@@ -21,15 +21,15 @@ end greg;
 
 architecture arch of greg is
         -- Registers
-        signal GR0, GR1, GR2, GR3       : std_logic_vector(31 downto 0) := x"00000000";
-	    signal GR4, GR5, GR6, GR7       : std_logic_vector(31 downto 0) := x"00000000";
-	    signal GR8, GR9, GR10, GR11     : std_logic_vector(31 downto 0) := x"00000000";
-	    signal GR12, GR13, GR14, GR15   : std_logic_vector(31 downto 0) := x"00000000";
+        signal GR0, GR1, GR2, GR3       : std_logic_vector(31 downto 0) := X"0000_0000";
+	    signal GR4, GR5, GR6, GR7       : std_logic_vector(31 downto 0) := X"0000_0000";
+	    signal GR8, GR9, GR10, GR11     : std_logic_vector(31 downto 0) := X"0000_0000";
+	    signal GR12, GR13, GR14, GR15   : std_logic_vector(31 downto 0) := X"0000_0000";
 
         -- Dbus control
         alias greg_dbus                 : std_logic_vector(1 downto 0)  is contr_greg(5 downto 4);
-       -- General Registers control
-        alias c_greg                    : std_logic_vector(3 downto 0)  is contr_greg(3 downto 0); 
+        -- General Registers control
+        alias c_greg                    : std_logic_vector(3 downto 0)  is contr_greg(3 downto 0);
 
         process(clk) begin
             if rising_edge(clk) then
@@ -52,7 +52,6 @@ architecture arch of greg is
                         when "1110" => dbus <= GR14;
                         when others => dbus <= GR15;
                     end case;
-                    greg_dbus <= "00"; -- Reset so we only move ONCE
                 elsif greg_dbus="10" then
                     case c_greg is
                         when "0000" => GR0 <= dbus;
@@ -72,10 +71,9 @@ architecture arch of greg is
                         when "1110" => GR14 <= dbus;
                         when others => GR15 <= dbus;
                     end case;
-                    greg_dbus <= "00"; -- Reset so we only move ONCE
                 end if;
             end if;       
         end process;
 
-end architecture;
+end architecture greg;
 
