@@ -10,6 +10,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 -- library UNISIM;
 -- use UNISIM.VComponents.all;
 
+-- CPU without support for 2-compliment.
 entity cpu is 
 	Port( clk, rst : in std_logic;
 				-- TODO: Implement an actually working bus.
@@ -21,19 +22,19 @@ end cpu;
 architecture arch of cpu is 
 	-- CPU registers
 	signal IR : std_logic_vector(31 downto 0) := x"00000000";
-	signal PC : std_logic_vector(20 downto 0) := x"0000"; -- PC is the same size as ASR.
-	signal ASR : std_logic_vector(20 downto 0); -- 21 bits, expand to 32 for simplicity?
-	signal AR, HR : std_logic_vector(31 downto 0) := x"00000000";
-    signal buss : std_logic_vector(31 downto 0) := x"00000000";  -- buss used inside computer
+	signal PC : std_logic_vector(20 downto 0) := '0' & x"00000"; -- PC is the same size as ASR.
+	signal ASR : std_logic_vector(20 downto 0) := '0' & x"00000"; -- 21 bits, expand to 32 for simplicity?
+	signal AR : std_logic_vector(32 downto 0) := '0' & x"00000000"; -- bit 32 is carry-flag
 
+  signal buss : std_logic_vector(31 downto 0) := x"00000000";  -- buss used inside computer
 
 	signal GR0, GR1, GR2, GR3 : std_logic_vector(31 downto 0) := x"00000000";
 	signal GR4, GR5, GR6, GR7 : std_logic_vector(31 downto 0) := x"00000000";
 	signal GR8, GR9, GR10, GR11 : std_logic_vector(31 downto 0) := x"00000000";
 	signal GR12, GR13, GR14, GR15 : std_logic_vector(31 downto 0) := x"00000000";
 	
-	-- Flags
-	signal Z, N, C, O, L : std_logic := '0';
+	-- Flags: Zero, Carry, Loop
+	signal Z, C, L : std_logic := '0';
 
 	-- Instructions
 	alias OP : std_logic_vector(4 downto 0) is IR(31 downto 27);
@@ -44,16 +45,16 @@ architecture arch of cpu is
 	-- uMem
 	type uMem_t is array(63 downto 0) of std_logic_vector(27 downto 0); -- Expand to 32 for simplicity.
 	constant uMem : uMem_t := ( -- Memory for microprograming code.
-		x"0000000", x"0000000", x"0000000", x"0000000",
-		x"0000000", x"0000000", x"0000000", x"0000000",
-		x"0000000", x"0000000", x"0000000", x"0000000",
-		x"0000000", x"0000000", x"0000000", x"0000000",
-		x"0000000", x"0000000", x"0000000", x"0000000",
-		x"0000000", x"0000000", x"0000000", x"0000000",
-		x"0000000", x"0000000", x"0000000", x"0000000",
-		x"0000000", x"0000000", x"0000000", x"0000000",
-		x"0000000", x"0000000", x"0000000", x"0000000",
-		x"0000000", x"0000000", x"0000000", x"0000000",
+		x"00F8000", x"008A000", x"0004100", x"0078080",
+		x"00FA080", x"0078000", x"00B8080", x"0240000",
+		x"1184000", x"0138080", x"0380000", x"0880000",
+		x"0130180", x"0380000", x"0A80000", x"0130180",
+		x"0380000", x"0C80000", x"0130800", x"02C0000",
+		x"1040000", x"0118180", x"02C0420", x"1040000",
+		x"0118180", x"0000180", x"0000780", x"0130180",
+		x"0380000", x"0A80180", x"0380000", x"1400000",
+		x"0130180", x"0380000", x"0B40000", x"0130180",
+		x"00B0180", x"0190180", x"0000000", x"0000000",
 		x"0000000", x"0000000", x"0000000", x"0000000",
 		x"0000000", x"0000000", x"0000000", x"0000000",
 		x"0000000", x"0000000", x"0000000", x"0000000",
@@ -78,137 +79,110 @@ architecture arch of cpu is
 begin 
 	-- K1 - Go to asembler instruction.
 	with OP select
-	K1 <=	x"00" when "00000", -- Change x"0000" to instruction in uMem.
-				x"00" when "00001",
-				x"00" when "00010",
-				x"00" when "00011",
-				x"00" when "00100",
-				x"00" when "00101",
-				x"00" when "00110",
-				x"00" when "00111",
-				x"00" when "01000",
-				x"00" when "01001",
+	K1 <=	x"0A" when "00000", -- ADD,     Change x"0000" to instruction in uMem.
+				x"0D" when "00001", -- SUB
+				x"10" when "00010", -- AND
+				x"13" when "00011", -- BRA
+				x"16" when "00100", -- BNE
+				x"1A" when "00101", -- HALT
+				x"1E" when "00110", -- INC
+				x"21" when "00111", -- DEC
+				x"2A" when "01000", -- LOAD
+				x"2B" when "01001", -- STORE
 				x"00" when "01010",
 				x"00" when "01011",
 				x"00"	when others;
 
 	-- K2 - Choose adressing method.
 	with M select
-	K2 <=	x"00" when "00",  -- Change x"0000" to adressing method in uMem.
-				x"00" when "01",
-				x"00" when "10",
-				x"00" when "11";
+	K2 <=	x"03" when "00", -- EA Direkt,   Change x"0000" to adressing method in uMem.
+				x"04" when "01", -- EA Imidiate
+				x"05" when "10", -- EA Indirekt
+				x"08" when "11"; -- EA Indexerad
 	
 	-- ALU
 	process(clk) begin  
 		if rising_edge(clk) then
 			case ALU is
-				-- Completed
-                -- NOP
+        -- NOP (No flags)
 				when "0000" =>	-- NOP, do nothinhg.
 				
-				-- Completed
-                -- AR = buss
-				when "0001" => AR <= buss;
+        -- AR = buss (No flags)
+				when "0001" => AR <= C & buss;
 				
-				-- Completed
-                -- AR = buss'
-				when "0010" => AR <= not buss;
+        -- AR = buss' (No flags)
+				when "0010" => AR <= C & not buss;
 				
-				-- Completed
-                -- AR = 0
-				when "0011" => AR <= x"00000000";
+        -- AR = 0 (Z, C flags)
+				when "0011" => AR <= '0' & x"00000000";
 											 Z <= '1';
-											 N <= '0';
+											 C <= '0';
 				
-				-- TODO: Add code for flags.
-                -- AR = AR + buss
-				when "0100" => AR <= AR + buss;
-											 -- Z <= '1' when AR=0 else '0';
-											 -- N <= '1' when AR(31)='1' else '0';
-											 if (AR + buss)=0 then Z <= '1';
-																				else Z <= '0';
+        -- AR = AR + buss (Z, C flags)
+				when "0100" => AR <= AR + ('0' & buss);
+											 if (AR + ('0' & buss))=0 then Z <= '1';
+																								else Z <= '0';
 											 end if;
-											 if AR(31)='1' then N <= '1'; -- broken
-											 							 else N <= '0';
+											 if (AR + ('0' & buss))>('0' & x"11111111") then C <= '1';
+											 																							else C <= '0';
 											 end if;
 				
-				-- TODO: Add code for flags.
-                -- AR = AR - buss
-				when "0101" => AR <= AR - buss;
-											 --Z <= '1' when AR=0 else '0';
-											 --N <= '1' when AR(31)='1' else '0';
+        -- AR = AR - buss (Z, C flags)
+				when "0101" => AR <= AR - ('0' & buss);
 											 if (AR - buss)=0 then Z <= '1';
 											 				 else Z <= '0';
 											 end if;
-											 if AR(31)='1' then N <= '1'; -- broken
-											 							 else N <= '0';
+											 if AR < ('0' & buss) then C <= '1';
+											 											else C <= '0';
 											 end if;
 
-				-- Completed
-                -- AR = AR & buss
-				when "0110" => AR <= AR and buss;
-											 --Z <= '1' when AR=0 else '0';
-											 --N <= '1' when AR(31)='1' else '0';
-											 if (AR and buss)=0 then Z <= '1';
-											 				 else Z <= '0';
-											 end if;
-											 if (AR(31) and buss(31))='1' then N <= '1';
-											 							 								else N <= '0';
+        -- AR = AR & buss (Z-flag)
+				when "0110" => AR(31 downto 0) <= AR(31 downto 0) and buss(31 downto 0);
+											 if (AR(31 downto 0) and buss(31 downto 0))=0 then Z <= '1';
+											 				 																			else Z <= '0';
 											 end if;
 
-				-- Completed
-                -- AR = AR or buss
-				when "0111" => AR <= AR or bus_in;
-											 --Z <= '1' when AR=0 else '0';
-											 --N <= '1' when AR(31)='1' else '0';
+        -- AR = AR or buss (Z-flag)
+				when "0111" => AR <= AR or ('0' & bus_in);
 											 if (AR or buss)=0 then Z <= '1';
 											 									 else Z <= '0';
 											 end if;
-											 if (AR(31) or buss(31))='1' then N <= '1';
-											 														 else N <= '0';
-											 end if;
 
-				-- Completed
-                -- AR = AR + buss (no flags)
-				when "0111" => AR <= AR + bus_in;
+        -- AR = AR + buss (no flags)
+				when "1000" => AR(31 downto 0) <= AR(31 downto 0) + bus_in(31 downto 0);
 				
-				-- Completed
-                -- Logic shift left
-				when "1001" => AR(31 downto 0) <= AR(30 downto 0) & '0'; -- Shift Left Logic.
-											 --Z <= '1' when AR(30 downto 0)=0 else '0';
-											 --N <= '1' when AR(30)='1' else '0';
-											 C <= AR(31);
+        -- Logic shift left (Z, C flags)
+				when "1001" => AR(31 downto 0) <= AR(30 downto 0) & '0';
 											 if AR(30 downto 0)=0 then Z <= '1';
 											 				 							else Z <= '0';
 											 end if;
-											 if AR(30)='1' then N <= '1';
-											 							 else N <= '0';
+											 C <= AR(31);
+
+				-- Increment AR (Z, C)
+				when "1010" => AR <= AR + 1;
+											 Z <= '1';
+											 if AR(31 downto 0)=x"FFFFFFFF" then C <= '1';
+											 									 							else C <= '0';
 											 end if;
 
-				-- Unusefull
-				when "1010" => -- ARHR << 1  Not usefull for us. 
+				-- Undefined
+				when "1011" => -- Undefined
 				
-				-- Unusefull?
-				when "1011" => -- AR >> 1 (arithmetic). Not usefull for us.
+				-- Undefined
+				when "1100" => -- Undefined
 				
-				-- Unusefull
-				when "1100" => -- ARHR >> 1 (arithmetic).   Not usefull for us.
-				
-				-- Completed
-				when "1101" => AR(31 downto 0) <= '0' & AR(31 downto 1); -- Shift Right Logic.
-											 --Z <= '1' when AR(31 downto 1)=0 else '0'; 
+				-- Logic shift right (Z, C flags)
+				when "1101" => AR(31 downto 0) <= '0' & AR(31 downto 1);
 											 if AR(31 downto 1)=0 then Z <= '1';
 											 											else Z <= '0';
 											 end if;
-											 N <= '0';
 											 C <= AR(0);
+
+				-- Undefined
+				when "1110" => -- Undefined
 				
-				-- Unusefull
-				when "1110" => -- Rotate AR left. - Ehm rotate?
-				
-				-- Unusefull
-				when "1111" => -- Rotate ARHR left.  Not usefull for us.
+				-- Undefined
+				when "1111" => -- Undefined
  			
  			end case;
 		end if;
@@ -226,8 +200,7 @@ begin
 				
 				when "0011" => uPC <= x"00";
 
-				when "0100" => --uPC <= uADR when Z='0' else (uPc + 1);
-											 if Z='0' then uPC <= uADR;
+				when "0100" => if Z='0' then uPC <= uADR;
 											 					else uPC <= uPC + 1;
 											 end if;
 
@@ -238,43 +211,31 @@ begin
 				
 				when "0111" => uPc <= SuPC;
 
-				when "1000" => --uPC <= uADR when Z='1' else (uPc + 1);
-											 if Z='1' then uPC <= uADR;
+				when "1000" => if Z='1' then uPC <= uADR;
 											 					else uPC <= uPC + 1;
 											 end if;
 				
-				when "1001" => --uPC <= uADR when N='1' else (uPc + 1);
-											 if N='1' then uPC <= uADR;
+				when "1001" => -- Undefined
+				
+				when "1010" => if C='1' then uPC <= uADR;
 											 					else uPC <= uPC + 1;
 											 end if;
 				
-				when "1010" => --uPC <= uADR when C='1' else (uPc + 1);
-											 if C='1' then uPC <= uADR;
-											 					else uPC <= uPC + 1;
-											 end if;
+				when "1011" => -- Undefined
 				
-				when "1011" => --uPC <= uADR when O='1' else (uPc + 1);
-											 if O='1' then uPC <= uADR;
-											 					else uPC <= uPC + 1;
-											 end if;
-				
-				when "1100" => --uPC <= uADR when L='1' else (uPc + 1);
-											 if L='1' then uPC <= uADR;
+				when "1100" => if L='1' then uPC <= uADR;
 											 					else uPC <= uPC + 1;
 											 end if;
 
-				when "1010" => --uPC <= uADR when C='0' else (uPc + 1);
-											 if C='0' then uPC <= uADR;
+				when "1101" => if C='0' then uPC <= uADR;
 											 					else uPC <= uPC + 1;
 											 end if;
 
-				when "1011" => --uPC <= uADR when O='0' else (uPc + 1);
-											 if O='0' then uPC <= uADR;
-											 					else uPC <= uPC + 1;
-											 end if;
+				when "1110" => -- Undefined
 
-				-- TODO: Add HALT execute code.
-				when "1111" => uPC <= x"00";
+				when "1011" => -- Undefined
+
+				when "1111" => -- Undefined
 
  			end case;
 		end if;
@@ -286,11 +247,11 @@ begin
 			case TB is 
 				when "000" => -- Nope  
 				when "001" => buss <= IR;
-				when "010" => buss <= bus_in:
+				when "010" => buss <= bus_in;
 				when "011" => buss <= PC;
-				when "100" => buss <= AR;
-				when "101" => buss <= HR;
-                when "110" => -- handled in another process
+				when "100" => buss <= AR(31 downto 0);
+				when "101" => -- buss <= HR;
+        when "110" => -- handled in another process
 				when others => buss <= "0000" & uIR; -- 111
 			end case ;
 		end if;
@@ -305,8 +266,8 @@ begin
 				when "010" => bus_out <= buss;
 				when "011" => PC <= buss;
 				when "100" => -- undefined
-				when "101" => HR <= buss;
-                when "110" => -- handled in another process 
+				when "101" => -- HR <= buss;
+        when "110" => -- handled in another process 
 				when others => ASR <= buss; -- 111
 			end case ;
 		end if;
@@ -344,6 +305,7 @@ begin
                     when "1101" => buss <= GR13;
                     when "1110" => buss <= GR14;
                     when others => buss <= GR15;
+                end case;
             elsif FB="110" then
                 case GRx is
                     when "0000" => GR0 <= buss;
@@ -362,6 +324,7 @@ begin
                     when "1101" => GR13 <= buss;
                     when "1110" => GR14 <= buss;
                     when others => GR15 <= buss;
+                end case;
             end if;
         end if;       
     end process;
