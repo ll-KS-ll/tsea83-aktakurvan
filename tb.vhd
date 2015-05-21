@@ -1,54 +1,84 @@
 -- TestBench Template 
 
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
-USE ieee.numeric_std.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
-ENTITY tb IS
-END tb;
+entity tb is
+end tb;
 
-ARCHITECTURE behavior OF tb IS 
+architecture behavior of tb is 
+  
+  component alu 
+    port(
+      clk, rst  : in      std_logic;
+      dbus      : inout   std_logic_vector(31 downto 0);
+      contr_alu : in      std_logic_vector(5 downto 0); -- Needs to be six so we can tel AUu when to move to dbus
+      Z, C, L   : inout   std_logic
+      );
+  end component;
 
-  -- Component Declaration
-  COMPONENT CPU
-    PORT(
-      clk, rst : in std_logic;
-        bus_in : in std_logic_vector (31 downto 0);
-        bus_out : out std_logic_vector (31 downto 0)
+  component controller
+    port( 
+      clk, rst        : in        std_logic;
+      dbus            : inout     std_logic_vector(31 downto 0);
+      contr_areg      : out       std_logic_vector(1 downto 0);
+      contr_alu       : out       std_logic_vector(5 downto 0);
+      contr_memory    : out       std_logic_vector(1 downto 0);
+      contr_greg      : out       std_logic_vector(5 downto 0);
+      Z, C, L         : inout     std_logic
     );
-  END COMPONENT;
+  end component;
 
-  COMPONENT GPU
-    PORT(
+  component greg
+    port(
+      clk, rst        : in         std_logic;
+      dbus            : inout      std_logic_vector(31 downto 0);
+      contr_greg      : in         std_logic_vector(5 downto 0)
+    );
+  end component;
+
+  component gpu
+    port(
       clk,rst : in std_logic;
       --adress : in std_logic_vector (20 downto 0);
       --data_in : in std_logic_vector (3 downto 0);
       --data_ut : out std_logic_vector (3 downto 0);
       vga_red, vga_green : out std_logic_vector (2 downto 0);
       vga_blue : out std_logic_vector (2 downto 1);
-      Hsync, Vsync : out std_logic);
+      hsync,vsync : out std_logic);
     );
-  END COMPONENT;    
+  end component;    
 
   -- Internal signals
 
-  SIGNAL clk : std_logic := '0';
-  SIGNAL rst : std_logic := '0';
-  SIGNAL Hsync,Vsync : std_logic;
-  SIGNAL bus_in :  std_logic_vector(31 downto 0);
-  SIGNAL bus_out : std_logic_vector(31 downto 0);
-  -- SIGNAL tb_running : boolean := true;
-  SIGNAL vgaRed, vgaGreen : STD_LOGIC_VECTOR (2 downto 0);
-  SIGNAL vgaBlue : STD_LOGIC_VECTOR (2 downto 1);
-BEGIN
+  signal clk : std_logic := '0';
+  signal rst : std_logic := '0';
+  signal dbus : std_logic_vector(31 downto 0);
+  signal contr_alu : std_logic_vector(5 downto 0);
+  signal contr_areg : std_logic_vector(1 downto 0);
+  signal contr_memory : std_logic_vector(1 downto 0);
+  signal contr_greg : std_logic_vector(5 downto 0);
+  signal Z, C, L : std_logic
+  signal hsync,vsync : std_logic;
+  signal vga_red, vga_green : std_logic_vector(2 downto 0);
+  signal vga_blue : std_logic_vector(2 downto 1);
+
+begin
 
   -- Component Instantiation
     
-    -- ALU 
-    alu0: alu PORT MAP(clk,rst,bus_in,bus_out);
+  -- ALU 
+  alu0: alu port map(clk,rst,dbus, contr_alu, Z, C, L);
 
-    -- GPU
-    gpu0: gpu PORT MAP(clk, rst, vgaRed, vgaGreen, vgaBlue, Hsync, Vsync);
+  -- Controller
+  controller0: controller port map (clk, rst, dbus, contr_areg, contr_alu, 
+    contr_memory, contr_greg, Z, C, L);
+
+  greg0: greg port map(clk, rst, dbus, contr_greg);
+
+  -- GPU
+  gpu0: gpu port map(clk, rst, vga_red, vga_green, vga_blue, hsync, vsync);
 
   -- 100 MHz system clock
   clk_gen : process
