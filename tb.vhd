@@ -13,7 +13,7 @@ architecture behavior of tb is
     port(
       clk, rst  : in      std_logic;
       dbus      : inout   std_logic_vector(31 downto 0);
-      contr_alu : in      std_logic_vector(5 downto 0); -- Needs to be six so we can tel AUu when to move to dbus
+      contr_alu : inout   std_logic_vector(5 downto 0); -- Needs to be six so we can tel AUu when to move to dbus
       Z, C, L   : inout   std_logic
       );
   end component;
@@ -34,7 +34,15 @@ architecture behavior of tb is
     port(
       clk, rst        : in         std_logic;
       dbus            : inout      std_logic_vector(31 downto 0);
-      contr_greg      : in         std_logic_vector(5 downto 0)
+      contr_greg      : inout      std_logic_vector(5 downto 0)
+    );
+  end component;
+
+  component areg
+    port(
+      clk, rst        : in        std_logic;
+      dbus            : inout     std_logic_vector(31 downto 0);
+      contr_areg      : inout     std_logic_vector(1 downto 0)
     );
   end component;
 
@@ -76,6 +84,8 @@ begin
     contr_memory, contr_greg, Z, C, L);
 
   greg0: greg port map(clk, rst, dbus, contr_greg);
+
+  areg0: areg port map(clk,rst,dbus, contr_areg);
 
   -- GPU
   gpu0: gpu port map(clk, rst, vga_red, vga_green, vga_blue, hsync, vsync);
