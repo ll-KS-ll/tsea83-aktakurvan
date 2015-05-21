@@ -15,7 +15,7 @@ entity alu is
         port(
             clk, rst        : in         std_logic;
             dbus            : inout      std_logic_vector(31 downto 0);
-            contr_alu       : in         std_logic_vector(5 downto 0); -- Needs to be six so we can tel AUu when to move to dbus
+            contr_alu       : inout      std_logic_vector(5 downto 0); -- Needs to be six so we can tel AUu when to move to dbus
             Z, C, L         : inout      std_logic
             );
 end alu;
@@ -120,10 +120,13 @@ architecture arch of alu is
         process(clk) begin
             if rising_edge(clk) then
                 case alu_dbus
-                    when "00" => ;-- NOP
-                    when "01" =>    dbus    <= AR;
+                    when "00" =>    contr_alu(5 downto 4)   <= "00"; -- NOP
+                    when "01" =>    dbus                    <= AR;
+                                    contr_alu(5 downto 4)   <= "00"; -- Reset
                     when "10" =>    HR      <= dbus;
+                                    contr_alu(5 downto 4)   <= "00"; -- Reset
                     when others =>  dbus    <= HR;
+                                    contr_alu(5 downto 4)   <= "00"; -- Reset
                 end case;
             end if;
         end process;

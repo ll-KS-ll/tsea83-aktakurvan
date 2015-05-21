@@ -15,7 +15,7 @@ entity greg is
         port(
             clk, rst        : in         std_logic;
             dbus            : inout      std_logic_vector(31 downto 0);
-            contr_greg      : in         std_logic_vector(5 downto 0);
+            contr_greg      : inout      std_logic_vector(5 downto 0);
             );
 end greg;
 
@@ -31,6 +31,7 @@ architecture arch of greg is
         -- General Registers control
         alias c_greg                    : std_logic_vector(3 downto 0)  is contr_greg(3 downto 0);
 
+        -- To and from Gregs and Dbus
         process(clk) begin
             if rising_edge(clk) then
                 if greg_dbus="01" then
@@ -52,6 +53,7 @@ architecture arch of greg is
                         when "1110" => dbus <= GR14;
                         when others => dbus <= GR15;
                     end case;
+                    contr_greg(5 downto 4) <= "00";
                 elsif greg_dbus="10" then
                     case c_greg is
                         when "0000" => GR0 <= dbus;
@@ -71,6 +73,7 @@ architecture arch of greg is
                         when "1110" => GR14 <= dbus;
                         when others => GR15 <= dbus;
                     end case;
+                    contr_greg(5 downto 4) <= "00";
                 end if;
             end if;       
         end process;
