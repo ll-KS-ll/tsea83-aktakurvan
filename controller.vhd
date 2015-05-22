@@ -20,7 +20,7 @@ entity controller is
             contr_alu       : out       std_logic_vector(5 downto 0);
             contr_memory    : out       std_logic_vector(1 downto 0);
             contr_greg      : out       std_logic_vector(5 downto 0);
-            Z, C, L         : inout     std_logic;
+            Z, C, L         : inout     std_logic
             );
 end controller;
 
@@ -52,24 +52,24 @@ architecture arch of controller is
 		alias uADR          : std_logic_vector(7 downto 0)      is uIR(7 downto 0); 
 
         -- uMem
-	    type uMem_t is array(63 downto 0) of std_logic_vector(27 downto 0); -- Expand to 32 for simplicity.
+	    type uMem_t is array(63 downto 0) of std_logic_vector(31 downto 0); -- Expand to 32 for simplicity.
 	    constant uMem : uMem_t := ( -- Memory for microprograming code.
-		    x"00F8000", x"008A000", x"0004100", x"0078080",
-		    x"00FA080", x"0078000", x"00B8080", x"0240000",
-		    x"1184000", x"0138080", x"0380000", x"0880000",
-		    x"0130180", x"0380000", x"0A80000", x"0130180",
-		    x"0380000", x"0C80000", x"0130800", x"02C0000",
-		    x"1040000", x"0118180", x"02C0420", x"1040000",
-		    x"0118180", x"0000180", x"0000780", x"0130180",
-		    x"0380000", x"0A80180", x"0380000", x"1400000",
-		    x"0130180", x"0380000", x"0B40000", x"0130180",
-		    x"00B0180", x"0190180", x"0000000", x"0000000",
-		    x"0000000", x"0000000", x"0000000", x"0000000",
-		    x"0000000", x"0000000", x"0000000", x"0000000",
-		    x"0000000", x"0000000", x"0000000", x"0000000",
-		    x"0000000", x"0000000", x"0000000", x"0000000",
-		    x"0000000", x"0000000", x"0000000", x"0000000",
-		    x"0000000", x"0000000", x"0000000", x"0000000"
+		    x"000F_8000", x"0008_A000", x"0000_4100", x"0007_8080",
+            x"000F_A080", x"0007_8000", x"000B_8080", x"0024_0000",
+            x"0118_4000", x"0013_8080", x"0038_0000", x"0088_0000",
+		    x"0013_0180", x"0038_0000", x"00A8_0000", x"0013_0180",
+		    x"0038_0000", x"00C8_0000", x"0013_0800", x"002C_0000",
+		    x"0104_0000", x"0011_8180", x"002C_0420", x"0104_0000",
+		    x"0011_8180", x"0000_0180", x"0000_0780", x"0013_0180",
+		    x"0038_0000", x"00A8_0180", x"0038_0000", x"0140_0000",
+		    x"0013_0180", x"0038_0000", x"00B4_0000", x"0013_0180",
+		    x"000B_0180", x"0019_0180", x"0000_0000", x"0000_0000",
+		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
+		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
+		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
+		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
+		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
+		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000"
 		    );
 begin
         -- K1 - Go to instruction 
@@ -139,7 +139,7 @@ begin
         -- uIR
         process(clk) begin
             if rising_edge(clk) then
-                uIR <=  uMem(uPC);
+                uIR <=  uMem(conv_integer(uPC));
             end if;
         end process;
 
@@ -157,7 +157,7 @@ begin
         process(clk) begin
             if rising_edge(clk) then
                 case TB is -- To dbus controller
-                    when "000" => ;-- NOP
+                    when "000" => -- NOP
                     when "001" => dbus <= IR;
                     when "010" => contr_areg(1 downto 0)    <= "01";-- Tell memory to move PM to dbus 
                     when "011" => dbus <= PC;
@@ -167,16 +167,16 @@ begin
                     when others => dbus <= X"0" & uIR;
                 end case;
                 case FB is -- From dbus controller
-                    when "000" => ;-- NOP
+                    when "000" => -- NOP
                     when "001" => IR <= dbus;
-                    when "010" => ;-- From dbus to memory
+                    when "010" => -- From dbus to memory
                     when "011" => PC <= dbus;
-                    when "100" => ;-- NOP
+                    when "100" => -- NOP
                     when "101" => contr_alu(5 downto 4)     <= "10"; -- HR <= dbus 
                     when "110" => contr_greg(5 downto 4)    <= "10"; -- Tells General Registers to move from dbus to GRx
                     when others => contr_areg(1 downto 0)   <= "10"; --Tell areg to move from dbus to ASR
-                end case
+                end case;
             end if;
-        end Process;
+        end process;
                                     
-end architecture controller;
+end architecture;
