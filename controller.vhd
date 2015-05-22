@@ -15,10 +15,12 @@ entity controller is
         port( 
             clk, rst        : in        std_logic;
             dbus            : inout     std_logic_vector(31 downto 0);
-            -- Finish these, vectors are not final size
+            -- Memory
             contr_areg      : out       std_logic_vector(1 downto 0);
+            areg_store      : out       std_logic_vector(20 downto 0);
+            -- Alu
             contr_alu       : out       std_logic_vector(5 downto 0);
-            contr_memory    : out       std_logic_vector(1 downto 0);
+            -- General Registers
             contr_greg      : out       std_logic_vector(5 downto 0);
             Z, C, L         : inout     std_logic
             );
@@ -52,7 +54,7 @@ architecture arch of controller is
 		alias uADR          : std_logic_vector(7 downto 0)      is uIR(7 downto 0); 
 
         -- uMem
-	    type uMem_t is array(63 downto 0) of std_logic_vector(31 downto 0); -- Expand to 32 for simplicity.
+	    type uMem_t is array(0 to 64) of std_logic_vector(31 downto 0); -- Expand to 32 for simplicity.
 	    constant uMem : uMem_t := ( -- Memory for microprograming code.
 		    x"000F_8000", x"0008_A000", x"0000_4100", x"0007_8080",
             x"000F_A080", x"0007_8000", x"000B_8080", x"0024_0000",
@@ -152,6 +154,12 @@ begin
             end if;
         end process;
 
+        -- Update areg_store
+        process(clk) begin
+            if rising_edge(clk) then
+                areg_store <= ADR;
+            end if;
+        end process;
 
         -- dbus control
         process(clk) begin
@@ -159,7 +167,7 @@ begin
                 case TB is -- To dbus controller
                     when "000" => -- NOP
                     when "001" => dbus <= IR;
-                    when "010" => contr_areg(1 downto 0)    <= "01";-- Tell memory to move PM to dbus 
+                    when "010" => contr_areg(1 downto 0)    <= "01"; -- From memory(adr) to dbus 
                     when "011" => dbus <= PC;
                     when "100" => contr_alu(5 downto 4)     <= "01"; -- Tells ALU to move from AR to dbus! 
                     when "101" => contr_alu(5 downto 4)     <= "11"; -- dbus <= HR 
@@ -169,12 +177,12 @@ begin
                 case FB is -- From dbus controller
                     when "000" => -- NOP
                     when "001" => IR <= dbus;
-                    when "010" => -- From dbus to memory
+                    when "010" => contr_areg(1 downto 0)    <= "10";  -- From dbus to memory(ASR)
                     when "011" => PC <= dbus;
                     when "100" => -- NOP
                     when "101" => contr_alu(5 downto 4)     <= "10"; -- HR <= dbus 
                     when "110" => contr_greg(5 downto 4)    <= "10"; -- Tells General Registers to move from dbus to GRx
-                    when others => contr_areg(1 downto 0)   <= "10"; --Tell areg to move from dbus to ASR
+                    when others => contr_areg(1 downto 0)   <= "11"; -- Tell areg to move from dbus to ASR
                 end case;
             end if;
         end process;
