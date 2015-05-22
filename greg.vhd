@@ -15,7 +15,7 @@ entity greg is
         port(
             clk, rst        : in         std_logic;
             dbus            : inout      std_logic_vector(31 downto 0);
-            contr_greg      : inout      std_logic_vector(5 downto 0);
+            contr_greg      : inout      std_logic_vector(5 downto 0)
             );
 end greg;
 
@@ -30,6 +30,8 @@ architecture arch of greg is
         alias greg_dbus                 : std_logic_vector(1 downto 0)  is contr_greg(5 downto 4);
         -- General Registers control
         alias c_greg                    : std_logic_vector(3 downto 0)  is contr_greg(3 downto 0);
+
+begin
 
         -- To and from Gregs and Dbus
         process(clk) begin
@@ -78,5 +80,5 @@ architecture arch of greg is
             end if;       
         end process;
 
-end architecture greg;
+end architecture;
 

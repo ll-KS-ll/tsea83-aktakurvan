@@ -29,7 +29,9 @@ architecture arch of alu is
         alias alu_dbus      : std_logic_vector(1 downto 0)      is contr_alu(5 downto 4);      
         -- Alu control
         alias c_alu         : std_logic_vector(3 downto 0)      is contr_alu(3 downto 0);
-        
+
+begin
+
         -- Alu Math
         process(clk) begin
             if rising_edge(clk) then
@@ -69,8 +71,8 @@ architecture arch of alu is
                     -- AR = AR & dbus (Z)
                     when "0110" => AR <= AR and dbus;
                                 -- Set Z flag
-                                if (AR and dbus)=0 then Z='1';
-                                else Z='0';
+                                if (AR and dbus)=0 then Z <= '1';
+                                else Z <= '0';
                                 end if;
                     -- AR = AR or dbus (Z)
                     when "0111" => AR <= AR or ('0' & dbus);
@@ -87,9 +89,9 @@ architecture arch of alu is
                                 else Z <= '0';
                                 end if;
                                 -- Set C flag
-                                C <= AR(31)
+                                C <= AR(31);
                     -- Increment AR (Z, C)
-                    when "1010" => AR <= AR+1;
+                    when "1010" => AR <= AR + 1;
                                 -- Set Z flag
                                 Z <= '0';
                                 -- Set C flag
@@ -119,7 +121,7 @@ architecture arch of alu is
         -- dbus controller
         process(clk) begin
             if rising_edge(clk) then
-                case alu_dbus
+                case alu_dbus is
                     when "00" =>    contr_alu(5 downto 4)   <= "00"; -- NOP
                     when "01" =>    dbus                    <= AR;
                                     contr_alu(5 downto 4)   <= "00"; -- Reset
@@ -131,4 +133,4 @@ architecture arch of alu is
             end if;
         end process;
                                 
-end architecture alu;
+end architecture;

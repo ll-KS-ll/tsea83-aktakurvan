@@ -40,12 +40,14 @@ architecture arch of areg is
             x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
             x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000"
         );
-        
+
+begin
+
         process(clk) begin
             if rising_edge(clk) then
-                case areg_dbus
+                case areg_dbus is
                     when "00" =>    contr_areg  <= "00"; -- NOP
-                    when "01" =>    dbus        <= pMem_T(ASR);
+                    when "01" =>    dbus        <= pMem(conv_integer(ASR));
                                     contr_areg  <= "00";
                     when "10" =>    ASR         <= dbus;
                                     contr_areg  <= "00";
@@ -54,6 +56,7 @@ architecture arch of areg is
             end if;
         end process;
 
+end architecture ; -- arch
 
 
 
