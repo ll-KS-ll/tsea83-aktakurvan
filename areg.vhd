@@ -16,14 +16,15 @@ entity areg is
             clk, rst        : in        std_logic;
             dbus            : inout     std_logic_vector(31 downto 0);
             contr_areg      : inout     std_logic_vector(1 downto 0);
-            areg_store      : in        std_logic_vector(20 downto 0)
             );
 end areg;
 
 architecture arch of areg is
+        -- Registeers
+        signal ASR          : std_logic_vector(20 downto 0)     := X"000_000";
+
         -- Dbus control
         alias areg_dbus     : std_logic_vector(1 downto 0)      is contr_areg(1 downto 0);
-        alias areg_toStore  : std_logic                         is contr_areg(2);
 
         --PM
         type pMem_t is array(0 to 1024) of std_logic_vector(31 downto 0);
@@ -47,11 +48,12 @@ begin
             if rising_edge(clk) then
                 case areg_dbus is
                     when "00" =>    contr_areg                      <= "00"; -- NOP
-                    when "01" =>    dbus                            <= pMem(conv_integer(areg_store));
+                    when "01" =>    dbus                            <= pMem(conv_integer(ASR));
                                     contr_areg                      <= "00";
-                    when "10" =>    pMem(conv_integer(areg_store)   <= dbus; -- Move to ASR and store it;
+                    when "10" =>    pMem(conv_integer(ASR))         <= dbus; -- Move to ASR and store it;
                                     contr_areg                      <= "00";
-                    when others =>  contr_areg                      <= "00"; -- NOP
+                    when others =>  ASR                             <= dbus; -- From dbus to ASR
+                                    contr_areg                      <= "00";
                 end case;
             end if;
         end process;

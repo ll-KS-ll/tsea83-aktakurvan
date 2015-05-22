@@ -182,7 +182,7 @@ begin
                     when "100" => -- NOP
                     when "101" => contr_alu(5 downto 4)     <= "10"; -- HR <= dbus 
                     when "110" => contr_greg(5 downto 4)    <= "10"; -- Tells General Registers to move from dbus to GRx
-                    when others => contr_areg(1 downto 0)   <= "10"; --Tell areg to move from dbus to ASR
+                    when others => contr_areg(1 downto 0)   <= "11"; -- Tell areg to move from dbus to ASR
                 end case;
             end if;
         end process;
