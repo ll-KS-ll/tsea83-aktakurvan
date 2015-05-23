@@ -13,9 +13,11 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 -- General Registers
 entity greg is
         port(
-            clk, rst        : in         std_logic;
-            dbus            : inout      std_logic_vector(31 downto 0);
-            contr_greg      : inout      std_logic_vector(5 downto 0)
+            clk, rst        : in        std_logic;
+            dbus            : in        std_logic_vector(31 downto 0);
+            gregOut         : out       std_logic_vector(31 downto 0);
+            FB_o            : in        std_logic_vector(2 downto 0);
+            OP_o            : in        std_logic_vector(3 downto 0)
             );
 end greg;
 
@@ -26,38 +28,34 @@ architecture arch of greg is
 	    signal GR8, GR9, GR10, GR11     : std_logic_vector(31 downto 0) := X"0000_0000";
 	    signal GR12, GR13, GR14, GR15   : std_logic_vector(31 downto 0) := X"0000_0000";
 
-        -- Dbus control
-        alias greg_dbus                 : std_logic_vector(1 downto 0)  is contr_greg(5 downto 4);
-        -- General Registers control
-        alias c_greg                    : std_logic_vector(3 downto 0)  is contr_greg(3 downto 0);
 
 begin
 
-        -- To and from Gregs and Dbus
+        -- Output
+        with OP_o select
+                gregOut <=  GR0     when "0000";
+                            GR1     when "0001";
+                            GR2     when "0010";
+                            GR3     when "0011";
+                            GR4     when "0100";
+                            GR5     when "0101";
+                            GR6     when "0110";
+                            GR7     when "0111";
+                            GR8     when "1000";
+                            GR9     when "1001";
+                            GR10    when "1010";
+                            GR11    when "1011";
+                            GR12    when "1100";
+                            GR13    when "1101";
+                            GR14    when "1110";
+                            GR15    when others;
+
+
+        -- Input
         process(clk) begin
             if rising_edge(clk) then
-                if greg_dbus="01" then
-                    case c_greg is
-                        when "0000" => dbus <= GR0;
-                        when "0001" => dbus <= GR1;
-                        when "0010" => dbus <= GR2;
-                        when "0011" => dbus <= GR3;
-                        when "0100" => dbus <= GR4;
-                        when "0101" => dbus <= GR5;
-                        when "0110" => dbus <= GR6;
-                        when "0111" => dbus <= GR7;
-                        when "1000" => dbus <= GR8;
-                        when "1001" => dbus <= GR9;
-                        when "1010" => dbus <= GR10;
-                        when "1011" => dbus <= GR11;
-                        when "1100" => dbus <= GR12;
-                        when "1101" => dbus <= GR13;
-                        when "1110" => dbus <= GR14;
-                        when others => dbus <= GR15;
-                    end case;
-                    contr_greg(5 downto 4) <= "00";
-                elsif greg_dbus="10" then
-                    case c_greg is
+                if FB_o="110" then
+                    case OP_o is
                         when "0000" => GR0 <= dbus;
                         when "0001" => GR1 <= dbus;
                         when "0010" => GR2 <= dbus;
@@ -75,8 +73,7 @@ begin
                         when "1110" => GR14 <= dbus;
                         when others => GR15 <= dbus;
                     end case;
-                    contr_greg(5 downto 4) <= "00";
-                end if;
+                end if;  
             end if;       
         end process;
 

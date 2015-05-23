@@ -14,15 +14,13 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 entity controller is
         port( 
             clk, rst        : in        std_logic;
-            dbus            : inout     std_logic_vector(31 downto 0);
-            -- Memory
-            contr_areg      : out       std_logic_vector(1 downto 0);
-            areg_store      : out       std_logic_vector(20 downto 0);
-            -- Alu
-            contr_alu       : out       std_logic_vector(5 downto 0);
-            -- General Registers
-            contr_greg      : out       std_logic_vector(5 downto 0);
-            Z, C, L         : inout     std_logic
+            dbus            : in        std_logic_vector(31 downto 0);
+            -- Flags 
+            Z, C, L         : in        std_logic;
+            controllerOut   : out       std_logic_vector(31 downto 0);
+            TB_o            : out       std_logic_vector(2 downto 0);
+            FB_o            : out       std_logic_vector(2 downto 0);
+            OP_o            : out       std_logic_vector(3 downto 0)
             );
 end controller;
 
@@ -32,10 +30,10 @@ architecture arch of controller is
         signal PC           : std_logic_vector(31 downto 0)     := X"0000_0000";
 
         --Instructions
-        alias OP            : std_logic_vector(4 downto 0)      is IR(31 downto 27);
-        alias GRx           : std_logic_vector(3 downto 0)      is IR(26 downto 23);
-        alias M             : std_logic_vector(1 downto 0)      is IR(22 downto 21);
-        alias ADR           : std_logic_vector(20 downto 0)     is IR(20 downto 0); 
+        alias OP            : std_logic_vector(3 downto 0)      is IR(31 downto 28);
+        alias GRx           : std_logic_vector(3 downto 0)      is IR(27 downto 24);
+        alias M             : std_logic_vector(1 downto 0)      is IR(23 downto 22);
+        alias ADR           : std_logic_vector(20 downto 0)     is IR(21 downto 0); 
 
         --Micro-programcounters and K-nets
         signal uPC, SuPC    : std_logic_vector(7 downto 0)      := X"00";
@@ -76,18 +74,18 @@ architecture arch of controller is
 begin
         -- K1 - Go to instruction 
         with OP select
-            K1 <=   X"0A" when "00000", -- ADD
-                    X"0D" when "00001", -- SUB
-                    X"10" when "00010", -- AND
-	    	        X"13" when "00011", -- BRA
-			        X"16" when "00100", -- BNE
-			        X"1A" when "00101", -- HALT				       
-                    X"1E" when "00110", -- INC
-			        X"21" when "00111", -- DEC
-			        X"2A" when "01000", -- LOAD
-    				X"2B" when "01001", -- STORE
-	    			X"00" when "01010",
-		    		X"00" when "01011",
+            K1 <=   X"0A" when "0000", -- ADD
+                    X"0D" when "0001", -- SUB
+                    X"10" when "0010", -- AND
+	    	        X"13" when "0011", -- BRA
+			        X"16" when "0100", -- BNE
+			        X"1A" when "0101", -- HALT				       
+                    X"1E" when "0110", -- INC
+			        X"21" when "0111", -- DEC
+			        X"2A" when "1000", -- LOAD
+    				X"2B" when "1001", -- STORE
+	    			X"00" when "1010",
+		    		X"00" when "1011",
 			    	X"00" when others;
 
         -- K2 - Choose adressing mode
@@ -150,41 +148,22 @@ begin
             if rising_edge(clk) then
                 if P='1' then
                     PC <= PC+1;
+                else
+                    PC <= PC;
                 end if;
             end if;
         end process;
 
-        -- Update areg_store
-        process(clk) begin
-            if rising_edge(clk) then
-                areg_store <= ADR;
-            end if;
-        end process;
+        -- FB and TB are clocked so we dont need to clock TBo and FBo
+        TB_o <= TB;
+        FB_o <= FB;
+        OP_o <= OP;
 
-        -- dbus control
-        process(clk) begin
-            if rising_edge(clk) then
-                case TB is -- To dbus controller
-                    when "000" => -- NOP
-                    when "001" => dbus <= IR;
-                    when "010" => contr_areg(1 downto 0)    <= "01"; -- From memory(adr) to dbus 
-                    when "011" => dbus <= PC;
-                    when "100" => contr_alu(5 downto 4)     <= "01"; -- Tells ALU to move from AR to dbus! 
-                    when "101" => contr_alu(5 downto 4)     <= "11"; -- dbus <= HR 
-                    when "110" => contr_greg(5 downto 4)    <= "01"; -- Tells General Registers to move GRx to dbus
-                    when others => dbus <= X"0" & uIR;
-                end case;
-                case FB is -- From dbus controller
-                    when "000" => -- NOP
-                    when "001" => IR <= dbus;
-                    when "010" => contr_areg(1 downto 0)    <= "10";  -- From dbus to memory(ASR)
-                    when "011" => PC <= dbus;
-                    when "100" => -- NOP
-                    when "101" => contr_alu(5 downto 4)     <= "10"; -- HR <= dbus 
-                    when "110" => contr_greg(5 downto 4)    <= "10"; -- Tells General Registers to move from dbus to GRx
-                    when others => contr_areg(1 downto 0)   <= "11"; -- Tell areg to move from dbus to ASR
-                end case;
-            end if;
-        end process;
+        -- From controller to buss
+        with TB select
+            controllerOut <=    IR when "001";
+                                PC when "011";
+                                (others => 'Z') when others;
+                                    
                                     
 end architecture;
