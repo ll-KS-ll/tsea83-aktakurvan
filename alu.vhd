@@ -17,6 +17,7 @@ entity alu is
             dbus            : in        std_logic_vector(31 downto 0);
             aluOut          : out       std_logic_vector(31 downto 0);
             TB_o            : in        std_logic_vector(2 downto 0);
+            ALU_o           : in        std_logic_vector(3 downto 0);
             Z, C, L         : out       std_logic
             );
 end alu;
@@ -31,13 +32,13 @@ begin
         -- Alu Math
         process(clk) begin
             if rising_edge(clk) then
-                case c_alu is
+                case ALU_o is
                     -- NOP (no flags)
                     when "0000" => null;-- Undefined
                     -- AR = dbus (no flags)
-                    when "0001" => AR <= C & dbus;
+                    when "0001" => AR <= '0' & dbus;
                     -- AR = dbus' (no flags);
-                    when "0010" => AR <= C & not dbus;
+                    when "0010" => AR <= '0' & not dbus;
                     -- AR = 0 (Z, C)
                     when "0011" => AR <= '0' & X"0000_0000"; -- 33 bits?
                                 -- Set Z Flag
@@ -116,8 +117,8 @@ begin
 
         -- I/O
         with TB_o select
-                aluOut <=   AR              when "100";
-                            HR              when "101";
+                aluOut <=   AR              when "100",
+                            HR              when "101",
                             (others => 'Z') when others;
 
                                         

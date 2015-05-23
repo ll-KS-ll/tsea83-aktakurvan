@@ -33,21 +33,21 @@ begin
 
         -- Output
         with OP_o select
-                gregOut <=  GR0     when "0000";
-                            GR1     when "0001";
-                            GR2     when "0010";
-                            GR3     when "0011";
-                            GR4     when "0100";
-                            GR5     when "0101";
-                            GR6     when "0110";
-                            GR7     when "0111";
-                            GR8     when "1000";
-                            GR9     when "1001";
-                            GR10    when "1010";
-                            GR11    when "1011";
-                            GR12    when "1100";
-                            GR13    when "1101";
-                            GR14    when "1110";
+                gregOut <=  GR0     when "0000",
+                            GR1     when "0001",
+                            GR2     when "0010",
+                            GR3     when "0011",
+                            GR4     when "0100",
+                            GR5     when "0101",
+                            GR6     when "0110",
+                            GR7     when "0111",
+                            GR8     when "1000",
+                            GR9     when "1001",
+                            GR10    when "1010",
+                            GR11    when "1011",
+                            GR12    when "1100",
+                            GR13    when "1101",
+                            GR14    when "1110",
                             GR15    when others;
 
 
