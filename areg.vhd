@@ -27,7 +27,7 @@ architecture arch of areg is
         --PM
         type pMem_t is array(0 to 1023) of std_logic_vector(31 downto 0);
 
-        constant pMem : pMem_t := ( -- Program memory
+        signal pMem : pMem_t := ( -- Program memory
             x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
             x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
             x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
