@@ -27,12 +27,12 @@ begin
     -- dbus depends on what TB from controller say it should be. TB_o is clocked from TB,
     -- so this doesn't have to be.
     with TB_o select
-            dbus <= controllerOut   when "001";
-                    aregOut         when "010";
-                    controllerOut   when "011";
-                    aluOut          when "100";
-                    aluOut          when "101";
-                    gregOut         when "110";
+            dbus <= controllerOut   when "001",
+                    aregOut         when "010",
+                    controllerOut   when "011",
+                    aluOut          when "100",
+                    aluOut          when "101",
+                    gregOut         when "110",
                     (others => 'Z') when others;
 
 end architecture;
