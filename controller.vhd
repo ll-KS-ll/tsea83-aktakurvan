@@ -20,7 +20,8 @@ entity controller is
             controllerOut   : out       std_logic_vector(31 downto 0);
             TB_o            : out       std_logic_vector(2 downto 0);
             FB_o            : out       std_logic_vector(2 downto 0);
-            OP_o            : out       std_logic_vector(3 downto 0)
+            OP_o            : out       std_logic_vector(3 downto 0);
+            ALU_o           : out       std_logic_vector(3 downto 0)
             );
 end controller;
 
@@ -158,11 +159,12 @@ begin
         TB_o <= TB;
         FB_o <= FB;
         OP_o <= OP;
+        ALU_o <= ALU;
 
         -- From controller to buss
         with TB select
-            controllerOut <=    IR when "001";
-                                PC when "011";
+            controllerOut <=    IR when "001",
+                                PC when "011",
                                 (others => 'Z') when others;
                                     
                                     
