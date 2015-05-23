@@ -114,7 +114,7 @@ begin
 
   areg0: areg port map(clk, rst, dbus, aregOut, FB_o);
 
-  mux0: mux port map(clk. rst, aluOut, controllerOut, gregOut, aregOut, TB_o, dbus);
+  mux0: mux port map(clk, rst, aluOut, controllerOut, gregOut, aregOut, TB_o, dbus);
 
   -- GPU
   gpu0: gpu port map(clk, rst, vga_red, vga_green, vga_blue, hsync, vsync);
