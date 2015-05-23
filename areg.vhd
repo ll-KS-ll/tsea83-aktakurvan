@@ -15,7 +15,7 @@ entity areg is
         port(
             clk, rst        : in        std_logic;
             dbus            : inout     std_logic_vector(31 downto 0);
-            contr_areg      : inout     std_logic_vector(1 downto 0);
+            contr_areg      : inout     std_logic_vector(1 downto 0)
             );
 end areg;
 
@@ -28,8 +28,7 @@ architecture arch of areg is
 
         --PM
         type pMem_t is array(0 to 1024) of std_logic_vector(31 downto 0);
-
-        constant pMem : pMem_t := ( -- Program memory
+        signal pMem : pMem_t := ( -- Program memory
             x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
             x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
             x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
