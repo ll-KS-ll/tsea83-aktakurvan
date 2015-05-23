@@ -52,6 +52,16 @@ architecture behavior of tb is
     );
   end component;
 
+  component mux is
+    port(
+      clk, rst                : in        std_logic;
+      aluOut, controllerOut   : in        std_logic_vector(31 downto 0);
+      gregOut, aregOut        : in        std_logic_vector(31 downto 0);
+      TB_o                    : in        std_logic_vector(2 downto 0);
+      dbus                    : out       std_logic_vector(31 downto 0)
+    );
+  end component;
+
   component gpu
     port(
       clk,rst : in std_logic;
@@ -103,6 +113,8 @@ begin
   greg0: greg port map(clk, rst, dbus, gregOut, FB_o, OP_o);
 
   areg0: areg port map(clk, rst, dbus, aregOut, FB_o);
+
+  mux0: mux port map(clk. rst, aluOut, controllerOut, gregOut, aregOut, TB_o, dbus);
 
   -- GPU
   gpu0: gpu port map(clk, rst, vga_red, vga_green, vga_blue, hsync, vsync);
