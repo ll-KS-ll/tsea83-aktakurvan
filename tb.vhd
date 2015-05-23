@@ -66,6 +66,8 @@ architecture behavior of tb is
 
   -- Internal signals
 
+  signal tb_running : boolean := true;
+
   signal clk : std_logic := '0';
   signal rst : std_logic := '1';
   
@@ -81,7 +83,6 @@ architecture behavior of tb is
   signal gregOut : std_logic_vector(31 downto 0);
   signal aregOut : std_logic_vector(31 downto 0);
 
-  
   signal Z, C, L : std_logic;
   
   signal hsync,vsync : std_logic;
@@ -109,7 +110,7 @@ begin
   -- 100 MHz system clock
   clk_gen : process
   begin
-    while true loop -- while tb_running loop
+    while tb_running loop -- while tb_running loop
       clk <= '0';
       wait for 5 ns;
       clk <= '1';
