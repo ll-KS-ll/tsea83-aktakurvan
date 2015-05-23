@@ -60,7 +60,7 @@ architecture behavior of tb is
       --data_ut : out std_logic_vector (3 downto 0);
       vga_red, vga_green : out std_logic_vector (2 downto 0);
       vga_blue : out std_logic_vector (2 downto 1);
-      hsync,vsync : out std_logic);
+      hsync,vsync : out std_logic)
     );
   end component;    
 

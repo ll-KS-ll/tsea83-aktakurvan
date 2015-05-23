@@ -74,7 +74,7 @@ begin
                     -- AR = AR or dbus (Z)
                     when "0111" => AR <= AR or ('0' & dbus);
                                 -- Set Z flag
-                                if (AR or dbus)=0 then Z <= '1';
+                                if (AR or ('0' & dbus))=0 then Z <= '1';
                                 else Z <= '0';
                                 end if;
                     -- AR = AR + dbus (no flags);
