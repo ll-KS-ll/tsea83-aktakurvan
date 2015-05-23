@@ -24,8 +24,8 @@ end alu;
 
 architecture arch of alu is
         -- Registers
-        signal AR           : std_logic_vector(32 downto 0)     := X"0000_0000";
-        signal HR           : std_logic_vector(32 downto 0)     := X"0000_0000";
+        signal AR           : std_logic_vector(32 downto 0)     := '0' & X"0000_0000";
+        signal HR           : std_logic_vector(32 downto 0)     := '0' & X"0000_0000";
 
 begin
 
@@ -66,9 +66,9 @@ begin
                                 else C <= '0';
                                 end if;
                     -- AR = AR & dbus (Z)
-                    when "0110" => AR <= AR and dbus;
+                    when "0110" => AR <= AR and ('0' & dbus);
                                 -- Set Z flag
-                                if (AR and dbus)=0 then Z <= '1';
+                                if (AR and ('0' & dbus))=0 then Z <= '1';
                                 else Z <= '0';
                                 end if;
                     -- AR = AR or dbus (Z)
@@ -117,8 +117,8 @@ begin
 
         -- I/O
         with TB_o select
-                aluOut <=   AR              when "100",
-                            HR              when "101",
+                aluOut <=   AR(31 downto 0) when "100",
+                            HR(31 downto 0) when "101",
                             (others => 'Z') when others;
 
                                         
