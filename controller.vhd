@@ -34,7 +34,7 @@ architecture arch of controller is
         alias OP            : std_logic_vector(3 downto 0)      is IR(31 downto 28);
         alias GRx           : std_logic_vector(3 downto 0)      is IR(27 downto 24);
         alias M             : std_logic_vector(1 downto 0)      is IR(23 downto 22);
-        alias ADR           : std_logic_vector(20 downto 0)     is IR(21 downto 0); 
+        alias ADR           : std_logic_vector(21 downto 0)     is IR(21 downto 0); 
 
         --Micro-programcounters and K-nets
         signal uPC, SuPC    : std_logic_vector(7 downto 0)      := X"00";
@@ -53,7 +53,7 @@ architecture arch of controller is
 		alias uADR          : std_logic_vector(7 downto 0)      is uIR(7 downto 0); 
 
         -- uMem
-	    type uMem_t is array(0 to 64) of std_logic_vector(31 downto 0); -- Expand to 32 for simplicity.
+	    type uMem_t is array(0 to 63) of std_logic_vector(31 downto 0); -- Expand to 32 for simplicity.
 	    constant uMem : uMem_t := ( -- Memory for microprograming code.
 		    x"000F_8000", x"0008_A000", x"0000_4100", x"0007_8080",
             x"000F_A080", x"0007_8000", x"000B_8080", x"0024_0000",
@@ -117,13 +117,13 @@ begin
                                 if Z='1' then uPC <= uADR;
                                 else uPC <= uPC+1;
                                 end if;
-                    when "1001" => -- Undefined
+                    when "1001" => null; -- Undefined
                     when "1010" => 
                                 if C='1' then uPC <= uADR;
                                 else uPC <= uPC+1;
                                 end if;
-                    when "1011" => -- Undefined
-                    when "1100" =>
+                    when "1011" => null; -- Undefined
+                    when "1100" => 
                                 if L='1' then uPC <= uADR;
                                 else uPC <= uPC+1;
                                 end if;
@@ -131,8 +131,8 @@ begin
                                 if C='0' then uPC <= uADR;
                                 else uPC <= uPC+1;
                                 end if;
-                    when "1110" => -- Undefined
-                    when "1111" => -- Undefined
+                    when "1110" => null; -- Undefined
+                    when others => null; -- Undefined
                 end case;
             end if;
         end process;
