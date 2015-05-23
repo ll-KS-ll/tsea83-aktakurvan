@@ -11,11 +11,11 @@ architecture behavior of tb is
   
   component alu 
     port(
-      clk, rst  : in      std_logic;
-      dbus      : inout   std_logic_vector(31 downto 0);
-      contr_alu : inout   std_logic_vector(5 downto 0); -- Needs to be six so we can tel AUu when to move to dbus
-      Z, C, L   : inout   std_logic
-      );
+      clk, rst        : in         std_logic;
+      dbus            : inout      std_logic_vector(31 downto 0);
+      contr_alu       : inout      std_logic_vector(5 downto 0); -- Needs to be six so we can tel AUu when to move to dbus
+      Z, C, L         : inout      std_logic
+    );
   end component;
 
   component controller
@@ -23,10 +23,10 @@ architecture behavior of tb is
       clk, rst        : in        std_logic;
       dbus            : inout     std_logic_vector(31 downto 0);
       contr_areg      : out       std_logic_vector(1 downto 0);
+      areg_store      : out       std_logic_vector(20 downto 0);
       contr_alu       : out       std_logic_vector(5 downto 0);
-      contr_memory    : out       std_logic_vector(1 downto 0);
       contr_greg      : out       std_logic_vector(5 downto 0);
-      Z, C, L         : inout     std_logic
+      Z, C, L         : inout     std_logic    
     );
   end component;
 
@@ -61,12 +61,12 @@ architecture behavior of tb is
   -- Internal signals
 
   signal clk : std_logic := '0';
-  signal rst : std_logic := '0';
+  signal rst : std_logic := '1';
   signal dbus : std_logic_vector(31 downto 0);
   signal contr_alu : std_logic_vector(5 downto 0);
   signal contr_areg : std_logic_vector(1 downto 0);
-  signal contr_memory : std_logic_vector(1 downto 0);
   signal contr_greg : std_logic_vector(5 downto 0);
+  signal areg_store : std_logic_vector(20 downto 0);
   signal Z, C, L : std_logic
   signal hsync,vsync : std_logic;
   signal vga_red, vga_green : std_logic_vector(2 downto 0);
@@ -77,11 +77,11 @@ begin
   -- Component Instantiation
     
   -- ALU 
-  alu0: alu port map(clk,rst,dbus, contr_alu, Z, C, L);
+  alu0: alu port map(clk, rst, dbus, contr_alu, Z, C, L);
 
   -- Controller
-  controller0: controller port map (clk, rst, dbus, contr_areg, contr_alu, 
-    contr_memory, contr_greg, Z, C, L);
+  controller0: controller port map (clk, rst, dbus, contr_areg, contr_store, contr_alu, 
+      contr_greg, Z, C, L);
 
   greg0: greg port map(clk, rst, dbus, contr_greg);
 
@@ -109,7 +109,7 @@ begin
   begin
     -- Aktivera reset ett litet tag.
     rst <= '1';
-    wait for 500 ns;
+    wait for 50 ns;
 
     wait until rising_edge(clk);        -- se till att reset släpps synkront
                                         -- med klockan
