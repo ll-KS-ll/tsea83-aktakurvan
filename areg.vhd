@@ -14,8 +14,8 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 entity areg is
         port(
             clk, rst        : in        std_logic;           
-            aregOut         : out       std_logic_vector(31 downto 0);
             dbus            : in        std_logic_vector(31 downto 0);
+            aregOut         : out       std_logic_vector(31 downto 0);
             FB_o            : in        std_logic_vector(2 downto 0)
             );
 end areg;
