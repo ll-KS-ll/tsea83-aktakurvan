@@ -45,11 +45,15 @@ begin
         -- Memory Control
         process(clk) begin
             if rising_edge(clk) then
-                case FB_o is
-                    when "010" => pMem(conv_integer(ASR))   <= dbus;
-                    when "111" => ASR                       <= dbus(20 downto 0); -- ASR is only 21. 
-                    when others => null;
-                end case;
+                if rst = '1' then
+                    ASR <= '0' & X"00000";
+                else
+                    case FB_o is
+                        when "010" => pMem(conv_integer(ASR))   <= dbus;
+                        when "111" => ASR                       <= dbus(20 downto 0); -- ASR is only 21. 
+                        when others => null;
+                    end case;
+                end if;
             end if;
         end process;
 

@@ -99,58 +99,68 @@ begin
         -- uPC / SEQ
         process(clk) begin
             if rising_edge(clk) then
-                case SEQ is
-                    when "0000" => uPC <= uPC+1;    -- Increment uPC by 1
-                    when "0001" => uPC <= K1;       --
-                    when "0010" => uPC <= K2;       --
-                    when "0011" => uPC <= X"00";    --
-                    when "0100" => 
-                                if Z='0' then uPC <= uADR;
-                                else uPC <= uPC+1;
-                                end if;
-                    when "0101" => uPC <= uADR;
-                    when "0110" => 
-                                SuPC <= uPC+1;
-                                uPC <= uADR;
-                    when "0111" => uPC <= SuPC;
-                    when "1000" =>
-                                if Z='1' then uPC <= uADR;
-                                else uPC <= uPC+1;
-                                end if;
-                    when "1001" => null; -- Undefined
-                    when "1010" => 
-                                if C='1' then uPC <= uADR;
-                                else uPC <= uPC+1;
-                                end if;
-                    when "1011" => null; -- Undefined
-                    when "1100" => 
-                                if L='1' then uPC <= uADR;
-                                else uPC <= uPC+1;
-                                end if;
-                    when "1101" =>
-                                if C='0' then uPC <= uADR;
-                                else uPC <= uPC+1;
-                                end if;
-                    when "1110" => null; -- Undefined
-                    when others => null; -- Undefined
-                end case;
+                if rst = '1' then
+                    uPC <= x"00";
+                    SuPC <= x"00";
+                else 
+                    case SEQ is
+                        when "0000" => uPC <= uPC+1;    -- Increment uPC by 1
+                        when "0001" => uPC <= K1;       --
+                        when "0010" => uPC <= K2;       --
+                        when "0011" => uPC <= X"00";    --
+                        when "0100" => 
+                                    if Z='0' then uPC <= uADR;
+                                    else uPC <= uPC+1;
+                                    end if;
+                        when "0101" => uPC <= uADR;
+                        when "0110" => 
+                                    SuPC <= uPC+1;
+                                    uPC <= uADR;
+                        when "0111" => uPC <= SuPC;
+                        when "1000" =>
+                                    if Z='1' then uPC <= uADR;
+                                    else uPC <= uPC+1;
+                                    end if;
+                        when "1001" => null; -- Undefined
+                        when "1010" => 
+                                    if C='1' then uPC <= uADR;
+                                    else uPC <= uPC+1;
+                                    end if;
+                        when "1011" => null; -- Undefined
+                        when "1100" => 
+                                    if L='1' then uPC <= uADR;
+                                    else uPC <= uPC+1;
+                                    end if;
+                        when "1101" =>
+                                    if C='0' then uPC <= uADR;
+                                    else uPC <= uPC+1;
+                                    end if;
+                        when "1110" => null; -- Undefined
+                        when others => null; -- Undefined
+                    end case;
+                end if;
             end if;
         end process;
 
         -- uIR
         process(clk) begin
             if rising_edge(clk) then
-                uIR <=  uMem(conv_integer(uPC));
+                if rst = '1' then
+                    IR <= x"0000_0000";
+                    uIR <= x"0000_0000";
+                else
+                    uIR <=  uMem(conv_integer(uPC));
+                end if;
             end if;
         end process;
 
         -- PC
         process(clk) begin
             if rising_edge(clk) then
-                if P='1' then
+                if rst='1' then
+                    PC <= x"0000_0000";                
+                elsif P='1' then
                     PC <= PC+1;
-                else
-                    PC <= PC;
                 end if;
             end if;
         end process;

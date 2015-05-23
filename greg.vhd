@@ -54,7 +54,24 @@ begin
         -- Input
         process(clk) begin
             if rising_edge(clk) then
-                if FB_o="110" then
+                if rst = '1' then
+                    GR0 <= x"0000_0000";
+                    GR1 <= x"0000_0000";
+                    GR2 <= x"0000_0000";
+                    GR3 <= x"0000_0000";
+                    GR4 <= x"0000_0000";
+                    GR5 <= x"0000_0000";
+                    GR6 <= x"0000_0000";
+                    GR7 <= x"0000_0000";
+                    GR8 <= x"0000_0000";
+                    GR9 <= x"0000_0000";
+                    GR10 <= x"0000_0000";
+                    GR11 <= x"0000_0000";
+                    GR12 <= x"0000_0000";
+                    GR13 <= x"0000_0000";
+                    GR14 <= x"0000_0000";
+                    GR15 <= x"0000_0000";
+                elsif FB_o="110" then
                     case OP_o is
                         when "0000" => GR0 <= dbus;
                         when "0001" => GR1 <= dbus;
