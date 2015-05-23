@@ -22,7 +22,7 @@ end areg;
 
 architecture arch of areg is
         -- Registeers
-        signal ASR          : std_logic_vector(20 downto 0)     := '0' & X"000_000";
+        signal ASR          : std_logic_vector(20 downto 0)     := '0' & X"00000";
 
         --PM
         type pMem_t is array(0 to 1023) of std_logic_vector(31 downto 0);
