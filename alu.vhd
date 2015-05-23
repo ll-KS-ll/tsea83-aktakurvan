@@ -13,10 +13,11 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 -- ALU
 entity alu is
         port(
-            clk, rst        : in         std_logic;
-            dbus            : inout      std_logic_vector(31 downto 0);
-            contr_alu       : inout      std_logic_vector(5 downto 0); -- Needs to be six so we can tel AUu when to move to dbus
-            Z, C, L         : inout      std_logic
+            clk, rst        : in        std_logic;
+            dbus            : in        std_logic_vector(31 downto 0);
+            aluOut          : out       std_logic_vector(31 downto 0);
+            TB_o            : in        std_logic_vector(2 downto 0);
+            Z, C, L         : out       std_logic
             );
 end alu;
 
@@ -25,11 +26,6 @@ architecture arch of alu is
         signal AR           : std_logic_vector(32 downto 0)     := X"0000_0000";
         signal HR           : std_logic_vector(32 downto 0)     := X"0000_0000";
 
-        -- Dbus control
-        alias alu_dbus      : std_logic_vector(1 downto 0)      is contr_alu(5 downto 4);      
-        -- Alu control
-        alias c_alu         : std_logic_vector(3 downto 0)      is contr_alu(3 downto 0);
-
 begin
 
         -- Alu Math
@@ -37,7 +33,7 @@ begin
             if rising_edge(clk) then
                 case c_alu is
                     -- NOP (no flags)
-                    when "0000" => -- Undefined
+                    when "0000" => null;-- Undefined
                     -- AR = dbus (no flags)
                     when "0001" => AR <= C & dbus;
                     -- AR = dbus' (no flags);
@@ -99,9 +95,9 @@ begin
                                 else C <= '0';
                                 end if;
                     -- Undefined
-                    when "1011" => -- Undefined
+                    when "1011" => null;-- Undefined
                     -- Undefined
-                    when "1100" => -- Undefined
+                    when "1100" => null;-- Undefined
                     -- Logic-shift-right (Z, C)
                     when "1101" => AR(31 downto 0) <= '0' & AR(31 downto 1);
                                 -- Set Z flag
@@ -111,26 +107,18 @@ begin
                                 -- Set C flag
                                 C <= AR(0);
                     -- Undefined
-                    when "1110" => -- Undefined
+                    when "1110" => null;-- Undefined
                     -- Undefined
-                    when others => -- Undefined
+                    when others => null;-- Undefined
                 end case;
             end if;
         end process;
 
-        -- dbus controller
-        process(clk) begin
-            if rising_edge(clk) then
-                case alu_dbus is
-                    when "00" =>    contr_alu(5 downto 4)   <= "00"; -- NOP
-                    when "01" =>    dbus                    <= AR;
-                                    contr_alu(5 downto 4)   <= "00"; -- Reset
-                    when "10" =>    HR      <= dbus;
-                                    contr_alu(5 downto 4)   <= "00"; -- Reset
-                    when others =>  dbus    <= HR;
-                                    contr_alu(5 downto 4)   <= "00"; -- Reset
-                end case;
-            end if;
-        end process;
-                                
+        -- I/O
+        with TB_o select
+                aluOut <=   AR              when "100";
+                            HR              when "101";
+                            (others => 'Z') when others;
+
+                                        
 end architecture;
