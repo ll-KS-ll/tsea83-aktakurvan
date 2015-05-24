@@ -12,16 +12,22 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity gpu is 
   Port  ( clk,rst : in std_logic;
-          --adress : in std_logic_vector (20 downto 0);
-          --data_in : in std_logic_vector (3 downto 0);
-          --data_ut : out std_logic_vector (3 downto 0);
+          dbus : in std_logic_vector(31 downto 0);
+          gpuOut : out std_logic_vector(31 downto 0);
+          FB_o : in std_logic_vector(2 downto 0);
           vga_red, vga_green : out std_logic_vector (2 downto 0);
           vga_blue : out std_logic_vector (2 downto 1);
           hsync, vsync : out std_logic);
-          -- temp names, used for communicating between gpu and cpu
-          gpu_handshake : inout std_logic_vector(2 downto 0);
-          dbus : inout std_logic_vector(31 downto 0);
 end gpu;
+
+-- ====== Info ======
+-- ASR is split in to rows and cols.
+-- The first 12 bits is used to index columns in memory.
+-- The last 9 bits is used to index rows in memory.
+--
+-- When writing to memory the 4 lsb is writen to indexed spot.
+-- When reading from memory 4 bits is added as lsb on the bus. 
+
 
 architecture Behavioral of gpu is
   -- VGA
@@ -34,6 +40,11 @@ architecture Behavioral of gpu is
   alias mem_col : std_logic_vector(8 downto 0) is xctr(9 downto 1);
   signal pixel : std_logic_vector(8 downto 0) := "000000000";
   
+  -- Address register
+  signal ASR : std_logic_vector(20 downto 0) := '0' & x"00000";
+  alias asr_row : std_logic_vector(8 downto 0) is ASR(8 downto 0);
+  alias asr_col : std_logic_vector(11 downto 0) is ASR(20 downto 9);
+
   -- Color palette
   type color_t is array (0 to 15) of std_logic_vector (7 downto 0);
   constant colors : color_t := -- "rrrgggbb"
@@ -135,27 +146,26 @@ begin
   end process;
 
   -- Color
+  vga_red(2 downto 0) <= colors(conv_integer(video))(7 downto 5);
+  vga_green(2 downto 0) <= colors(conv_integer(video))(4 downto 2);
+  vga_blue(2 downto 1) <= colors(conv_integer(video))(1 downto 0);
+  
+  -- W/R GPU Memory.
   process(clk) begin
     if rising_edge(clk) then
-      -- Does this really need a process?
-      vga_red(2 downto 0) <= colors(conv_integer(video))(7 downto 5);
-      vga_green(2 downto 0) <= colors(conv_integer(video))(4 downto 2);
-      vga_blue(2 downto 1) <= colors(conv_integer(video))(1 downto 0);
+      if rst = '1' then
+        ASR <= '0' & X"00000";
+      else
+        case FB_o is
+          -- when "100" => gpu_memory(conv_integer(asr_row))(conv_integer(asr_col+3) downto conv_integer(asr_col)) <= dbus(3 downto 0);
+          when "101" => ASR <= dbus(20 downto 0); -- ASR is only 21. 
+          when others => null;
+        end case;
+      end if;
     end if;
   end process;
   
-  -- W/R GPU Memory.
-  -- process(clk) begin
-  --  if rising_edge(clk) then
-  --    if wea='0' then
-  --      mem(conv_integer(addra)) <= dataina;
-  --    end if;
-  --    if web='0' then
-  --      mem(conv_integer(addrb)) <= datainb;
-  --    end if;
-  --    datauta <= mem(conv_integer(addra));
-  --    datautb <= mem(conv_integer(addrb));
-  --  end if;
-  --end process;
-  
+  -- Outsignal is always what ASR points to in memory.
+  --gpuOut(3 downto 0) <= gpu_memory(conv_integer(asr_row))(conv_integer(asr_col+3) downto conv_integer(asr_col));
+
 end Behavioral;

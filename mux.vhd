@@ -17,6 +17,7 @@ entity mux is
             clk, rst                : in        std_logic;
             aluOut, controllerOut   : in        std_logic_vector(31 downto 0);
             gregOut, aregOut        : in        std_logic_vector(31 downto 0);
+            gpuOut                  : in        std_logic_vector(31 downto 0);
             TB_o                    : in        std_logic_vector(2 downto 0);
             dbus                    : out       std_logic_vector(31 downto 0)
             );
@@ -31,8 +32,9 @@ begin
                     aregOut         when "010",
                     controllerOut   when "011",
                     aluOut          when "100",
-                    aluOut          when "101",
+                    -- aluOut          when "101", -- HR
                     gregOut         when "110",
+                    gpuOut          when "111",
                     (others => 'Z') when others;
 
 end architecture;

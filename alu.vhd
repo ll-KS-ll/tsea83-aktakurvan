@@ -25,7 +25,6 @@ end alu;
 architecture arch of alu is
         -- Registers
         signal AR           : std_logic_vector(32 downto 0)     := '0' & X"0000_0000";
-        signal HR           : std_logic_vector(32 downto 0)     := '0' & X"0000_0000";
 
 begin
 
@@ -34,7 +33,6 @@ begin
             if rising_edge(clk) then
                 if rst = '1' then
                     AR <= '0' & X"0000_0000";
-                    HR <= '0' & X"0000_0000";
                 else
                     case ALU_o is
                         -- NOP (no flags)
@@ -123,7 +121,6 @@ begin
         -- I/O
         with TB_o select
                 aluOut <=   AR(31 downto 0) when "100",
-                            HR(31 downto 0) when "101",
                             (others => 'Z') when others;
                                         
 end architecture;
