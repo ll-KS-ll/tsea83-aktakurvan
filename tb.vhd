@@ -28,7 +28,7 @@ architecture behavior of tb is
       controllerOut   : out    std_logic_vector(31 downto 0);
       TB_o            : out    std_logic_vector(2 downto 0);
       FB_o            : out    std_logic_vector(2 downto 0);
-      OP_o            : out    std_logic_vector(3 downto 0);
+      GRx_o            : out    std_logic_vector(3 downto 0);
       ALU_o           : out    std_logic_vector(3 downto 0)    
     );
   end component;
@@ -39,7 +39,7 @@ architecture behavior of tb is
       dbus            : in      std_logic_vector(31 downto 0);
       gregOut         : out     std_logic_vector(31 downto 0);
       FB_o            : in      std_logic_vector(2 downto 0);
-      OP_o            : in      std_logic_vector(3 downto 0)
+      GRx_o            : in      std_logic_vector(3 downto 0)
     );
   end component;
 
