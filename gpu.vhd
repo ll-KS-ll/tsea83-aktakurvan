@@ -117,6 +117,12 @@ begin
   -- Memory
   process(clk) begin
     if rising_edge(clk) then
+      -- Following code is out commeted cuz it locks compiling :s
+      --if rst = '1' then
+      --  video <= x"1"; -- Screen is red when reset is pressed. 
+      --  pixel <= "000000000";
+      --  gpu_memory <= ((others=> (others=>'1')));
+      --els
       if mod_4=3 then
         if xctr<640 and yctr<480 then
           pixel <= mem_col(6 downto 0) & "00"; -- pixel position 
@@ -131,6 +137,7 @@ begin
   -- Color
   process(clk) begin
     if rising_edge(clk) then
+      -- Does this really need a process?
       vga_red(2 downto 0) <= colors(conv_integer(video))(7 downto 5);
       vga_green(2 downto 0) <= colors(conv_integer(video))(4 downto 2);
       vga_blue(2 downto 1) <= colors(conv_integer(video))(1 downto 0);
