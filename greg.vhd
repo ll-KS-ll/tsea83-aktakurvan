@@ -17,7 +17,7 @@ entity greg is
             dbus            : in        std_logic_vector(31 downto 0);
             gregOut         : out       std_logic_vector(31 downto 0);
             FB_o            : in        std_logic_vector(2 downto 0);
-            OP_o            : in        std_logic_vector(3 downto 0)
+            GRx_o            : in        std_logic_vector(3 downto 0)
             );
 end greg;
 
@@ -32,7 +32,7 @@ architecture arch of greg is
 begin
 
         -- Output
-        with OP_o select
+        with GRx_o select
                 gregOut <=  GR0     when "0000",
                             GR1     when "0001",
                             GR2     when "0010",
@@ -72,7 +72,7 @@ begin
                     GR14 <= x"0000_0000";
                     GR15 <= x"0000_0000";
                 elsif FB_o="110" then
-                    case OP_o is
+                    case GRx_o is
                         when "0000" => GR0 <= dbus;
                         when "0001" => GR1 <= dbus;
                         when "0010" => GR2 <= dbus;
