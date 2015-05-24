@@ -22,14 +22,20 @@ end areg;
 
 architecture arch of areg is
         -- Registeers
-        signal ASR          : std_logic_vector(20 downto 0)     := '0' & X"00000";
+        signal ASR          : std_logic_vector(19 downto 0)     := X"00000";
 
         --PM
         type pMem_t is array(0 to 1023) of std_logic_vector(31 downto 0);
 
         signal pMem : pMem_t := ( -- Program memory
-            x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
-            x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
+            x"8000_0004", -- LOAD 
+            x"0000_0005", -- ADD
+            x"9000_0006", -- STORE
+            x"0000_0000",
+            x"1111_0000", 
+            x"0000_1111", 
+            x"0000_0000", 
+            x"0000_0000",
             x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
             x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
             x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
@@ -46,11 +52,11 @@ begin
         process(clk) begin
             if rising_edge(clk) then
                 if rst = '1' then
-                    ASR <= '0' & X"00000";
+                    ASR <= X"00000";
                 else
                     case FB_o is
                         when "010" => pMem(conv_integer(ASR))   <= dbus;
-                        when "111" => ASR                       <= dbus(20 downto 0); -- ASR is only 21. 
+                        when "111" => ASR                       <= dbus(19 downto 0); -- ASR is only 21. 
                         when others => null;
                     end case;
                 end if;
