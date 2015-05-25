@@ -47,8 +47,8 @@ architecture Behavioral of gpu is
   
   -- Memory/Bus
   alias data : std_logic_vector(3 downto 0) is dbus(3 downto 0);
-  alias row : std_logic_vector(7 downto 0) is dbus(11 downto 4);
-  alias col : std_logic_vector(8 downto 0) is dbus(20 downto 12);
+  signal row : integer := 0;--dbus(11 downto 4));
+  signal col : integer := 0;--dbus(20 downto 12));
   alias rw_flag : std_logic is dbus(31);
 
   -- Color palette
@@ -87,6 +87,8 @@ architecture Behavioral of gpu is
   attribute ram_style: string;
   attribute ram_style of gpu_memory : signal is "block";
 begin
+
+
   -- GPU clock, 25MHz from 100MHz
   process(clk) begin
      if rising_edge(clk) then
@@ -179,17 +181,20 @@ begin
   --  end if;
   --end process;
 
+  row <= conv_integer(dbus(11 downto 4)) * 160;
+  col <= conv_integer(dbus(20 downto 12));
+
   -- W/R GPU Memory.
   process(clk) begin
     if rising_edge(clk) then
       if FB_o="100" then
         if rw_flag = '0' then
           -- Write
-          gpu_memory(conv_integer((conv_integer(row)*160) + col)) <= data; 
+          gpu_memory(row + col) <= data; 
         else 
           -- Read
           --gpuOut <= x"0000_000" & gpu_memory(conv_integer(row&col));
-          gpuOut <= x"0000_000" & gpu_memory(conv_integer((conv_integer(row)*160) + col));
+          --gpuOut <= x"0000_000" & gpu_memory(conv_integer((conv_integer(row)*160) + col));
           -- Broken, out of LUTs :s
           --gpuOut <= "0000_0000_000" & row & col & gpu_memory(conv_integer(row&col));
         end if;
