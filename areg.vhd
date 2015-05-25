@@ -44,7 +44,7 @@ architecture arch of areg is
             0013=>x"BC00_0000",		-- Write to GPU GR12, GR13, GR14
             0014=>x"8D00_0000",		-- Decrease GR13
             0015=>x"6D00_03EE",		-- Compare GR13 with PM(1006)
-            0016=>x"4000_0013",		-- Branch on Not Equal to address 13
+            0016=>x"4000_000D",		-- Branch on Not Equal to address 13
             0017=>x"3000_0017",		-- Branch Always 17 (Ininity loop.)
             1000=>x"0000_0000",		-- Color black
             1001=>x"0000_0001",		-- Color red
