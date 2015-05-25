@@ -98,13 +98,13 @@ begin
                                     else C <= '0';
                                     end if;
                         -- Logic-shift-left 4 bits (Z)
-                        when "1011" => AR(31 downto 0) <= AR(27 downto 0) & '0000';
+                        when "1011" => AR(31 downto 0) <= AR(27 downto 0) & "0000";
                                     -- Set Z flag
                                     if AR(27 downto 0)=0 then Z <= '1';
                                     else Z <= '0';
                                     end if;
                         -- Logic-shift-left 8 bits (Z)
-                        when "1100" => AR(31 downto 0) <= AR(23 downto 0) & '00000000';
+                        when "1100" => AR(31 downto 0) <= AR(23 downto 0) & "00000000";
                                     -- Set Z flag
                                     if AR(23 downto 0)=0 then Z <= '1';
                                     else Z <= '0';
@@ -122,6 +122,7 @@ begin
                                     -- Set Z flag
                                     if AR(31 downto 0)=X"0000_0001" then Z <= '1';
                                     else Z <= '0';
+                                    end if;
                                     -- Set C flag
                                     if AR(31 downto 0)=X"0000_0000" then C <= '1';
                                     else C <= '0';

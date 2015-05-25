@@ -169,8 +169,9 @@ begin
                                     if C='0' then uPC <= uADR;
                                     else uPC <= uPC+1;
                                     end if;
-                        when "1110" => GRx <= GRx+1;
-                                    => uPC <= uPC+1;
+                        when "1110" => 
+                                    GRx <= GRx+1;
+                                    uPC <= uPC+1;
                         when others => null; -- Undefined
                     end case;
                 end if;
