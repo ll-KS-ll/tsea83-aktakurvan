@@ -43,6 +43,9 @@ architecture Behavioral of gpu is
   signal xctr,yctr : std_logic_vector(9 downto 0) := "0000000000";
   signal hs : std_logic := '1';
   signal vs : std_logic := '1';
+
+  alias rad : std_logic_vector(8 downto 0) is yctr(9 downto 1);
+  alias kol : std_logic_vector(8 downto 0) is xctr(9 downto 1);
   
   -- Memory/Bus
   alias data : std_logic_vector(3 downto 0) is dbus(3 downto 0);
@@ -702,9 +705,8 @@ begin
       --els
       if mod_4=3 then
         if xctr<640 and yctr<480 then
-          -- pixel = y*row_width + x
-          --video <= gpu_memory(conv_integer((conv_integer(yctr(9 downto 2))*160) + xctr(9 downto 2)));
-          video <= gpu_memory(conv_integer((conv_integer(yctr(9 downto 2))*160)+conv_integer(xctr(9 downto 2))));
+          -- yctr / 2 & xctr / 2 
+          video <= gpu_memory(conv_integer(rad) + conv_integer(kol));
         else
           video <= "0000";
         end if; 
