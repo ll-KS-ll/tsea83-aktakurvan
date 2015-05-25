@@ -36,9 +36,9 @@ architecture Behavioral of gpu is
   signal hs : std_logic := '1';
   signal vs : std_logic := '1';
   -- Memmory
-  alias mem_row : std_logic_vector(8 downto 0) is yctr(9 downto 1);
-  alias mem_col : std_logic_vector(8 downto 0) is xctr(9 downto 1);
-  signal pixel : std_logic_vector(8 downto 0) := "000000000";
+  --alias mem_row : std_logic_vector(8 downto 0) is yctr(9 downto 1);
+  --alias mem_col : std_logic_vector(8 downto 0) is xctr(9 downto 1);
+  --signal pixel : std_logic_vector(3 downto 0) := "0000";
   
   -- Address register
   signal ASR : std_logic_vector(20 downto 0) := '0' & x"00000";
@@ -66,9 +66,13 @@ architecture Behavioral of gpu is
       x"FF"); -- White
   signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
   -- GPU RAM
-  type ram_t is array (0 to 239) of std_logic_vector (1279 downto 0);
+  --type ram_t is array (0 to 239) of std_logic_vector (1279 downto 0);
+  type ram_t is array (0 to 76799) of std_logic_vector (3 downto 0);
   signal gpu_memory: ram_t := ((others=> (others=>'0'))); -- Init every bit in memory to 1. 
   
+  -- Force xilinx to use block RAM.
+  attribute ram_style: string;
+  attribute ram_style of gpu_memory : signal is "block";
 begin
   -- GPU clock, 25MHz from 100MHz
   process(clk) begin
@@ -136,8 +140,8 @@ begin
       --els
       if mod_4=3 then
         if xctr<640 and yctr<480 then
-          pixel <= mem_col(6 downto 0) & "00"; -- pixel position 
-          video <= gpu_memory(conv_integer(mem_row))(conv_integer(pixel+3) downto conv_integer(pixel));
+          --pixel <= mem_col(6 downto 0) & "00"; -- pixel position 
+          video <= gpu_memory(conv_integer(xctr+yctr));
         else
           video <= "0000";
         end if;
@@ -157,7 +161,7 @@ begin
         ASR <= '0' & X"00000";
       else
         case FB_o is
-          when "100" => gpu_memory(conv_integer(asr_row))(conv_integer(asr_col+3) downto conv_integer(asr_col)) <= dbus(3 downto 0);
+          when "100" => gpu_memory(conv_integer(ASR)) <= dbus(3 downto 0);
           when "101" => ASR <= dbus(20 downto 0); -- ASR is only 21. 
           when others => null;
         end case;
@@ -166,6 +170,6 @@ begin
   end process;
   
   -- Outsignal is always what ASR points to in memory.
-  gpuOut(3 downto 0) <= gpu_memory(conv_integer(asr_row))(conv_integer(asr_col+3) downto conv_integer(asr_col));
+  gpuOut <= gpu_memory(conv_integer(ASR));
 
 end Behavioral;
