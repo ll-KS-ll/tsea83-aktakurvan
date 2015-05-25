@@ -57,7 +57,7 @@ architecture behavior of tb is
       clk, rst                : in        std_logic;
       aluOut, controllerOut   : in        std_logic_vector(31 downto 0);
       gregOut, aregOut        : in        std_logic_vector(31 downto 0);
-      gpuOut                  : in        std_logic_vector(3 downto 0);
+      gpuOut                  : in        std_logic_vector(31 downto 0);
       TB_o                    : in        std_logic_vector(2 downto 0);
       dbus                    : out       std_logic_vector(31 downto 0)
     );
@@ -70,7 +70,7 @@ architecture behavior of tb is
       --data_in : in std_logic_vector (3 downto 0);
       --data_ut : out std_logic_vector (3 downto 0);
       dbus : in std_logic_vector(31 downto 0);
-      gpuOut : out std_logic_vector(3 downto 0);
+      gpuOut : out std_logic_vector(31 downto 0);
       FB_o : in std_logic_vector(2 downto 0);
       vga_red, vga_green : out std_logic_vector (2 downto 0);
       vga_blue : out std_logic_vector (2 downto 1);
@@ -96,7 +96,7 @@ architecture behavior of tb is
   signal controllerOut : std_logic_vector(31 downto 0);
   signal gregOut : std_logic_vector(31 downto 0);
   signal aregOut : std_logic_vector(31 downto 0);
-  signal gpuOut : std_logic_vector(3 downto 0);
+  signal gpuOut : std_logic_vector(31 downto 0);
 
   signal Z, C, L : std_logic;
   

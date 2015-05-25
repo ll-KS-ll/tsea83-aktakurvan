@@ -67,35 +67,35 @@ architecture arch of controller is
             x"0027_0100", -- 
             x"0070_0000", -- ADD
             x"0110_0000", -- 
-		    x"0026_4300", -- 
+		        x"0026_0300", -- 
             x"0070_0000", -- SUB
             x"0150_0000", -- 
-            x"0026_4300", -- 
+            x"0026_0300", -- 
 		    x"0070_0000", -- AND 
             x"0190_0000", -- 
-            x"0026_4300", -- 
-            x"000B_4300", -- BRA
+            x"0026_0300", -- 
+            x"000B_0300", -- BRA
 		    x"0208_0816", -- BNE
-            x"0000_4300", -- 
+            x"0000_0300", -- 
             x"000B_0300", --  
             x"0000_0F00", -- HALT (not done)
 		    x"0026_0300", -- 
             x"0070_0000", -- CMP
-            x"0150_4300", -- 
+            x"0150_0300", -- 
             x"0070_0000", -- INC
             x"0280_0000", --  
-            x"0026_4300", -- 
+            x"0026_0300", -- 
 		    x"0070_0000", -- DEC
             x"03A8_0000", -- 
-            x"0026_4300", -- 
-            x"0016_4300", -- LOAD
-		    x"0032_4300", -- STORE
+            x"0026_0300", -- 
+            x"0016_0300", -- LOAD
+		    x"0032_0300", -- STORE
             x"0070_0000", -- STOREG
             x"0300_0E00", -- 
             x"0130_0000", --
 		    x"02C0_0E00", --
             x"0130_0000", --
-            x"0024_4300", --
+            x"0024_0300", --
             x"0000_0000",
 		    x"0000_0000",
             x"0000_0000", 
@@ -152,7 +152,7 @@ begin
                                     uPC <= uADR;
                         when "0111" => uPC <= SuPC;
                         when "1000" =>
-                                    if Z='1' then uPC <= uADR;
+                                    if Z='0' then uPC <= uADR;
                                     else uPC <= uPC+1;
                                     end if;
                         when "1001" => null; -- Undefined
@@ -170,7 +170,7 @@ begin
                                     else uPC <= uPC+1;
                                     end if;
                         when "1110" => 
-                                    GRx <= GRx+1;
+                                    --GRx <= GRx+1;
                                     uPC <= uPC+1;
                         when others => null; -- Undefined
                     end case;
@@ -188,7 +188,7 @@ begin
                     PC <= x"0000_0000";                
                 elsif P='1' then
                     PC <= PC+1;
-                elsif TB="011" then
+                elsif FB="011" then
                     PC <= x"000" & dbus(19 downto 0);
                 end if;
             end if;
@@ -209,10 +209,14 @@ begin
         -- IR
         process(clk) begin
           if rising_edge(clk) then
-              if rst='1' then
-                 IR <= x"0000_0000";
-              elsif FB="001" then
+              --if rst='1' then
+              --   IR <= x"0000_0000";
+              --elsif FB="001" then
+              if FB="001" then
                  IR <= dbus;
+              end if;
+              if SEQ="1110" then
+                GRx <= GRx+1;
               end if;
           end if;
         end process;        
