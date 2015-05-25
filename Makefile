@@ -27,11 +27,11 @@
 # Timingrapporten (skapas av make aktakurvan.timing) ligger i lab-synthdir/layoutdefault/design.trw
 
 XILINX_INIT = source /sw/xilinx/ise_14.2i/ISE_DS/settings64.sh;
-# XILINX_INIT = source /opt/xilinx/14.7/ISE_DS/settings64.sh;  # Used by K-S, please don't remove :)
+#XILINX_INIT = source /opt/xilinx/14.7/ISE_DS/settings64.sh;
 PART=xc6slx16-3-csg324
 
-aktakurvan.%: S=gpu.vhd
-#aktakurvan.%: T=gpu_tb.vhd
+aktakurvan.%: S=gpu.vhd alu.vhd controller.vhd greg.vhd areg.vhd mux.vhd
+aktakurvan.%: T=tb.vhd
 aktakurvan.%: U=aktakurvan.ucf
 
 # Misc functions that are good to have
