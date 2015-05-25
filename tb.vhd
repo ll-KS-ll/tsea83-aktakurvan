@@ -28,7 +28,7 @@ architecture behavior of tb is
       controllerOut   : out    std_logic_vector(31 downto 0);
       TB_o            : out    std_logic_vector(2 downto 0);
       FB_o            : out    std_logic_vector(2 downto 0);
-      OP_o            : out    std_logic_vector(3 downto 0);
+      GRx_o            : out    std_logic_vector(3 downto 0);
       ALU_o           : out    std_logic_vector(3 downto 0)    
     );
   end component;
@@ -39,7 +39,7 @@ architecture behavior of tb is
       dbus            : in      std_logic_vector(31 downto 0);
       gregOut         : out     std_logic_vector(31 downto 0);
       FB_o            : in      std_logic_vector(2 downto 0);
-      OP_o            : in      std_logic_vector(3 downto 0)
+      GRx_o            : in      std_logic_vector(3 downto 0)
     );
   end component;
 
@@ -85,7 +85,7 @@ architecture behavior of tb is
   
   signal TB_o : std_logic_vector(2 downto 0);
   signal FB_o : std_logic_vector(2 downto 0);
-  signal OP_o : std_logic_vector(3 downto 0);
+  signal GRx_o : std_logic_vector(3 downto 0);
   signal ALU_o : std_logic_vector(3 downto 0);
   
   signal aluOut : std_logic_vector(31 downto 0);
@@ -108,9 +108,9 @@ begin
 
   -- Controller
   controller0: controller port map (clk, rst, dbus, Z, C, L, controllerOut, 
-      TB_o, FB_o, OP_o, ALU_o);
+      TB_o, FB_o, GRx_o, ALU_o);
 
-  greg0: greg port map(clk, rst, dbus, gregOut, FB_o, OP_o);
+  greg0: greg port map(clk, rst, dbus, gregOut, FB_o, GRx_o);
 
   areg0: areg port map(clk, rst, dbus, aregOut, FB_o);
 
