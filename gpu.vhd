@@ -72,7 +72,7 @@ architecture Behavioral of gpu is
       x"FF"); -- White      F
   signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
   -- GPU RAM
-  type ram_t is array (0 to 76799) of std_logic_vector (3 downto 0);
+  type ram_t is array (0 to 19200) of std_logic_vector (3 downto 0);
   -- signal gpu_memory: ram_t := ((others=> (others=>'0'))); -- Init every bit in memory to 1. 
   signal gpu_memory: ram_t := ((others=> x"0")); 
   --constant grr : ram_t := 
@@ -154,7 +154,7 @@ begin
       if mod_4=3 then
         if xctr<640 and yctr<480 then
           -- yctr / 2 & xctr / 2 
-          video <= gpu_memory(conv_integer(yctr(8 downto 1)&xctr(8 downto 1)));
+          video <= gpu_memory(conv_integer(yctr(8 downto 2)&xctr(8 downto 2)));
         else
           video <= "0000";
         end if; 
