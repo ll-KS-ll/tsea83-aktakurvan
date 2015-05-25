@@ -185,10 +185,11 @@ begin
       if FB_o="100" then
         if rw_flag = '0' then
           -- Write
-          gpu_memory(conv_integer(row&col)) <= data; 
+          gpu_memory(conv_integer((conv_integer(row)*160) + col)) <= data; 
         else 
           -- Read
-          gpuOut <= x"0000_000" & gpu_memory(conv_integer(row&col));
+          --gpuOut <= x"0000_000" & gpu_memory(conv_integer(row&col));
+          gpuOut <= x"0000_000" & gpu_memory(conv_integer((conv_integer(row)*160) + col));
           -- Broken, out of LUTs :s
           --gpuOut <= "0000_0000_000" & row & col & gpu_memory(conv_integer(row&col));
         end if;
