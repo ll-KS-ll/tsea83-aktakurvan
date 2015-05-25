@@ -4,6 +4,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -13,7 +14,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 entity gpu is 
   Port  ( clk,rst : in std_logic;
           dbus : in std_logic_vector(31 downto 0);
-          gpuOut : out std_logic_vector(3 downto 0);
+          gpuOut : out std_logic_vector(31 downto 0);
           FB_o : in std_logic_vector(2 downto 0);
           vga_red, vga_green : out std_logic_vector (2 downto 0);
           vga_blue : out std_logic_vector (2 downto 1);
@@ -21,13 +22,21 @@ entity gpu is
 end gpu;
 
 -- ====== Info ======
--- ASR is split in to rows and cols.
--- The first 12 bits is used to index columns in memory.
--- The last 9 bits is used to index rows in memory.
+-- GPU displays at a resolution of 640x480.
+-- The memory contains 320x240 (76800) pixles that are displayed.
+-- These can be writen and read through x and y coordinates.
+-- The memory internal is a long row of 4 bits arrays.
 --
--- When writing to memory the 4 lsb is writen to indexed spot.
--- When reading from memory 4 bits is added as lsb on the bus. 
-
+-- When reading and writing to GPU Memory, the data on the bus is split into sections.
+-- 
+-- The last 4 bits is the data (color) to read or to be writen.
+-- Bit 11-4, 8 bits (256) is used to index rows in memory.
+-- Bit 20-12, 9 (512) is used to index columns in memory.
+-- Bit 31 is used to signal read or write. 1 for read, 0 for write.
+--
+-- GM: [f--- ---- ---x xxxx xxxx yyyy yyyy cccc]
+-- 
+-- 
 
 architecture Behavioral of gpu is
   -- VGA
@@ -35,15 +44,12 @@ architecture Behavioral of gpu is
   signal xctr,yctr : std_logic_vector(9 downto 0) := "0000000000";
   signal hs : std_logic := '1';
   signal vs : std_logic := '1';
-  -- Memmory
-  --alias mem_row : std_logic_vector(8 downto 0) is yctr(9 downto 1);
-  --alias mem_col : std_logic_vector(8 downto 0) is xctr(9 downto 1);
-  --signal pixel : std_logic_vector(3 downto 0) := "0000";
   
-  -- Address register
-  signal ASR : std_logic_vector(20 downto 0) := '0' & x"00000";
-  alias asr_row : std_logic_vector(8 downto 0) is ASR(8 downto 0);
-  alias asr_col : std_logic_vector(11 downto 0) is ASR(20 downto 9);
+  -- Memory/Bus
+  alias data : std_logic_vector(3 downto 0) is dbus(3 downto 0);
+  alias row : std_logic_vector(7 downto 0) is dbus(11 downto 4);
+  alias col : std_logic_vector(8 downto 0) is dbus(20 downto 12);
+  alias rw_flag : std_logic is dbus(31);
 
   -- Color palette
   type color_t is array (0 to 15) of std_logic_vector (7 downto 0);
@@ -66,9 +72,9 @@ architecture Behavioral of gpu is
       x"FF"); -- White
   signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
   -- GPU RAM
-  --type ram_t is array (0 to 239) of std_logic_vector (1279 downto 0);
   type ram_t is array (0 to 76799) of std_logic_vector (3 downto 0);
-  signal gpu_memory: ram_t := ((others=> (others=>'0'))); -- Init every bit in memory to 1. 
+  -- signal gpu_memory: ram_t := ((others=> (others=>'0'))); -- Init every bit in memory to 1. 
+  signal gpu_memory: ram_t := ((others=> x"4")); 
   
   -- Force xilinx to use block RAM.
   attribute ram_style: string;
@@ -140,11 +146,11 @@ begin
       --els
       if mod_4=3 then
         if xctr<640 and yctr<480 then
-          --pixel <= mem_col(6 downto 0) & "00"; -- pixel position 
-          video <= gpu_memory(conv_integer(xctr+yctr));
+          -- yctr / 2 & xctr / 2 
+          video <= gpu_memory(conv_integer(yctr(8 downto 1)&xctr(8 downto 1)));
         else
           video <= "0000";
-        end if;
+        end if; 
       end if;
     end if;
   end process;
@@ -155,24 +161,80 @@ begin
   vga_blue(2 downto 1) <= colors(conv_integer(video))(1 downto 0);
 
   -- ASR
-  process(clk) begin
-    if rising_edge(clk) then
-      if rst='1' then
-        ASR <= '0' & x"00000";
-      end if;
-      if FB_o="101" then
-        ASR <= dbus(20 downto 0); -- ASR is only 21-bits
-      end if;
-    end if;
-  end process;
+  --process(clk) begin
+  --  if rising_edge(clk) then
+  --    if rst='1' then
+  --      ASR <= '0' & x"00000";
+  --    end if;
+  --    if FB_o="101" then
+  --      ASR <= dbus(20 downto 0); -- ASR is only 21-bits
+  --    end if;
+  --  end if;
+  --end process;
 
   -- W/R GPU Memory.
   process(clk) begin
     if rising_edge(clk) then
       if FB_o="100" then
-        gpu_memory(conv_integer(ASR)) <= dbus(3 downto 0); 
+        if rw_flag = '0' then
+          -- Write
+          gpu_memory(conv_integer(row&col)) <= data; 
+        else 
+          -- Read
+          gpuOut <= x"0000_000" & gpu_memory(conv_integer(row&col));
+          -- Broken, out of LUTs :s
+          --gpuOut <= "0000_0000_000" & row & col & gpu_memory(conv_integer(row&col));
+        end if;
       end if;
-      gpuOut(3 downto 0) <= gpu_memory(conv_integer(ASR));
+      -- Explination.
+      --   0 1 2 3      x   Display structure
+      -- 0 a b c d    y d
+      -- 1 e f g h 
+      -- 2 i j k l 
+      -- 3 m n o p 
+
+      -- p  d (x,y)    GPU Memory structure
+      -- ----------
+      -- 0  a (0,0)
+      -- 1  b (1,0)
+      -- 2  c (2,0)
+      -- 3  d (3,0)
+      -- 4  e (0,1)
+      -- 5  f (1,1)
+      -- 6  g (2,1)
+      -- 7  h (3,1)
+      -- 8  i (0,2)
+      -- 9  j (1,2)
+      -- 10 k (2,2)
+      -- 11 l (3,2)
+      -- 12 m (0,3)
+      -- 13 n (1,3)
+      -- 14 o (2,3)
+      -- 15 p (3,3)
+
+      --  x  y    p      Solution
+      -- --------------
+      -- 00 00  0000 0
+      -- 01 00  0001 1
+      -- 10 00  0010 2
+      -- 11 00  0011 3
+      --      
+      -- 00 01  0100 4
+      -- 01 01  0101 5
+      -- 10 01  0110 6
+      -- 11 01  0111 7
+      ---
+      -- 00 10  1000 8
+      -- 01 10  1001 9
+      -- 10 10  1010 10
+      -- 11 10  1011 11
+      ---
+      -- 00 11  1100 12
+      -- 01 11  1101 13
+      -- 10 11  1110 14
+      -- 11 11  1111 15
+      -- -----------
+      -- xx yy  xxyy     General solution
     end if;
   end process;
   
