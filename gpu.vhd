@@ -153,23 +153,27 @@ begin
   vga_red(2 downto 0) <= colors(conv_integer(video))(7 downto 5);
   vga_green(2 downto 0) <= colors(conv_integer(video))(4 downto 2);
   vga_blue(2 downto 1) <= colors(conv_integer(video))(1 downto 0);
-  
-  -- W/R GPU Memory.
+
+  -- ASR
   process(clk) begin
     if rising_edge(clk) then
-      if rst = '1' then
-        ASR <= '0' & X"00000";
-      else
-        case FB_o is
-          when "100" => gpu_memory(conv_integer(ASR)) <= dbus(3 downto 0);
-          when "101" => ASR <= dbus(20 downto 0); -- ASR is only 21. 
-          when others => null;
-        end case;
+      if rst='1' then
+        ASR <= '0' & x"00000";
+      end if;
+      if FB_o="101" then
+        ASR <= dbus(20 downto 0); -- ASR is only 21-bits
       end if;
     end if;
   end process;
-  
-  -- Outsignal is always what ASR points to in memory.
-  gpuOut <= gpu_memory(conv_integer(ASR));
 
+  -- W/R GPU Memory.
+  process(clk) begin
+    if rising_edge(clk) then
+      if FB_o="100" then
+        gpu_memory(conv_integer(ASR)) <= dbus(3 downto 0); 
+      end if;
+      gpuOut(3 downto 0) <= gpu_memory(conv_integer(ASR));
+    end if;
+  end process;
+  
 end Behavioral;

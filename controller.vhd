@@ -20,7 +20,7 @@ entity controller is
             controllerOut   : out       std_logic_vector(31 downto 0);
             TB_o            : out       std_logic_vector(2 downto 0);
             FB_o            : out       std_logic_vector(2 downto 0);
-            GRx_o            : out       std_logic_vector(3 downto 0);
+            GRx_o           : out       std_logic_vector(3 downto 0);
             ALU_o           : out       std_logic_vector(3 downto 0)
             );
 end controller;
@@ -46,60 +46,60 @@ architecture arch of controller is
         alias ALU           : std_logic_vector(3 downto 0)      is uIR(25 downto 22);
         alias TB            : std_logic_vector(2 downto 0)      is uIR(21 downto 19); 
         alias FB            : std_logic_vector(2 downto 0)      is uIR(18 downto 16); 
-		    alias S             : std_logic                         is uIR(15);
+		alias S             : std_logic                         is uIR(15);
         alias P             : std_logic                         is uIR(14);           -- When '1' PC++
-		    alias LC            : std_logic_vector(1 downto 0)      is uIR(13 downto 12);
-		    alias SEQ           : std_logic_vector(3 downto 0)      is uIR(11 downto 8);
-		    alias uADR          : std_logic_vector(7 downto 0)      is uIR(7 downto 0); 
+		alias LC            : std_logic_vector(1 downto 0)      is uIR(13 downto 12);
+		alias SEQ           : std_logic_vector(3 downto 0)      is uIR(11 downto 8);
+		alias uADR          : std_logic_vector(7 downto 0)      is uIR(7 downto 0); 
 
         -- uMem
 	    type uMem_t is array(0 to 63) of std_logic_vector(31 downto 0); -- Expand to 32 for simplicity.
 	    constant uMem : uMem_t := ( -- Memory for microprograming code.
 		    x"001F_0000", -- Hämtfas
-        x"0011_4000", -- 
-        x"0000_8200", -- Decide EA  
-        x"000F_0100", -- EA Direct   
-        x"001F_4100", -- EA Imediate
-        x"000F_0000", -- EA Indirect
-        x"0017_0100", --
-        x"0048_0000", --
-        x"0230_8000", -- EA Indexed (Fel, väljer Gr3) 
-        x"0027_0100", -- 
-        x"0070_0000", -- ADD
-        x"0110_0000", -- 
+            x"0011_4000", -- 
+            x"0000_8200", -- Decide EA  
+            x"000F_0100", -- EA Direct   
+            x"001F_4100", -- EA Imediate
+            x"000F_0000", -- EA Indirect
+            x"0017_0100", --
+            x"0048_0000", --
+            x"0230_8000", -- EA Indexed (Fel, väljer Gr3) 
+            x"0027_0100", -- 
+            x"0070_0000", -- ADD
+            x"0110_0000", -- 
 		    x"0026_0300", -- 
-        x"0070_0000", -- SUB
-        x"0150_0000", -- 
-        x"0026_0300", -- 
+            x"0070_0000", -- SUB
+            x"0150_0000", -- 
+            x"0026_0300", -- 
 		    x"0070_0000", -- AND 
-        x"0190_0000", -- 
-        x"0026_0300", -- 
-        x"0058_0000", -- BRA
+            x"0190_0000", -- 
+            x"0026_0300", -- 
+            x"0058_0000", -- BRA
 		    x"0208_0000", -- 
-        x"0023_0300", -- 
-        x"0058_0840", -- BNE 
-        x"0208_0000", -- 
+            x"0023_0300", -- 
+            x"0058_0840", -- BNE 
+            x"0208_0000", -- 
 		    x"0023_0300", -- 
-        x"0000_0300", -- 
-        x"0000_0000", -- HALT (not done)
-        x"0000_0000", 
-        x"0070_0000", -- CMP 
-        x"0150_0300", -- 
+            x"0000_0300", -- 
+            x"0000_0000", -- HALT (not done)
+            x"0000_0000", 
+            x"0070_0000", -- CMP 
+            x"0150_0300", -- 
 		    x"0070_0000", -- INC
-        x"0280_0000", -- 
-        x"0026_0300", -- 
-        x"0070_0000", -- DEC
+            x"0280_0000", -- 
+            x"0026_0300", -- 
+            x"0070_0000", -- DEC
 		    x"0168_0000", --
-        x"0026_0300", --
-        x"0000_0000", -- BGE(ej klar
-        x"0000_0000", 
+            x"0026_0300", --
+            x"0000_0000", -- BGE(ej klar
+            x"0000_0000", 
 		    x"0000_0000", 
-        x"0000_0000", 
-        x"0000_0000", 
-        x"0000_0000",
+            x"0000_0000", 
+            x"0000_0000", 
+            x"0000_0000",
 		    x"0016_0300", -- LOAD
-        x"0032_0300", -- STORE
-        x"0000_0000", x"0000_0000",
+            x"0032_0300", -- STORE
+            x"0000_0000", x"0000_0000",
 		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
 		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
 		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
@@ -112,16 +112,16 @@ begin
             K1 <=   X"0A" when "0000", -- ADD
                     X"0D" when "0001", -- SUB
                     X"10" when "0010", -- AND
-	    	            X"13" when "0011", -- BRA
-			              X"16" when "0100", -- BNE
-			              X"1A" when "0101", -- HALT				       
+	    	        X"13" when "0011", -- BRA
+			        X"16" when "0100", -- BNE
+			        X"1A" when "0101", -- HALT				       
                     X"1E" when "0110", -- INC
-			              X"21" when "0111", -- DEC
-			              X"2A" when "1000", -- LOAD
-    				        X"2B" when "1001", -- STORE
-	    			        X"00" when "1010",
-		    		        X"00" when "1011",
-			    	        X"00" when others;
+			        X"21" when "0111", -- DEC
+			        X"2A" when "1000", -- LOAD
+    				X"2B" when "1001", -- STORE
+	    			X"00" when "1010",
+		    		X"00" when "1011",
+			    	X"00" when others;
 
         -- K2 - Choose adressing mode
         with M select
