@@ -169,7 +169,8 @@ begin
                                     if C='0' then uPC <= uADR;
                                     else uPC <= uPC+1;
                                     end if;
-                        when "1110" => null; -- Undefined
+                        when "1110" => GRx <= GRx+1;
+                                    => uPC <= uPC+1;
                         when others => null; -- Undefined
                     end case;
                 end if;
@@ -187,7 +188,7 @@ begin
                 elsif P='1' then
                     PC <= PC+1;
                 elsif TB="011" then
-                    PC <= dbus;
+                    PC <= dbus(19 downto 0);
                 end if;
             end if;
         end process;

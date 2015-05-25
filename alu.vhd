@@ -97,10 +97,18 @@ begin
                                     if AR(31 downto 0)=X"FFFF_FFFF" then C <= '1';
                                     else C <= '0';
                                     end if;
-                        -- Undefined
-                        when "1011" => null;-- Undefined
-                        -- Undefined
-                        when "1100" => null;-- Undefined
+                        -- Logic-shift-left 4 bits (Z)
+                        when "1011" => AR(31 downto 0) <= AR(27 downto 0) & '0000';
+                                    -- Set Z flag
+                                    if AR(27 downto 0)=0 then Z <= '1';
+                                    else Z <= '0';
+                                    end if;
+                        -- Logic-shift-left 8 bits (Z)
+                        when "1100" => AR(31 downto 0) <= AR(23 downto 0) & '00000000';
+                                    -- Set Z flag
+                                    if AR(23 downto 0)=0 then Z <= '1';
+                                    else Z <= '0';
+                                    end if;
                         -- Logic-shift-right (Z, C)
                         when "1101" => AR(31 downto 0) <= '0' & AR(31 downto 1);
                                     -- Set Z flag
@@ -109,8 +117,15 @@ begin
                                     end if;
                                     -- Set C flag
                                     C <= AR(0);
-                        -- Undefined
-                        when "1110" => null;-- Undefined
+                        -- Decrement AR (Z)
+                        when "1110" => AR <= AR - 1;
+                                    -- Set Z flag
+                                    if AR(31 downto 0)=X"0000_0001" then Z <= '1';
+                                    else Z <= '0';
+                                    -- Set C flag
+                                    if AR(31 downto 0)=X"0000_0000" then C <= '1';
+                                    else C <= '0';
+                                    end if;
                         -- Undefined
                         when others => null;-- Undefined
                     end case;
