@@ -57,6 +57,7 @@ architecture behavior of tb is
       clk, rst                : in        std_logic;
       aluOut, controllerOut   : in        std_logic_vector(31 downto 0);
       gregOut, aregOut        : in        std_logic_vector(31 downto 0);
+      gpuOut                  : in        std_logic_vector(3 downto 0);
       TB_o                    : in        std_logic_vector(2 downto 0);
       dbus                    : out       std_logic_vector(31 downto 0)
     );
@@ -68,6 +69,9 @@ architecture behavior of tb is
       --adress : in std_logic_vector (20 downto 0);
       --data_in : in std_logic_vector (3 downto 0);
       --data_ut : out std_logic_vector (3 downto 0);
+      dbus : in std_logic_vector(31 downto 0);
+      gpuOut : out std_logic_vector(3 downto 0);
+      FB_o : in std_logic_vector(2 downto 0);
       vga_red, vga_green : out std_logic_vector (2 downto 0);
       vga_blue : out std_logic_vector (2 downto 1);
       hsync,vsync : out std_logic
@@ -92,6 +96,7 @@ architecture behavior of tb is
   signal controllerOut : std_logic_vector(31 downto 0);
   signal gregOut : std_logic_vector(31 downto 0);
   signal aregOut : std_logic_vector(31 downto 0);
+  signal gpuOut : std_logic_vector(3 downto 0);
 
   signal Z, C, L : std_logic;
   
@@ -114,10 +119,10 @@ begin
 
   areg0: areg port map(clk, rst, dbus, aregOut, FB_o);
 
-  mux0: mux port map(clk, rst, aluOut, controllerOut, gregOut, aregOut, TB_o, dbus);
+  mux0: mux port map(clk, rst, aluOut, controllerOut, gregOut, aregOut, gpuOut, TB_o, dbus);
 
   -- GPU
-  gpu0: gpu port map(clk, rst, vga_red, vga_green, vga_blue, hsync, vsync);
+  gpu0: gpu port map(clk, rst, dbus, gpuOut, FB_o, vga_red, vga_green, vga_blue, hsync, vsync);
 
   -- 100 MHz system clock
   clk_gen : process

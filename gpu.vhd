@@ -13,7 +13,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 entity gpu is 
   Port  ( clk,rst : in std_logic;
           dbus : in std_logic_vector(31 downto 0);
-          gpuOut : out std_logic_vector(31 downto 0);
+          gpuOut : out std_logic_vector(3 downto 0);
           FB_o : in std_logic_vector(2 downto 0);
           vga_red, vga_green : out std_logic_vector (2 downto 0);
           vga_blue : out std_logic_vector (2 downto 1);
@@ -67,7 +67,7 @@ architecture Behavioral of gpu is
   signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
   -- GPU RAM
   type ram_t is array (0 to 239) of std_logic_vector (1279 downto 0);
-  signal gpu_memory: ram_t := ((others=> (others=>'1'))); -- Init every bit in memory to 1. 
+  signal gpu_memory: ram_t := ((others=> (others=>'0'))); -- Init every bit in memory to 1. 
   
 begin
   -- GPU clock, 25MHz from 100MHz
@@ -157,7 +157,7 @@ begin
         ASR <= '0' & X"00000";
       else
         case FB_o is
-          -- when "100" => gpu_memory(conv_integer(asr_row))(conv_integer(asr_col+3) downto conv_integer(asr_col)) <= dbus(3 downto 0);
+          when "100" => gpu_memory(conv_integer(asr_row))(conv_integer(asr_col+3) downto conv_integer(asr_col)) <= dbus(3 downto 0);
           when "101" => ASR <= dbus(20 downto 0); -- ASR is only 21. 
           when others => null;
         end case;
@@ -166,6 +166,6 @@ begin
   end process;
   
   -- Outsignal is always what ASR points to in memory.
-  --gpuOut(3 downto 0) <= gpu_memory(conv_integer(asr_row))(conv_integer(asr_col+3) downto conv_integer(asr_col));
+  gpuOut(3 downto 0) <= gpu_memory(conv_integer(asr_row))(conv_integer(asr_col+3) downto conv_integer(asr_col));
 
 end Behavioral;
