@@ -75,7 +75,14 @@ architecture Behavioral of gpu is
   type ram_t is array (0 to 76799) of std_logic_vector (3 downto 0);
   -- signal gpu_memory: ram_t := ((others=> (others=>'0'))); -- Init every bit in memory to 1. 
   signal gpu_memory: ram_t := ((others=> x"4")); 
-  
+  --constant grr : ram_t := 
+  --  ('1' when pixel_x <= 320 and pixel_y = 0
+  --  '1' when pixel_x = 0 and pixel_y <= 240
+  --  '1' when pixel_x = 320 and pixel_y <= 240
+  --  '1' when pixel_x <= 320 and pixel_y = 240
+  --  others=> (others=>'0'));
+  ---signal gpu_memory: ram_t := grr;
+
   -- Force xilinx to use block RAM.
   attribute ram_style: string;
   attribute ram_style of gpu_memory : signal is "block";
