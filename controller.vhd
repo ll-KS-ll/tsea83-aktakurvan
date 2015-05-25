@@ -189,7 +189,7 @@ begin
                 elsif P='1' then
                     PC <= PC+1;
                 elsif TB="011" then
-                    PC <= dbus(19 downto 0);
+                    PC <= x"000" & dbus(19 downto 0);
                 end if;
             end if;
         end process;
