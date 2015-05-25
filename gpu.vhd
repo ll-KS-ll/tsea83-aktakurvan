@@ -172,6 +172,5 @@ begin
             gpuOut(3 downto 0) <= gpu_memory(conv_integer(asr_row))(conv_integer(asr_col+3) downto conv_integer(asr_col));
         end if;
     end process;
-  
-  -- Outsignal is always what ASR points to in memory.
+
 end Behavioral;
