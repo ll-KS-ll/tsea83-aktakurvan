@@ -4,8 +4,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
-use IEEE.NUMERIC_STD.ALL;
-
+use IEEE.STD_LOGIC_ARITH.ALL;
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
 -- library UNISIM;
@@ -74,7 +73,78 @@ architecture Behavioral of gpu is
   -- GPU RAM
   type ram_t is array (0 to 19200) of std_logic_vector (3 downto 0);
   -- signal gpu_memory: ram_t := ((others=> (others=>'0'))); -- Init every bit in memory to 1. 
-  signal gpu_memory: ram_t := ((others=> x"0")); 
+  signal gpu_memory: ram_t := (
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", 
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", 
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
+    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
+    
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", 
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", 
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
+    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
+
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", 
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", 
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
+    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
+
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", 
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", 
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
+    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
+
+
+    others=> x"0"
+    ); 
   --constant grr : ram_t := 
   --  ('1' when pixel_x <= 320 and pixel_y = 0
   --  '1' when pixel_x = 0 and pixel_y <= 240
@@ -153,8 +223,9 @@ begin
       --els
       if mod_4=3 then
         if xctr<640 and yctr<480 then
-          -- yctr / 2 & xctr / 2 
-          video <= gpu_memory(conv_integer(yctr(8 downto 2)&xctr(8 downto 2)));
+          -- pixel = y*row_width + x
+          --video <= gpu_memory(conv_integer((conv_integer(yctr(9 downto 2))*160) + xctr(9 downto 2)));
+          video <= gpu_memory(conv_integer((conv_integer(yctr(9 downto 2))*160)+conv_integer(xctr(9 downto 2))));
         else
           video <= "0000";
         end if; 
@@ -185,11 +256,12 @@ begin
       if FB_o="100" then
         if rw_flag = '0' then
           -- Write
-          gpu_memory(conv_integer((conv_integer(row)*160) + col)) <= data; 
+          --gpu_memory(conv_integer(unsigned(row)&unsigned(col))) <= data;
+          gpu_memory(conv_integer((conv_integer(row)*160)+conv_integer(col))) <= data;
         else 
           -- Read
           --gpuOut <= x"0000_000" & gpu_memory(conv_integer(row&col));
-          gpuOut <= x"0000_000" & gpu_memory(conv_integer((conv_integer(row)*160) + col));
+          --gpuOut <= x"0000_000" & gpu_memory(conv_integer((conv_integer(row)*160) + col));
           -- Broken, out of LUTs :s
           --gpuOut <= "0000_0000_000" & row & col & gpu_memory(conv_integer(row&col));
         end if;
