@@ -54,13 +54,13 @@ architecture Behavioral of gpu is
   -- Color palette
   type color_t is array (0 to 15) of std_logic_vector (7 downto 0);
   constant colors : color_t := -- "rrrgggbb"
-    ( x"00", -- Black
-      x"E0", -- Red
-      x"03", -- Blue
-      x"FC", -- Yellow
-      x"1C", -- Green/Lime
-      x"1F", -- Aqua
-      x"E3", -- Magenta
+    ( x"00", -- Black       0
+      x"E0", -- Red         1
+      x"03", -- Blue        2
+      x"FC", -- Yellow      3
+      x"1C", -- Green/Lime  4
+      x"1F", -- Aqua        5
+      x"E3", -- Magenta     6
       x"00",  
       x"00",
       x"00",
@@ -69,7 +69,7 @@ architecture Behavioral of gpu is
       x"00",
       x"00",
       x"00",
-      x"FF"); -- White
+      x"FF"); -- White      F
   signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
   -- GPU RAM
   type ram_t is array (0 to 76799) of std_logic_vector (3 downto 0);

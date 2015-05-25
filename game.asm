@@ -20,7 +20,7 @@
 # Numbers in PM:
 # Loop counts:
 # 239 - Width of gameplan - xPos - PM(1004)
-# 279 - Height of gameplan - yPos - PM(1005)
+# 239 - Height of gameplan - yPos - PM(1005)
 # 0 - Just a zero - PM(1006)
 
 
@@ -29,8 +29,8 @@
 #---------------------------------------#
 
 ## DRAW BORDERS ##
-# Save 239 and 279 somewhere in PM
-# Border is xPos 0->239 and yPos 0->279
+# Save 239 and 239 somewhere in PM
+# Border is xPos 0->239 and yPos 0->239
 # GR12 is xPos
 # GR13 is yPos
 # GR14 is color
