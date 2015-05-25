@@ -165,7 +165,7 @@ begin
             end if;
         end process;
 
-        -- FB and TB are clocked so we dont need to clock TBo and FBo
+        -- Out-signals
         TB_o <= TB;
         FB_o <= FB;
         OP_o <= OP;
