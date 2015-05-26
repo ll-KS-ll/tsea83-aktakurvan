@@ -16,7 +16,7 @@ entity areg is
             clk, rst        : in        std_logic;           
             dbus            : in        std_logic_vector(31 downto 0);
             aregOut         : out       std_logic_vector(31 downto 0);
-            FB_o            : in        std_logic_vector(2 downto 0)
+            FB_c            : in        std_logic_vector(2 downto 0)
             );
 end areg;
 
@@ -45,7 +45,7 @@ architecture arch of areg is
             0014=>x"8D00_0000",		-- Decrease GR13
             0015=>x"6D00_03EE",		-- Compare GR13 with PM(1006)
             0016=>x"4000_000D",		-- Branch on Not Equal to address 13
-            0017=>x"3000_0017",		-- Branch Always 17 (Ininity loop.)
+            0017=>x"3000_0011",		-- Branch Always 17 (Ininity loop.)
             1000=>x"0000_0000",		-- Color black
             1001=>x"0000_0001",		-- Color red
             1002=>x"0000_0002",		-- Color blue
@@ -68,7 +68,7 @@ begin
                 if rst = '1' then
                     ASR <= X"00000";
                 else
-                    case FB_o is
+                    case FB_c is
                         when "010" => pMem(conv_integer(ASR))   <= dbus;
                         when "111" => ASR                       <= dbus(19 downto 0); -- ASR is only 21. 
                         when others => null;
@@ -78,11 +78,8 @@ begin
         end process;
 
         -- Outsignal is always what ASR points to in memory.
-        --process(clk) begin
-        --    if rising_edge(clk) then
-              aregOut <= pMem(conv_integer(ASR));
-        --    end if;
-        --end process;
+        aregOut <= pMem(conv_integer(ASR));
+
 end architecture ;
 
 

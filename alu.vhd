@@ -16,8 +16,8 @@ entity alu is
             clk, rst        : in        std_logic;
             dbus            : in        std_logic_vector(31 downto 0);
             aluOut          : out       std_logic_vector(31 downto 0);
-            TB_o            : in        std_logic_vector(2 downto 0);
-            ALU_o           : in        std_logic_vector(3 downto 0);
+            TB_c            : in        std_logic_vector(2 downto 0);
+            ALU_c           : in        std_logic_vector(3 downto 0);
             Z, C, L         : out       std_logic
             );
 end alu;
@@ -34,7 +34,7 @@ begin
                 if rst = '1' then
                     AR <= '0' & X"0000_0000";
                 else
-                    case ALU_o is
+                    case ALU_c is
                         -- NOP (no flags)
                         when "0000" => null;-- Undefined
                         -- AR = dbus (no flags)
@@ -135,7 +135,7 @@ begin
         end process;
 
         -- I/O
-        with TB_o select
+        with TB_c select
                 aluOut <=   AR(31 downto 0) when "100",
                             (others => 'Z') when others;
                                         

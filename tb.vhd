@@ -9,74 +9,16 @@ end tb;
 
 architecture behavior of tb is 
   
-  component alu 
+  component master
     port(
-      clk, rst        : in        std_logic;
-      dbus            : in        std_logic_vector(31 downto 0);
-      aluOut          : out       std_logic_vector(31 downto 0);
-      TB_o            : in        std_logic_vector(2 downto 0);
-      ALU_o           : in        std_logic_vector(3 downto 0);
-      Z, C, L         : out       std_logic
+        clk, rst            : in        std_logic;
+        vga_red, vga_green  : out       std_logic_vector (2 downto 0);
+        vga_blue            : out       std_logic_vector (2 downto 1);
+        hsync, vsync        : out       std_logic
     );
   end component;
 
-  component controller
-    port( 
-      clk, rst        : in     std_logic;
-      dbus            : in     std_logic_vector(31 downto 0);
-      Z, C, L         : in     std_logic;
-      controllerOut   : out    std_logic_vector(31 downto 0);
-      TB_o            : out    std_logic_vector(2 downto 0);
-      FB_o            : out    std_logic_vector(2 downto 0);
-      GRx_o            : out    std_logic_vector(3 downto 0);
-      ALU_o           : out    std_logic_vector(3 downto 0)    
-    );
-  end component;
-
-  component greg
-    port(
-      clk, rst        : in      std_logic;
-      dbus            : in      std_logic_vector(31 downto 0);
-      gregOut         : out     std_logic_vector(31 downto 0);
-      FB_o            : in      std_logic_vector(2 downto 0);
-      GRx_o            : in      std_logic_vector(3 downto 0)
-    );
-  end component;
-
-  component areg
-    port(
-      clk, rst        : in     std_logic;
-      dbus            : in     std_logic_vector(31 downto 0);
-      aregOut         : out    std_logic_vector(31 downto 0);
-      FB_o            : in     std_logic_vector(2 downto 0)
-    );
-  end component;
-
-  component mux is
-    port(
-      clk, rst                : in        std_logic;
-      aluOut, controllerOut   : in        std_logic_vector(31 downto 0);
-      gregOut, aregOut        : in        std_logic_vector(31 downto 0);
-      gpuOut                  : in        std_logic_vector(31 downto 0);
-      TB_o                    : in        std_logic_vector(2 downto 0);
-      dbus                    : out       std_logic_vector(31 downto 0)
-    );
-  end component;
-
-  component gpu
-    port(
-      clk,rst : in std_logic;
-      --adress : in std_logic_vector (20 downto 0);
-      --data_in : in std_logic_vector (3 downto 0);
-      --data_ut : out std_logic_vector (3 downto 0);
-      dbus : in std_logic_vector(31 downto 0);
-      gpuOut : out std_logic_vector(31 downto 0);
-      FB_o : in std_logic_vector(2 downto 0);
-      vga_red, vga_green : out std_logic_vector (2 downto 0);
-      vga_blue : out std_logic_vector (2 downto 1);
-      hsync,vsync : out std_logic
-    );
-  end component;    
+   
 
   -- Internal signals
 
@@ -84,22 +26,6 @@ architecture behavior of tb is
 
   signal clk : std_logic := '0';
   signal rst : std_logic := '1';
-  
-  signal dbus : std_logic_vector(31 downto 0);
-  
-  signal TB_o : std_logic_vector(2 downto 0);
-  signal FB_o : std_logic_vector(2 downto 0);
-  signal GRx_o : std_logic_vector(3 downto 0);
-  signal ALU_o : std_logic_vector(3 downto 0);
-  
-  signal aluOut : std_logic_vector(31 downto 0);
-  signal controllerOut : std_logic_vector(31 downto 0);
-  signal gregOut : std_logic_vector(31 downto 0);
-  signal aregOut : std_logic_vector(31 downto 0);
-  signal gpuOut : std_logic_vector(31 downto 0);
-
-  signal Z, C, L : std_logic;
-  
   signal hsync,vsync : std_logic;
   signal vga_red, vga_green : std_logic_vector(2 downto 0);
   signal vga_blue : std_logic_vector(2 downto 1);
@@ -107,22 +33,8 @@ architecture behavior of tb is
 begin
 
   -- Component Instantiation
-    
-  -- ALU 
-  alu0: alu port map(clk, rst, dbus, aluOut, TB_o, ALU_o, Z, C, L);
-
-  -- Controller
-  controller0: controller port map (clk, rst, dbus, Z, C, L, controllerOut, 
-      TB_o, FB_o, GRx_o, ALU_o);
-
-  greg0: greg port map(clk, rst, dbus, gregOut, FB_o, GRx_o);
-
-  areg0: areg port map(clk, rst, dbus, aregOut, FB_o);
-
-  mux0: mux port map(clk, rst, aluOut, controllerOut, gregOut, aregOut, gpuOut, TB_o, dbus);
-
-  -- GPU
-  gpu0: gpu port map(clk, rst, dbus, gpuOut, FB_o, vga_red, vga_green, vga_blue, hsync, vsync);
+    m1 : master port map(clk, rst, vga_red, vga_green, vga_blue, hsync, vsync);
+ 
 
   -- 100 MHz system clock
   clk_gen : process

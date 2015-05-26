@@ -16,23 +16,23 @@ entity greg is
             clk, rst        : in        std_logic;
             dbus            : in        std_logic_vector(31 downto 0);
             gregOut         : out       std_logic_vector(31 downto 0);
-            FB_o            : in        std_logic_vector(2 downto 0);
-            GRx_o            : in        std_logic_vector(3 downto 0)
+            FB_c            : in        std_logic_vector(2 downto 0);
+            GRx_c            : in        std_logic_vector(3 downto 0)
             );
 end greg;
 
 architecture arch of greg is
         -- Registers
         signal GR0, GR1, GR2, GR3       : std_logic_vector(31 downto 0) := X"0000_0000";
-	    signal GR4, GR5, GR6, GR7       : std_logic_vector(31 downto 0) := X"0000_0000";
-	    signal GR8, GR9, GR10, GR11     : std_logic_vector(31 downto 0) := X"0000_0000";
-	    signal GR12, GR13, GR14, GR15   : std_logic_vector(31 downto 0) := X"0000_0000";
+	      signal GR4, GR5, GR6, GR7       : std_logic_vector(31 downto 0) := X"0000_0000";
+	      signal GR8, GR9, GR10, GR11     : std_logic_vector(31 downto 0) := X"0000_0000";
+	      signal GR12, GR13, GR14, GR15   : std_logic_vector(31 downto 0) := X"0000_0000";
 
 
 begin
 
         -- Output
-        with GRx_o select
+        with GRx_c select
                 gregOut <=  GR0     when "0000",
                             GR1     when "0001",
                             GR2     when "0010",
@@ -71,8 +71,8 @@ begin
                     GR13 <= x"0000_0000";
                     GR14 <= x"0000_0000";
                     GR15 <= x"0000_0000";
-                elsif FB_o="110" then
-                    case GRx_o is
+                elsif FB_c="110" then
+                    case GRx_c is
                         when "0000" => GR0 <= dbus;
                         when "0001" => GR1 <= dbus;
                         when "0010" => GR2 <= dbus;

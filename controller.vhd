@@ -15,17 +15,17 @@ entity controller is
         port( 
             clk, rst        : in        std_logic;
             dbus            : in        std_logic_vector(31 downto 0);
-            -- Flags 
             Z, C, L         : in        std_logic;
             controllerOut   : out       std_logic_vector(31 downto 0);
-            TB_o            : out       std_logic_vector(2 downto 0);
-            FB_o            : out       std_logic_vector(2 downto 0);
-            GRx_o           : out       std_logic_vector(3 downto 0);
-            ALU_o           : out       std_logic_vector(3 downto 0)
+            TB_c            : out       std_logic_vector(2 downto 0);
+            FB_c            : out       std_logic_vector(2 downto 0);
+            GRx_c           : out       std_logic_vector(3 downto 0);
+            ALU_c           : out       std_logic_vector(3 downto 0)
             );
 end controller;
 
 architecture arch of controller is
+      
         --Registers
         signal IR           : std_logic_vector(31 downto 0)     := X"0000_0000";
         signal PC           : std_logic_vector(31 downto 0)     := X"0000_0000";
@@ -46,11 +46,11 @@ architecture arch of controller is
         alias ALU           : std_logic_vector(3 downto 0)      is uIR(25 downto 22);
         alias TB            : std_logic_vector(2 downto 0)      is uIR(21 downto 19); 
         alias FB            : std_logic_vector(2 downto 0)      is uIR(18 downto 16); 
-		alias S             : std_logic                         is uIR(15);
+		    alias S             : std_logic                         is uIR(15);
         alias P             : std_logic                         is uIR(14);           -- When '1' PC++
-		alias LC            : std_logic_vector(1 downto 0)      is uIR(13 downto 12);
-		alias SEQ           : std_logic_vector(3 downto 0)      is uIR(11 downto 8);
-		alias uADR          : std_logic_vector(7 downto 0)      is uIR(7 downto 0); 
+		    alias LC            : std_logic_vector(1 downto 0)      is uIR(13 downto 12);
+		    alias SEQ           : std_logic_vector(3 downto 0)      is uIR(11 downto 8);
+		    alias uADR          : std_logic_vector(7 downto 0)      is uIR(7 downto 0); 
 
         -- uMem
 	    type uMem_t is array(0 to 63) of std_logic_vector(31 downto 0); -- Expand to 32 for simplicity.
@@ -195,10 +195,10 @@ begin
         end process;
 
         -- FB and TB are clocked so we dont need to clock TBo and FBo
-        TB_o <= TB;
-        FB_o <= FB;
-        GRx_o <= GRx;
-        ALU_o <= ALU;
+        TB_c <= TB;
+        FB_c <= FB;
+        GRx_c <= GRx;
+        ALU_c <= ALU;
 
         -- From controller to buss
         with TB select
@@ -209,9 +209,6 @@ begin
         -- IR
         process(clk) begin
           if rising_edge(clk) then
-              --if rst='1' then
-              --   IR <= x"0000_0000";
-              --elsif FB="001" then
               if FB="001" then
                  IR <= dbus;
               end if;
@@ -220,7 +217,6 @@ begin
               end if;
           end if;
         end process;        
-
-                                    
+                              
                                     
 end architecture;

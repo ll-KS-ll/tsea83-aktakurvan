@@ -14,7 +14,7 @@ entity gpu is
   Port  ( clk,rst : in std_logic;
           dbus : in std_logic_vector(31 downto 0);
           gpuOut : out std_logic_vector(31 downto 0);
-          FB_o : in std_logic_vector(2 downto 0);
+          FB_c : in std_logic_vector(2 downto 0);
           vga_red, vga_green : out std_logic_vector (2 downto 0);
           vga_blue : out std_logic_vector (2 downto 1);
           hsync, vsync : out std_logic);
@@ -40,12 +40,16 @@ end gpu;
 architecture Behavioral of gpu is
   -- VGA
   signal mod_4 : std_logic_vector(1 downto 0) := "00";
-  signal xctr,yctr : std_logic_vector(9 downto 0) := "0000000000";
+  signal xctr,yctr : std_logic_vector(10 downto 0) := "00000000000";
   signal hs : std_logic := '1';
   signal vs : std_logic := '1';
 
-  alias rad : std_logic_vector(8 downto 0) is yctr(9 downto 1);
-  alias kol : std_logic_vector(8 downto 0) is xctr(9 downto 1);
+  alias rad : std_logic_vector(8 downto 0) is yctr(10 downto 2);
+  alias kol : std_logic_vector(8 downto 0) is xctr(10 downto 2);
+  alias xpix : std_logic_vector(1 downto 0) is xctr(1 downto 0);
+  alias ypix : std_logic_vector(1 downto 0) is yctr(1 downto 0);
+  signal toVideo : std_logic_vector(3 downto 0) := x"0";
+  signal fromMem : integer := 0;
   
   -- Memory/Bus
   alias data : std_logic_vector(3 downto 0) is dbus(3 downto 0);
@@ -75,79 +79,12 @@ architecture Behavioral of gpu is
   signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
   -- GPU RAM
   type ram_t is array (0 to 19200) of std_logic_vector (3 downto 0);
-  -- signal gpu_memory: ram_t := ((others=> (others=>'0'))); -- Init every bit in memory to 1. 
-  signal gpu_memory: ram_t := (
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", 
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", 
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
-    x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5", x"5",
-    
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", 
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", 
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
-    x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6", x"6",
-
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", 
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", 
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
-    x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2", x"2",
-
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", 
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", 
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
-    x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1", x"1",
-
-
+  
+  constant gpu_memory_c: ram_t := (
+    x"1",
     others=> x"0"
     ); 
+  signal gpu_memory : ram_t := gpu_memory_c;
   --constant grr : ram_t := 
   --  ('1' when pixel_x <= 320 and pixel_y = 0
   --  '1' when pixel_x = 0 and pixel_y <= 240
@@ -157,8 +94,8 @@ architecture Behavioral of gpu is
   ---signal gpu_memory: ram_t := grr;
 
   -- Force xilinx to use block RAM.
-  attribute ram_style: string;
-  attribute ram_style of gpu_memory : signal is "block";
+  --attribute ram_style: string;
+  --attribute ram_style of gpu_memory : signal is "block";
 begin
 
 
@@ -177,10 +114,10 @@ begin
   process(clk) begin
     if rising_edge(clk) then
       if rst='1' then
-         xctr <= "0000000000";
+         xctr <= "00000000000";
       elsif mod_4=3 then
         if xctr=799 then
-          xctr <= "0000000000";
+          xctr <= "00000000000";
         else
           xctr <= xctr + 1;
         end if;
@@ -198,10 +135,10 @@ begin
   process(clk) begin
     if rising_edge(clk) then
       if rst='1' then
-        yctr <= "0000000000";
+        yctr <= "00000000000";
       elsif xctr=799 and mod_4=0 then
         if yctr=520 then
-          yctr <= "0000000000";
+          yctr <= "00000000000";
         else
           yctr <= yctr + 1;
         end if;
@@ -218,29 +155,19 @@ begin
   vsync <= vs;
   
   -- Memory
-  process(clk) begin
-    if rising_edge(clk) then
+  --process(clk) begin
+  --  if rising_edge(clk) then
       -- Following code is out commeted cuz it locks compiling :s
       --if rst = '1' then
       --  video <= x"1"; -- Screen is red when reset is pressed. 
       --  pixel <= "000000000";
       --  gpu_memory <= ((others=> (others=>'1')));
       --els
-      if mod_4=3 then
-        if xctr<640 and yctr<480 then
-          -- yctr / 2 & xctr / 2 
-          video <= gpu_memory(conv_integer(rad) + conv_integer(kol));
-        else
-          video <= "0000";
-        end if; 
-      end if;
-    end if;
-  end process;
+      
+   -- end if;
+  --end process;
 
-  -- Color
-  vga_red(2 downto 0) <= colors(conv_integer(video))(7 downto 5);
-  vga_green(2 downto 0) <= colors(conv_integer(video))(4 downto 2);
-  vga_blue(2 downto 1) <= colors(conv_integer(video))(1 downto 0);
+  
 
   -- ASR
   --process(clk) begin
@@ -253,26 +180,32 @@ begin
   --    end if;
   --  end if;
   --end process;
+  with FB_c select 
+    row <= conv_integer(dbus(11 downto 4)) * 160 when "100",
+            row when others;
+  
+  with FB_c select
+    col <= conv_integer(dbus(20 downto 12)) when "100",
+            col when others;
 
-  row <= conv_integer(dbus(11 downto 4)) * 160;
-  col <= conv_integer(dbus(20 downto 12));
-
+  fromMem <= conv_integer(kol) + conv_integer(rad)*160;
+  
   -- W/R GPU Memory.
   process(clk) begin
     if rising_edge(clk) then
-      if FB_o="100" then
-        if rw_flag = '0' then
-          -- Write
-          -- gpu_memory(conv_integer(unsigned(row)&unsigned(col))) <= data;
-          --"gpu_memory(conv_integer((conv_integer(row)*160)+conv_integer(col))) <= data;
-          gpu_memory(row + col) <= data; 
-        else 
-          -- Read
-          --gpuOut <= x"0000_000" & gpu_memory(conv_integer(row&col));
-          --gpuOut <= x"0000_000" & gpu_memory(conv_integer((conv_integer(row)*160) + col));
-          -- Broken, out of LUTs :s
-          --gpuOut <= "0000_0000_000" & row & col & gpu_memory(conv_integer(row&col));
+      if FB_c="100" and mod_4/=0 then
+        gpu_memory(conv_integer(row + col)) <= data;
+      elsif mod_4=0 and FB_c/="100" then
+        if rad<120 and kol<160 then
+          toVideo <= gpu_memory(fromMem);
         end if;
+      end if;
+      if mod_4=3 then
+        if xctr<640 and yctr<480 then
+          video <= toVideo;
+        else
+          video <= "0000";
+        end if; 
       end if;
       -- Explination.
       --   0 1 2 3      x   Display structure
@@ -325,5 +258,10 @@ begin
       -- xx yy  xxyy     General solution
     end if;
   end process;
+
+-- Color
+  vga_red(2 downto 0) <= colors(conv_integer(video))(7 downto 5);
+  vga_green(2 downto 0) <= colors(conv_integer(video))(4 downto 2);
+  vga_blue(2 downto 1) <= colors(conv_integer(video))(1 downto 0);
   
 end Behavioral;
