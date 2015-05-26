@@ -44,18 +44,23 @@ architecture Behavioral of gpu is
   signal hs : std_logic := '1';
   signal vs : std_logic := '1';
 
+<<<<<<< HEAD
   alias rad : std_logic_vector(8 downto 0) is yctr(10 downto 2);
   alias kol : std_logic_vector(8 downto 0) is xctr(10 downto 2);
   alias xpix : std_logic_vector(1 downto 0) is xctr(1 downto 0);
   alias ypix : std_logic_vector(1 downto 0) is yctr(1 downto 0);
   signal toVideo : std_logic_vector(3 downto 0) := x"0";
   signal fromMem : integer := 0;
+=======
+  alias rad : std_logic_vector(7 downto 0) is yctr(9 downto 2);
+  alias kol : std_logic_vector(7 downto 0) is xctr(9 downto 2);
+>>>>>>> 3de41df701275d3b611051ff47781b28af93d195
   
   -- Memory/Bus
   alias data : std_logic_vector(3 downto 0) is dbus(3 downto 0);
   signal row : integer := 0;--dbus(11 downto 4));
   signal col : integer := 0;--dbus(20 downto 12));
-  alias rw_flag : std_logic is dbus(31);
+  signal rw_flag : std_logic := '1';
 
   -- Color palette
   type color_t is array (0 to 15) of std_logic_vector (7 downto 0);
@@ -79,7 +84,6 @@ architecture Behavioral of gpu is
   signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
   -- GPU RAM
   type ram_t is array (0 to 19200) of std_logic_vector (3 downto 0);
-  
   constant gpu_memory_c: ram_t := (
     x"1",
     others=> x"0"
@@ -154,32 +158,8 @@ begin
   hsync <= hs;
   vsync <= vs;
   
-  -- Memory
-  --process(clk) begin
-  --  if rising_edge(clk) then
-      -- Following code is out commeted cuz it locks compiling :s
-      --if rst = '1' then
-      --  video <= x"1"; -- Screen is red when reset is pressed. 
-      --  pixel <= "000000000";
-      --  gpu_memory <= ((others=> (others=>'1')));
-      --els
-      
-   -- end if;
-  --end process;
 
-  
 
-  -- ASR
-  --process(clk) begin
-  --  if rising_edge(clk) then
-  --    if rst='1' then
-  --      ASR <= '0' & x"00000";
-  --    end if;
-  --    if FB_o="101" then
-  --      ASR <= dbus(20 downto 0); -- ASR is only 21-bits
-  --    end if;
-  --  end if;
-  --end process;
   with FB_c select 
     row <= conv_integer(dbus(11 downto 4)) * 160 when "100",
             row when others;
@@ -189,7 +169,7 @@ begin
             col when others;
 
   fromMem <= conv_integer(kol) + conv_integer(rad)*160;
-  
+
   -- W/R GPU Memory.
   process(clk) begin
     if rising_edge(clk) then
