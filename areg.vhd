@@ -53,7 +53,7 @@ architecture arch of areg is
             1004=>x"0000_00EF",		-- Widht game 239
             1005=>x"0000_00EF",		-- Height game 239
             1006=>x"0000_0000",		-- Constant 0
-            1007=>x"0000_0000",		
+            1007=>x"0000_013F",	    -- Width screen 319	
             1008=>x"0000_0000",
             1009=>x"0000_0000",
 
