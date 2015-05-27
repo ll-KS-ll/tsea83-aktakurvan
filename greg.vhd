@@ -77,9 +77,6 @@ begin
                     GR9 <= x"0000_0000";
                     GR10 <= x"0000_0000";
                     GR11 <= x"0000_0000";
-                    GR12 <= x"0000_0000";
-                    GR13 <= x"0000_0000";
-                    GR14 <= x"0000_0000";
                     GR15 <= x"0000_0000";
                 elsif FB_c="110" then
                     case GRx_c is
@@ -124,7 +121,7 @@ begin
 
 
 
---Instantiate UARt
+--Instantiate UART
     uart_comp : uart port map (
         clk         => clk,
         rst         => rst,

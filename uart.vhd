@@ -11,13 +11,14 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 --use UNISIM.VComponents.all;
 
 entity uart is
-    port ( clk,rst,txd : in std_logic;
-           uartOut : out std_logic_vector(7 downto 0); 
+    port ( clk,rst : in std_logic;
+            txd : in std_logic;
+           uartOut : out std_logic_vector(7 downto 0)
         );
 end uart;
 
 architecture Behavioral of uart is
-    signal txd,txd2 : std_logic; --insignalsvippor
+    signal txd1,txd2 : std_logic; --insignalsvippor
     signal sp,lp : std_logic; --shiftpulse, loadpulse
     signal running : std_logic; -- if running or not
     signal pulsenr : std_logic_vector(3 downto 0) := B"0000"; --current pulse number

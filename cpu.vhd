@@ -24,7 +24,6 @@ end cpu;
 architecture behaviour of cpu is
     -- Signals between components
     signal  Z_o, C_o, L_o   : std_logic;
-    signal  txd             : std_logic;
     signal  FB_c            : std_logic_vector(2 downto 0);
     signal  TB_c            : std_logic_vector(2 downto 0);
     signal  GRx_c           : std_logic_vector(3 downto 0);
