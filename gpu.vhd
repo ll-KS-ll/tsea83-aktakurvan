@@ -101,7 +101,7 @@ architecture Behavioral of gpu is
       x"E0", -- Red         4
       x"03", -- Blue        5
       x"FC", -- Yellow      6
-      x"00",  
+      x"49", -- DarkGrey    7 
       x"00",
       x"00",
       x"00",
