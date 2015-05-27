@@ -132,8 +132,8 @@ begin
              ryaddress - 83 when others; 
 
   with selected_digit select
-    digit <= display_numbers(conv_integer(current_seleced_number))(7 downto 4) when '1',
-             display_numbers(conv_integer(current_seleced_number))(3 downto 0) when others;
+    digit <= display_numbers(conv_integer(current_seleced_number(1 downto 0)))(7 downto 4) when '1',
+             display_numbers(conv_integer(current_seleced_number(1 downto 0)))(3 downto 0) when others;
 
   -- Deside if gpu memory or number should be drawn.
   with current_seleced_number(2) select

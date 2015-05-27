@@ -45,7 +45,7 @@ architecture arch of areg is
             0013=>x"B800_0000",		-- Write to GPU GR8, GR9, GR10
             0014=>x"8900_0000",		-- Decrease GR9
             0015=>x"6900_03EE",		-- Compare GR9 with PM(1006)
-            0016=>x"4000_0013",		-- Branch on Not Equal to address 13
+            0016=>x"4000_000D",		-- Branch on Not Equal to address 13
             -- LOAD SIDEBAR
             0017=>x"3000_0017",		-- Branch Always 17 (Ininity loop.)
             0018=>x"0000_0000",		--
