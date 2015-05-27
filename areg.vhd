@@ -50,7 +50,7 @@ architecture arch of areg is
             1001=>x"0000_0001",		-- Color red
             1002=>x"0000_0002",		-- Color blue
             1003=>x"0000_0004",		-- Color green
-            1004=>x"0000_013F",		-- Widht game 319
+            1004=>x"0000_00EF",		-- Widht game 239
             1005=>x"0000_00EF",		-- Height game 239
             1006=>x"0000_0000",		-- Constant 0
             1007=>x"0000_0000",		

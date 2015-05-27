@@ -56,8 +56,8 @@ architecture Behavioral of gpu is
   component gpu_display_numbers is 
     port ( 
       clk, rst : in std_logic;
-      --dbus : in std_logic_vector(31 downto 0);
-      --FB_o : in std_logic_vector(2 downto 0);
+      dbus : in std_logic_vector(31 downto 0);
+      FB_o : in std_logic_vector(2 downto 0);
       rxaddress  : in integer;
       ryaddress  : in integer;
       output_number : out std_logic
@@ -229,8 +229,8 @@ begin
   comp_num : gpu_display_numbers port map (
       clk       =>  clk,
       rst       => rst,
-      -- dbus     => dbus,
-      -- => FB_o,
+      dbus      => dbus,
+      FB_o      => FB_c,
       rxaddress  =>  rxaddress,
       ryaddress  =>  ryaddress,
       output_number => output_number

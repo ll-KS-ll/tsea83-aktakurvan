@@ -13,8 +13,8 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity gpu_display_numbers is 
   Port  ( clk,rst : in std_logic;
-          --dbus : in std_logic_vector(31 downto 0);
-          --FB_o : in std_logic_vector(2 downto 0);
+          dbus : in std_logic_vector(31 downto 0);
+          FB_o : in std_logic_vector(2 downto 0);
           rxaddress  : in integer;
           ryaddress  : in integer;
           output_number : out std_logic
@@ -28,7 +28,7 @@ architecture arch of gpu_display_numbers is
   -- Number to currently write to display.
   signal current_seleced_number : std_logic_vector(2 downto 0) := "100"; -- bit 2 toggles unselected.  
   signal x_num, y_num : integer := 0; -- Col and row in digit.
-  signal digit : std_logic_vector(3 downto 0) -- One single digit of the number;
+  signal digit : std_logic_vector(3 downto 0); -- One single digit of the number;
   signal selected_digit : std_logic := '0'; -- Which digit is active/supposed to be drawn.
 
   --constant x_num_loc : integer := 280; -- Left corner of digits
