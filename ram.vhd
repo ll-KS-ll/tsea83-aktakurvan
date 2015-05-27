@@ -180,6 +180,6 @@ END PROCESS;
               ram16(rPos) when 16,  
               ram17(rPos) when 17,  
               ram18(rPos) when 18,
-              ram19(rPos) when 19;  
+              ram19(rPos) when others;  
 
 end Behavioral;

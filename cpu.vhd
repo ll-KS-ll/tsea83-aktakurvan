@@ -13,10 +13,11 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 -- Top module(CPU)
 entity cpu is
     port( 
-          clk, rst       : in     std_logic;
-          gpu_dbus       : in     std_logic_vector(31 downto 0);
-          gpuTakeBus     : out    std_logic_vector(2 downto 0);
-          cpuOut         : out    std_logic_vector(31 downto 0)
+        clk, rst        : in    std_logic;
+        gpu_dbus        : in    std_logic_vector(31 downto 0);
+        gpuTakeBus      : out   std_logic_vector(2 downto 0);
+        cpuOut          : out   std_logic_vector(31 downto 0);
+        txd             : in    std_logic
         );
 end cpu;
 
@@ -66,7 +67,8 @@ architecture behaviour of cpu is
             dbus            : in        std_logic_vector(31 downto 0);
             gregOut         : out       std_logic_vector(31 downto 0);
             FB_c            : in        std_logic_vector(2 downto 0);
-            GRx_c           : in        std_logic_vector(3 downto 0)
+            GRx_c           : in        std_logic_vector(3 downto 0);
+            txd             : in        std_logic
           );
     end component;
     -- Sub-Module(Adress Register/Program Memory)
@@ -124,7 +126,8 @@ begin
         dbus          =>  cpu_dbus,
         gregOut       =>  greg_dbus,
         FB_c          =>  FB_c,
-        GRx_c         =>  GRx_c
+        GRx_c         =>  GRx_c,
+        txd           =>  txd
         );
 --Instantiate and do port map for Areg
   areg_comp : areg port map (

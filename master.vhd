@@ -14,6 +14,7 @@ entity master is
     port(
           -- UCF SIGNALS
           clk, rst            : in        std_logic;
+          txd                 : in        std_logic;
           vgaRed, vgaGreen    : out       std_logic_vector (2 downto 0);
           vgaBlue             : out       std_logic_vector (2 downto 1);
           hsync, vsync        : out       std_logic
@@ -28,7 +29,8 @@ architecture behaviour of master is
           clk, rst       : in     std_logic;
           gpu_dbus       : in     std_logic_vector(31 downto 0);
           gpuTakeBus     : out    std_logic_vector(2 downto 0);
-          cpuOut         : out    std_logic_vector(31 downto 0)
+          cpuOut         : out    std_logic_vector(31 downto 0);
+          txd            : in     std_logic
          );
   end component;
 --Instantiate GPU component
@@ -56,7 +58,8 @@ begin
       rst         =>  rst,
       gpu_dbus    =>  gpuToCpu,
       gpuTakeBus  =>  FB_gpu,
-      cpuOut      =>  cpuToGpu
+      cpuOut      =>  cpuToGpu,
+      txd         =>  txd
       );
 --Instantiate the GPU component
     comp_gpu : gpu port map (

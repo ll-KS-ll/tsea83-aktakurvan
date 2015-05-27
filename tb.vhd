@@ -12,6 +12,7 @@ architecture behavior of tb is
   component master
     port(
         clk, rst            : in        std_logic;
+        txd                 : in        std_logic;
         vgaRed, vgaGreen  : out       std_logic_vector (2 downto 0);
         vgaBlue            : out       std_logic_vector (2 downto 1);
         hsync, vsync        : out       std_logic
@@ -26,6 +27,7 @@ architecture behavior of tb is
 
   signal clk : std_logic := '0';
   signal rst : std_logic := '1';
+  signal txd  : std_logic := '1';
   signal hsync,vsync : std_logic;
   signal vgaRed, vgaGreen : std_logic_vector(2 downto 0);
   signal vgaBlue : std_logic_vector(2 downto 1);
@@ -33,7 +35,7 @@ architecture behavior of tb is
 begin
 
   -- Component Instantiation
-    m1 : master port map(clk, rst, vgaRed, vgaGreen, vgaBlue, hsync, vsync);
+    m1 : master port map(clk, rst, txd, vgaRed, vgaGreen, vgaBlue, hsync, vsync);
  
 
   -- 100 MHz system clock

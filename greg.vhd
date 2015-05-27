@@ -17,16 +17,26 @@ entity greg is
             dbus            : in        std_logic_vector(31 downto 0);
             gregOut         : out       std_logic_vector(31 downto 0);
             FB_c            : in        std_logic_vector(2 downto 0);
-            GRx_c            : in        std_logic_vector(3 downto 0)
+            GRx_c           : in        std_logic_vector(3 downto 0);
+            txd             : in        std_logic
             );
 end greg;
 
 architecture arch of greg is
+        component uart 
+            port(
+                clk, rst    : in    std_logic;
+                txd         : in    std_logic;
+                uartOut     : out   std_logic_vector(7 downto 0)
+                );
+        end component;  
         -- Registers
         signal GR0, GR1, GR2, GR3       : std_logic_vector(31 downto 0) := X"0000_0000";
-	      signal GR4, GR5, GR6, GR7       : std_logic_vector(31 downto 0) := X"0000_0000";
-	      signal GR8, GR9, GR10, GR11     : std_logic_vector(31 downto 0) := X"0000_0000";
-	      signal GR12, GR13, GR14, GR15   : std_logic_vector(31 downto 0) := X"0000_0000";
+	    signal GR4, GR5, GR6, GR7       : std_logic_vector(31 downto 0) := X"0000_0000";
+	    signal GR8, GR9, GR10, GR11     : std_logic_vector(31 downto 0) := X"0000_0000";
+        -- GR12-14 is for UART ONLY, 15 is special
+	    signal GR12, GR13, GR14, GR15   : std_logic_vector(31 downto 0) := X"0000_0000";
+        signal uartOut                  : std_logic_vector(7 downto 0);
 
 
 begin
@@ -67,9 +77,6 @@ begin
                     GR9 <= x"0000_0000";
                     GR10 <= x"0000_0000";
                     GR11 <= x"0000_0000";
-                    GR12 <= x"0000_0000";
-                    GR13 <= x"0000_0000";
-                    GR14 <= x"0000_0000";
                     GR15 <= x"0000_0000";
                 elsif FB_c="110" then
                     case GRx_c is
@@ -85,14 +92,42 @@ begin
                         when "1001" => GR9 <= dbus;
                         when "1010" => GR10 <= dbus;
                         when "1011" => GR11 <= dbus;
-                        when "1100" => GR12 <= dbus;
-                        when "1101" => GR13 <= dbus;
-                        when "1110" => GR14 <= dbus;
-                        when others => GR15 <= dbus;
+                        when others => GR15 <= dbus; -- GR12-14 is only modified by UART (hence they are missing here)
                     end case;
                 end if;  
             end if;       
         end process;
+        
+        --Uart To GR12-14
+        process(clk) begin
+            if rising_edge(clk) then
+                case uartOut is
+                    -- Player 1
+                    when x"15" => GR12 <= x"0000_0001"; -- Left turn(Q)
+                    when x"1D" => GR12 <= x"0000_0000"; -- Stop turn(W)
+                    when x"24" => GR12 <= x"0000_0002"; -- Right turn(E)
+                    -- Player 2
+                    when x"43" => GR13 <= x"0000_0001"; -- Left turn(I)
+                    when x"44" => GR13 <= x"0000_0000"; -- Stop turn(O)
+                    when x"4d" => GR13 <= x"0000_0002"; -- Right turn(P)
+                    -- Player 3 
+                    when x"2A" => GR14 <= x"0000_0001"; -- Left turn(V)
+                    when x"32" => GR14 <= x"0000_0000"; -- Stop turn(B)
+                    when x"31" => GR14 <= x"0000_0002"; -- Right turn(N)
+                    when others => null;
+                end case;
+            end if;
+        end process;
+
+
+
+--Instantiate UART
+    uart_comp : uart port map (
+        clk         => clk,
+        rst         => rst,
+        txd         => txd,
+        uartOut     => uartOut
+        );
 
 end architecture;
 
