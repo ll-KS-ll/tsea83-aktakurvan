@@ -32,7 +32,7 @@ architecture arch of areg is
             0000=>x"9A00_03F7",		-- Load border/sidebar color from PM(1015) into GR10
             0001=>x"B800_0000",		-- Write to GPU GR8, GR9, GR10
             0002=>x"7800_0000",		-- Increase GR8
-            0003=>x"6C00_03EC",		-- Compare GR8 with PM(1004)
+            0003=>x"6800_03EC",		-- Compare GR8 with PM(1004)
             0004=>x"4000_0001",		-- Branch on Not Equal to address 0001
             0005=>x"B800_0000",		-- Write to GPU GR8, GR9, GR10
             0006=>x"7900_0000",		-- Increase GR9
