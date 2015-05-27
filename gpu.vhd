@@ -4,20 +4,22 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
-use IEEE.STD_LOGIC_ARITH.ALL;
+--use IEEE.STD_LOGIC_NUMERIC.ALL;
+--use IEEE.STD_LOGIC_ARITH.ALL;
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
 -- library UNISIM;
 -- use UNISIM.VComponents.all;
 
 entity gpu is 
-  Port  ( clk,rst : in std_logic;
-          dbus : in std_logic_vector(31 downto 0);
-          gpuOut : out std_logic_vector(31 downto 0);
-          FB_c : in std_logic_vector(2 downto 0);
-          vga_red, vga_green : out std_logic_vector (2 downto 0);
-          vga_blue : out std_logic_vector (2 downto 1);
-          hsync, vsync : out std_logic);
+  Port  ( clk,rst           : in std_logic;
+          dbus              : in std_logic_vector(31 downto 0);
+          gpuOut            : out std_logic_vector(31 downto 0);
+          FB_c              : in std_logic_vector(2 downto 0);
+          vgaRed, vgaGreen  : out std_logic_vector (2 downto 0);
+          vgaBlue           : out std_logic_vector (2 downto 1);
+          hsync, vsync      : out std_logic
+        );
 end gpu;
 
 -- ====== Info ======
@@ -38,29 +40,42 @@ end gpu;
 -- 
 
 architecture Behavioral of gpu is
+  component ram
+      port (
+          clk       : in std_logic;
+          xaddress  : in integer;
+          yaddress  : in integer;
+          rxaddress  : in integer;
+          ryaddress  : in integer;
+          we        : in std_logic;
+          data_i    : in std_logic_vector(1 downto 0);
+          data_o    : out std_logic_vector(1 downto 0)
+          );
+  end component;
   -- VGA
   signal mod_4 : std_logic_vector(1 downto 0) := "00";
   signal xctr,yctr : std_logic_vector(10 downto 0) := "00000000000";
   signal hs : std_logic := '1';
   signal vs : std_logic := '1';
 
-<<<<<<< HEAD
-  alias rad : std_logic_vector(8 downto 0) is yctr(10 downto 2);
-  alias kol : std_logic_vector(8 downto 0) is xctr(10 downto 2);
+  alias rad : std_logic_vector(8 downto 0) is yctr(9 downto 1);
+  alias kol : std_logic_vector(8 downto 0) is xctr(9 downto 1);
   alias xpix : std_logic_vector(1 downto 0) is xctr(1 downto 0);
   alias ypix : std_logic_vector(1 downto 0) is yctr(1 downto 0);
-  signal toVideo : std_logic_vector(3 downto 0) := x"0";
-  signal fromMem : integer := 0;
-=======
-  alias rad : std_logic_vector(7 downto 0) is yctr(9 downto 2);
-  alias kol : std_logic_vector(7 downto 0) is xctr(9 downto 2);
->>>>>>> 3de41df701275d3b611051ff47781b28af93d195
   
+
+  --RAM
+  signal xaddress  : integer := 0;
+  signal yaddress  : integer := 0;
+  signal rxaddress  : integer := 0;
+  signal ryaddress  : integer := 0;
+  signal we        : std_logic := '0';
+  signal to_ram    : std_logic_vector(1 downto 0);
+  signal from_ram    : std_logic_vector(1 downto 0);
+
   -- Memory/Bus
-  alias data : std_logic_vector(3 downto 0) is dbus(3 downto 0);
-  signal row : integer := 0;--dbus(11 downto 4));
-  signal col : integer := 0;--dbus(20 downto 12));
-  signal rw_flag : std_logic := '1';
+  alias data : std_logic_vector(1 downto 0) is dbus(1 downto 0);
+  signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
 
   -- Color palette
   type color_t is array (0 to 15) of std_logic_vector (7 downto 0);
@@ -81,26 +96,11 @@ architecture Behavioral of gpu is
       x"00",
       x"00",
       x"FF"); -- White      F
-  signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
-  -- GPU RAM
-  type ram_t is array (0 to 19200) of std_logic_vector (3 downto 0);
-  constant gpu_memory_c: ram_t := (
-    x"1",
-    others=> x"0"
-    ); 
-  signal gpu_memory : ram_t := gpu_memory_c;
-  --constant grr : ram_t := 
-  --  ('1' when pixel_x <= 320 and pixel_y = 0
-  --  '1' when pixel_x = 0 and pixel_y <= 240
-  --  '1' when pixel_x = 320 and pixel_y <= 240
-  --  '1' when pixel_x <= 320 and pixel_y = 240
-  --  others=> (others=>'0'));
-  ---signal gpu_memory: ram_t := grr;
 
-  -- Force xilinx to use block RAM.
-  --attribute ram_style: string;
-  --attribute ram_style of gpu_memory : signal is "block";
+
 begin
+
+  gpuOut <= (others => 'Z'); 
 
 
   -- GPU clock, 25MHz from 100MHz
@@ -157,91 +157,55 @@ begin
   end process;
   hsync <= hs;
   vsync <= vs;
-  
 
+
+  -- COMMUNCATION WITH RAM  
+  with FB_c select
+    we <= '1' when "100",
+          '0' when others;
 
   with FB_c select 
-    row <= conv_integer(dbus(11 downto 4)) * 160 when "100",
-            row when others;
+    yaddress <= conv_integer(dbus(11 downto 4)) when "100",
+            yaddress when others;
   
   with FB_c select
-    col <= conv_integer(dbus(20 downto 12)) when "100",
-            col when others;
+    xaddress <= conv_integer(dbus(20 downto 12)) when "100",
+            xaddress when others;
 
-  fromMem <= conv_integer(kol) + conv_integer(rad)*160;
+  with FB_c select
+    to_ram <= data when "100",
+            to_ram when others;
 
-  -- W/R GPU Memory.
+  ryaddress <= conv_integer(rad);
+  rxaddress <= conv_integer(kol);
+
+  -- R GPU Memory.
   process(clk) begin
     if rising_edge(clk) then
-      if FB_c="100" and mod_4/=0 then
-        gpu_memory(conv_integer(row + col)) <= data;
-      elsif mod_4=0 and FB_c/="100" then
-        if rad<120 and kol<160 then
-          toVideo <= gpu_memory(fromMem);
+       if mod_4=3 then
+          if xctr<640 and yctr<480 then
+              video <= "00" & from_ram;
+          else
+              video <= x"0";        
+          end if;
         end if;
-      end if;
-      if mod_4=3 then
-        if xctr<640 and yctr<480 then
-          video <= toVideo;
-        else
-          video <= "0000";
-        end if; 
-      end if;
-      -- Explination.
-      --   0 1 2 3      x   Display structure
-      -- 0 a b c d    y d
-      -- 1 e f g h 
-      -- 2 i j k l 
-      -- 3 m n o p 
-
-      -- p  d (x,y)    GPU Memory structure
-      -- ----------
-      -- 0  a (0,0)
-      -- 1  b (1,0)
-      -- 2  c (2,0)
-      -- 3  d (3,0)
-      -- 4  e (0,1)
-      -- 5  f (1,1)
-      -- 6  g (2,1)
-      -- 7  h (3,1)
-      -- 8  i (0,2)
-      -- 9  j (1,2)
-      -- 10 k (2,2)
-      -- 11 l (3,2)
-      -- 12 m (0,3)
-      -- 13 n (1,3)
-      -- 14 o (2,3)
-      -- 15 p (3,3)
-
-      --  x  y    p      Solution
-      -- --------------
-      -- 00 00  0000 0
-      -- 01 00  0001 1
-      -- 10 00  0010 2
-      -- 11 00  0011 3
-      --      
-      -- 00 01  0100 4
-      -- 01 01  0101 5
-      -- 10 01  0110 6
-      -- 11 01  0111 7
-      ---
-      -- 00 10  1000 8
-      -- 01 10  1001 9
-      -- 10 10  1010 10
-      -- 11 10  1011 11
-      ---
-      -- 00 11  1100 12
-      -- 01 11  1101 13
-      -- 10 11  1110 14
-      -- 11 11  1111 15
-      -- -----------
-      -- xx yy  xxyy     General solution
     end if;
   end process;
 
--- Color
-  vga_red(2 downto 0) <= colors(conv_integer(video))(7 downto 5);
-  vga_green(2 downto 0) <= colors(conv_integer(video))(4 downto 2);
-  vga_blue(2 downto 1) <= colors(conv_integer(video))(1 downto 0);
+  -- Color
+  vgaRed(2 downto 0) <= colors(conv_integer(video))(7 downto 5);
+  vgaGreen(2 downto 0) <= colors(conv_integer(video))(4 downto 2);
+  vgaBlue(2 downto 1) <= colors(conv_integer(video))(1 downto 0);
+
+  comp_ram : ram port map (
+      clk       =>  clk,
+      xaddress  =>  xaddress,
+      yaddress  =>  yaddress,
+      rxaddress  =>  rxaddress,
+      ryaddress  =>  ryaddress,
+      we        =>  we,
+      data_i    =>  to_ram,
+      data_o    =>  from_ram
+      );
   
 end Behavioral;

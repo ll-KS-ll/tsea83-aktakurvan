@@ -30,7 +30,7 @@ XILINX_INIT = source /sw/xilinx/ise_14.2i/ISE_DS/settings64.sh;
 #XILINX_INIT = source /opt/xilinx/14.7/ISE_DS/settings64.sh;
 PART=xc6slx16-3-csg324
 
-aktakurvan.%: S=gpu.vhd alu.vhd controller.vhd greg.vhd areg.vhd mux.vhd cpu.vhd master.vhd
+aktakurvan.%: S=master.vhd ram.vhd gpu.vhd alu.vhd controller.vhd greg.vhd areg.vhd mux.vhd cpu.vhd
 aktakurvan.%: T=tb.vhd
 aktakurvan.%: U=aktakurvan.ucf
 

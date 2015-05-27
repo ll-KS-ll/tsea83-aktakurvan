@@ -35,7 +35,7 @@ architecture arch of areg is
             0004=>x"4000_0001",		-- Branch on Not Equal to address 0001
             0005=>x"BC00_0000",		-- Write to GPU GR12, GR13, GR14
             0006=>x"7D00_0000",		-- Increase GR13
-            0007=>x"6D00_03ED",	-- Compare GR13 with PM(1005)
+            0007=>x"6D00_03ED",	  -- Compare GR13 with PM(1005)
             0008=>x"4000_0005",		-- Branch on Not Equal to address 0005
             0009=>x"BC00_0000",		-- Write to GPU GR12, GR13, GR14
             0010=>x"8C00_0000",		-- Decrease GR12
@@ -50,8 +50,8 @@ architecture arch of areg is
             1001=>x"0000_0001",		-- Color red
             1002=>x"0000_0002",		-- Color blue
             1003=>x"0000_0004",		-- Color green
-            1004=>x"0000_0081",		-- Widht game 159
-            1005=>x"0000_0077",		-- Height game 119
+            1004=>x"0000_013F",		-- Widht game 319
+            1005=>x"0000_00EF",		-- Height game 239
             1006=>x"0000_0000",		-- Constant 0
             1007=>x"0000_0000",		
             1008=>x"0000_0000",
