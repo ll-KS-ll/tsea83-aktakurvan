@@ -13,28 +13,39 @@ port (
         rxaddress  : in integer;
         ryaddress  : in integer;
         we        : in std_logic;
-        data_i    : in std_logic_vector(1 downto 0);
-        data_o    : out std_logic_vector(1 downto 0)
+        data_i    : in std_logic_vector(3 downto 0);
+        data_o    : out std_logic_vector(3 downto 0)
      );
 end ram;
 
 architecture Behavioral of ram is
 
---Declaration of type and signal of a 256 element RAM
---with each element being 8 bit wide.
-subtype tmp is std_logic_vector(1 downto 0);
-type ram_t is array (0 to 8191) of tmp;
+  constant ram_heigth : integer := 4096;
 
-  signal ram0 : ram_t := (others => "00");
-  signal ram1 : ram_t := (others => "00");
-  signal ram2 : ram_t := (others => "00");
-  signal ram3 : ram_t := (others => "00");
-  signal ram4 : ram_t := (others => "00");
-  signal ram5 : ram_t := (others => "00");
-  signal ram6 : ram_t := (others => "00");
-  signal ram7 : ram_t := (others => "00");
-  signal ram8 : ram_t := (others => "00");
-  signal ram9 : ram_t := (others => "00");
+  subtype tmp is std_logic_vector(3 downto 0);
+  type ram_t is array (0 to 4095) of tmp;
+
+  signal ram0 : ram_t := (others => "0000");
+  signal ram1 : ram_t := (others => "0000");
+  signal ram2 : ram_t := (others => "0000");
+  signal ram3 : ram_t := (others => "0000");
+  signal ram4 : ram_t := (others => "0000");
+  signal ram5 : ram_t := (others => "0000");
+  signal ram6 : ram_t := (others => "0000");
+  signal ram7 : ram_t := (others => "0000");
+  signal ram8 : ram_t := (others => "0000");
+  signal ram9 : ram_t := (others => "0000");
+  signal ram10 : ram_t := (others => "0000");
+  signal ram11 : ram_t := (others => "0000");
+  signal ram12 : ram_t := (others => "0000");
+  signal ram13 : ram_t := (others => "0000");
+  signal ram14 : ram_t := (others => "0000");
+  signal ram15 : ram_t := (others => "0000");
+  signal ram16 : ram_t := (others => "0000");
+  signal ram17 : ram_t := (others => "0000");
+  signal ram18 : ram_t := (others => "0000");
+  signal ram19 : ram_t := (others => "0000");
+
 
   attribute ram_style: string;
   attribute ram_style of ram0 : signal is "block";
@@ -47,7 +58,16 @@ type ram_t is array (0 to 8191) of tmp;
   attribute ram_style of ram7 : signal is "block";
   attribute ram_style of ram8 : signal is "block";
   attribute ram_style of ram9 : signal is "block";
-
+  attribute ram_style of ram10 : signal is "block";
+  attribute ram_style of ram11 : signal is "block";
+  attribute ram_style of ram12 : signal is "block";
+  attribute ram_style of ram13 : signal is "block";
+  attribute ram_style of ram14 : signal is "block";
+  attribute ram_style of ram15 : signal is "block";
+  attribute ram_style of ram16 : signal is "block";
+  attribute ram_style of ram17 : signal is "block";
+  attribute ram_style of ram18 : signal is "block";
+  attribute ram_style of ram19 : signal is "block";
 
   signal memoryPos : integer := 0;
   signal rmemoryPos : integer := 0;
@@ -64,29 +84,49 @@ begin
   memoryPos <=  yaddress*320 + xaddress;
   rmemoryPos <= ryaddress*320 + rxaddress;
     
-  wRam  <=  0 when memoryPos<8192   else
-            1 when memoryPos<8192*2 else
-            2 when memoryPos<8192*3 else
-            3 when memoryPos<8192*4 else
-            4 when memoryPos<8192*5 else
-            5 when memoryPos<8192*6 else
-            6 when memoryPos<8192*7 else
-            7 when memoryPos<8192*8 else
-            8 when memoryPos<8192*9 else
-            9;
+  wRam  <=  0 when memoryPos<ram_heigth   else
+            1 when memoryPos<ram_heigth*2 else
+            2 when memoryPos<ram_heigth*3 else
+            3 when memoryPos<ram_heigth*4 else
+            4 when memoryPos<ram_heigth*5 else
+            5 when memoryPos<ram_heigth*6 else
+            6 when memoryPos<ram_heigth*7 else
+            7 when memoryPos<ram_heigth*8 else
+            8 when memoryPos<ram_heigth*9 else
+            9 when memoryPos<ram_heigth*10 else
+            10 when memoryPos<ram_heigth*11 else
+            11 when memoryPos<ram_heigth*12 else
+            12 when memoryPos<ram_heigth*13 else
+            13 when memoryPos<ram_heigth*14 else
+            14 when memoryPos<ram_heigth*15 else
+            15 when memoryPos<ram_heigth*16 else
+            16 when memoryPos<ram_heigth*17 else
+            17 when memoryPos<ram_heigth*18 else
+            18 when memoryPos<ram_heigth*19 else
+            19;
 
-  rRam  <=  0 when rmemoryPos<8192   else
-            1 when rmemoryPos<8192*2 else
-            2 when rmemoryPos<8192*3 else
-            3 when rmemoryPos<8192*4 else
-            4 when rmemoryPos<8192*5 else
-            5 when rmemoryPos<8192*6 else
-            6 when rmemoryPos<8192*7 else
-            7 when rmemoryPos<8192*8 else
-            8 when rmemoryPos<8192*9 else
-            9;
+  rRam  <=  0 when rmemoryPos<ram_heigth   else
+            1 when rmemoryPos<ram_heigth*2 else
+            2 when rmemoryPos<ram_heigth*3 else
+            3 when rmemoryPos<ram_heigth*4 else
+            4 when rmemoryPos<ram_heigth*5 else
+            5 when rmemoryPos<ram_heigth*6 else
+            6 when rmemoryPos<ram_heigth*7 else
+            7 when rmemoryPos<ram_heigth*8 else
+            8 when rmemoryPos<ram_heigth*9 else
+            9 when rmemoryPos<ram_heigth*10 else
+            10 when rmemoryPos<ram_heigth*11 else
+            11 when rmemoryPos<ram_heigth*12 else
+            12 when rmemoryPos<ram_heigth*13 else
+            13 when rmemoryPos<ram_heigth*14 else
+            14 when rmemoryPos<ram_heigth*15 else
+            15 when rmemoryPos<ram_heigth*16 else
+            16 when rmemoryPos<ram_heigth*17 else
+            17 when rmemoryPos<ram_heigth*18 else
+            18 when rmemoryPos<ram_heigth*19 else
+            19;
       
-   wPos  <=  memoryPos-8192*wRam;
+   wPos  <=  memoryPos-ram_heigth*wRam;
 
 --process for read and write operation.
 PROCESS(clk)
@@ -103,10 +143,20 @@ BEGIN
               when 6 => ram6(wPos) <= data_i;
               when 7 => ram7(wPos) <= data_i;
               when 8 => ram8(wPos) <= data_i;
-              when others => ram9(wPos) <= data_i;
+              when 9 => ram9(wPos) <= data_i;
+              when 10 => ram10(wPos) <= data_i;
+              when 11 => ram11(wPos) <= data_i;
+              when 12 => ram12(wPos) <= data_i;
+              when 13 => ram13(wPos) <= data_i;
+              when 14 => ram14(wPos) <= data_i;
+              when 15 => ram15(wPos) <= data_i;
+              when 16 => ram16(wPos) <= data_i;
+              when 17 => ram17(wPos) <= data_i;
+              when 18 => ram18(wPos) <= data_i;
+              when others => ram19(wPos) <= data_i;
             end case;
         end if;
-        rPos  <= rmemoryPos-8192*rRam;
+        rPos  <= rmemoryPos-ram_heigth*rRam;
     end if;
 END PROCESS;
 
@@ -120,6 +170,16 @@ END PROCESS;
               ram6(rPos) when 6,  
               ram7(rPos) when 7,  
               ram8(rPos) when 8,
-              ram9(rPos) when others;  
+              ram9(rPos) when 9, 
+              ram10(rPos) when 10,
+              ram11(rPos) when 11,
+              ram12(rPos) when 12,  
+              ram13(rPos) when 13,  
+              ram14(rPos) when 14,  
+              ram15(rPos) when 15,  
+              ram16(rPos) when 16,  
+              ram17(rPos) when 17,  
+              ram18(rPos) when 18,
+              ram19(rPos) when 19;  
 
 end Behavioral;

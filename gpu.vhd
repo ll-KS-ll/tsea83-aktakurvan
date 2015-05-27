@@ -48,8 +48,8 @@ architecture Behavioral of gpu is
           rxaddress  : in integer;
           ryaddress  : in integer;
           we        : in std_logic;
-          data_i    : in std_logic_vector(1 downto 0);
-          data_o    : out std_logic_vector(1 downto 0)
+          data_i    : in std_logic_vector(3 downto 0);
+          data_o    : out std_logic_vector(3 downto 0)
           );
   end component;
 
@@ -84,11 +84,11 @@ architecture Behavioral of gpu is
   signal rxaddress  : integer := 0;
   signal ryaddress  : integer := 0;
   signal we        : std_logic := '0';
-  signal to_ram    : std_logic_vector(1 downto 0);
-  signal from_ram    : std_logic_vector(1 downto 0);
+  signal to_ram    : std_logic_vector(3 downto 0);
+  signal from_ram    : std_logic_vector(3 downto 0);
 
   -- Memory/Bus
-  alias data : std_logic_vector(1 downto 0) is dbus(1 downto 0);
+  alias data : std_logic_vector(3 downto 0) is dbus(3 downto 0);
   signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
 
   -- Color palette
@@ -199,7 +199,7 @@ begin
        if mod_4=3 then
           if xctr<640 and yctr<480 then
               if output_number = '0' then
-                video <= "00" & from_ram;
+                video <= from_ram;
               else 
                 video <= "0010";
               end if;
