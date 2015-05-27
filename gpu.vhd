@@ -52,6 +52,18 @@ architecture Behavioral of gpu is
           data_o    : out std_logic_vector(1 downto 0)
           );
   end component;
+
+  component gpu_display_numbers is 
+    port ( 
+      clk, rst : in std_logic;
+      --dbus : in std_logic_vector(31 downto 0);
+      --FB_o : in std_logic_vector(2 downto 0);
+      rxaddress  : in integer;
+      ryaddress  : in integer;
+      output_number : out std_logic
+    );
+  end component;
+
   -- VGA
   signal mod_4 : std_logic_vector(1 downto 0) := "00";
   signal xctr,yctr : std_logic_vector(10 downto 0) := "00000000000";
@@ -63,6 +75,8 @@ architecture Behavioral of gpu is
   alias xpix : std_logic_vector(1 downto 0) is xctr(1 downto 0);
   alias ypix : std_logic_vector(1 downto 0) is yctr(1 downto 0);
   
+  -- Display number
+  signal output_number : std_logic := '0';
 
   --RAM
   signal xaddress  : integer := 0;
@@ -81,12 +95,12 @@ architecture Behavioral of gpu is
   type color_t is array (0 to 15) of std_logic_vector (7 downto 0);
   constant colors : color_t := -- "rrrgggbb"
     ( x"00", -- Black       0
-      x"E0", -- Red         1
-      x"03", -- Blue        2
-      x"FC", -- Yellow      3
-      x"1C", -- Green/Lime  4
-      x"1F", -- Aqua        5
-      x"E3", -- Magenta     6
+      x"E3", -- Magenta     1
+      x"1F", -- Aqua        2
+      x"1C", -- Green/Lime  3
+      x"E0", -- Red         4
+      x"03", -- Blue        5
+      x"FC", -- Yellow      6
       x"00",  
       x"00",
       x"00",
@@ -184,7 +198,11 @@ begin
     if rising_edge(clk) then
        if mod_4=3 then
           if xctr<640 and yctr<480 then
-              video <= "00" & from_ram;
+              if output_number = '0' then
+                video <= "00" & from_ram;
+              else 
+                video <= "0010";
+              end if;
           else
               video <= x"0";        
           end if;
@@ -207,5 +225,15 @@ begin
       data_i    =>  to_ram,
       data_o    =>  from_ram
       );
+
+  comp_num : gpu_display_numbers port map (
+      clk       =>  clk,
+      rst       => rst,
+      -- dbus     => dbus,
+      -- => FB_o,
+      rxaddress  =>  rxaddress,
+      ryaddress  =>  ryaddress,
+      output_number => output_number
+    );
   
 end Behavioral;
