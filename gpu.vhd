@@ -96,15 +96,15 @@ architecture Behavioral of gpu is
   -- Color palette
   type color_t is array (0 to 15) of std_logic_vector (7 downto 0);
   constant colors : color_t := -- "rrrgggbb"
-    ( x"00", -- Black       0
-      x"E3", -- Magenta     1
-      x"1F", -- Aqua        2
-      x"1C", -- Green/Lime  3
-      x"E0", -- Red         4
-      x"03", -- Blue        5
-      x"FC", -- Yellow      6
-      x"49", -- DarkGrey    7 
-      x"00",
+    ( x"00", -- Black         0 
+      x"E3", -- Magenta       1
+      x"1F", -- Aqua          2
+      x"1C", -- Green/Lime    3
+      x"E0", -- Red           4
+      x"03", -- Blue          5
+      x"FC", -- Yellow        6
+      x"49", -- DarkGrey      7 
+      x"24", -- DarkGreyGreen 8
       x"00",
       x"00",
       x"00",
@@ -192,8 +192,13 @@ begin
     to_ram <= data when "100",
             to_ram when others;
 
-  ryaddress <= conv_integer(rad);
-  rxaddress <= conv_integer(kol);
+  process(clk) begin
+    if rising_edge(clk) then
+      ryaddress <= conv_integer(rad);
+      rxaddress <= conv_integer(kol);
+    end if;
+  end process;
+
 
   -- R GPU Memory.
   process(clk) begin
