@@ -24,9 +24,10 @@ end gpu_display_numbers;
 architecture arch of gpu_display_numbers is
 
   -- Select wich numbers to display or none.
-  --signal numbers_activated : std_logic_vector(2 downto 0) := "000";
+  signal enabled : std_logic := '0';
+  signal activated_count : std_logic_vector(1 downto 0) := "00";
   -- Number to currently write to display.
-  signal current_seleced_number : std_logic_vector(2 downto 0) := "100"; -- bit 2 toggles unselected.  
+  signal current_selected_number : std_logic_vector(2 downto 0) := "100"; -- bit 2 toggles unselected.  
   signal x_num, y_num : integer := 0; -- Col and row in digit.
   signal digit : std_logic_vector(3 downto 0); -- One single digit of the number;
   signal selected_digit : std_logic := '0'; -- Which digit is active/supposed to be drawn.
@@ -44,9 +45,12 @@ architecture arch of gpu_display_numbers is
   signal display_numbers : number_t := (x"34", x"78", x"91", x"65"); -- BCD
 
   -- Bus stuff
-  --  alias bus_number : std_logic_vector(6 downto 0) is dbus(6 downto 0);
-  --  alias bus_current_seleced_number : std_logic_vector(1 downto 0) is dbus(11 downto 10);
-  --  alias bus_activate_number_code : std_logic_vector(2 downto 0) is dbus(31 downto 29);
+  --alias dbus_number : std_logic_vector(6 downto 0) is dbus(6 downto 0);
+  --alias dbus_current_selected_number : std_logic_vector(1 downto 0) is dbus(11 downto 10);
+  --alias dbus_activate_number_code : std_logic_vector(2 downto 0) is dbus(31 downto 29);
+
+  signal bcd : std_logic_vector(11 downto 0) := x"000";
+  signal temp : std_logic_vector(7 downto 0) := x"00";
 
   -- Number tile constants.
   type number_tile_t is array(0 to 6) of std_logic_vector(0 to 3);
@@ -84,22 +88,60 @@ architecture arch of gpu_display_numbers is
   constant numbers : numbers_t := (zero, one, two, three, four, five, six, seven, eight, nine);
 
 begin 
+  
+	process(clk) begin
+    if rising_edge(clk) then
+      if rst = '1' then
+        -- Reset
+        enabled <= '0';
+        activated_count <= "00";
+        display_numbers <= (others => (others => '0'));
+      elsif FB_o="101" then
+        -- [ewcc --dd dddd ddss]
+        -- e: Enable numbers.
+        -- w: Write, count of visible numbers
+        -- c: Count of numbers visible written if w=1
+        -- d: Data(number) to display
+        -- s: Select number.
+        -- e and w has to be 0 for d to be written.
 
---	process(clk) begin
---    if rising_edge(clk) then
---      if rst = '1' then
---        -- Reset
---      elsif FB_o="101" then
---        -- Display number
---        if not activate_number_code = '000' then
---          numbers_activated <= activate_number_code;
---        end if;
---        display_numbers(conv_integer(current_seleced_number)) <= number;
---    end if;
---  end process;
+        -- Toggle activate
+        if dbus(31) = '1' then
+          enabled <= not enabled;
+        end if;
+        
+        -- Set number of visible numbers
+        if dbus(30) = '1' then
+          activated_count <= dbus(29 downto 28);
+        end if;
+
+        -- Write number to display.
+        if dbus(31 downto 30) = "00" then
+          -- Convert binary number to bcd
+          bcd <= x"000";
+          temp <= dbus(9 downto 2);
+          for i in 0 to 7 loop
+            if bcd(3 downto 0) > 4 then
+              bcd(3 downto 0) <= bcd(3 downto 0) + 3;
+            end if;
+
+            if bcd(7 downto 4) > 4 then
+              bcd(7 downto 4) <= bcd(7 downto 4) + 3;
+            end if;
+
+            bcd <= bcd(10 downto 0) & temp(7);
+            temp <= temp(6 downto 0) & '0';
+          end loop;
+          -- Write bcd to displayed numbers.
+          display_numbers(conv_integer(dbus(1 downto 0))) <= bcd(7 downto 0);
+        end if;
+
+      end if;
+    end if;
+  end process;
 
 	-- Set number do draw right now or none.
-  current_seleced_number <= "100" when rxaddress >= 284 and 
+  current_selected_number <= "100" when rxaddress >= 284 and 
                                        rxaddress <  286 else
                             "000" when rxaddress >= 280 and 
                                        rxaddress <  290 and 
@@ -125,21 +167,21 @@ begin
   with selected_digit select
     x_num <= rxaddress - 280 when '1',
              rxaddress - 286 when others; 
-  with current_seleced_number select 
+  with current_selected_number select 
     y_num <= ryaddress - 32 when "000",
              ryaddress - 49 when "001",
              ryaddress - 66 when "010",
              ryaddress - 83 when others; 
 
   with selected_digit select
-    digit <= display_numbers(conv_integer(current_seleced_number(1 downto 0)))(7 downto 4) when '1',
-             display_numbers(conv_integer(current_seleced_number(1 downto 0)))(3 downto 0) when others;
+    digit <= display_numbers(conv_integer(current_selected_number)(1 downto 0))(7 downto 4) when '1',
+             display_numbers(conv_integer(current_selected_number)(1 downto 0))(3 downto 0) when others;
 
   -- Deside if gpu memory or number should be drawn.
-  with current_seleced_number(2) select
-    --output_number <= numbers(0)(y_num)(x_num) when '0',
-    output_number <= numbers(conv_integer(digit))(y_num)(x_num) when '0',
-                     '0' when others;  
+  output_number <= numbers(conv_integer(digit))(y_num)(x_num) when 
+                        current_selected_number(2) = '0' and 
+                        enabled = '1' else
+                   '0';  
 
 --with numbers_activated select
 --  output_number <=  
