@@ -16,6 +16,7 @@ entity gpu is
           dbus              : in std_logic_vector(31 downto 0);
           gpuOut            : out std_logic_vector(31 downto 0);
           FB_c              : in std_logic_vector(2 downto 0);
+          TB_c              : in std_logic_vector(2 downto 0);
           vgaRed, vgaGreen  : out std_logic_vector (2 downto 0);
           vgaBlue           : out std_logic_vector (2 downto 1);
           hsync, vsync      : out std_logic
@@ -80,6 +81,8 @@ architecture Behavioral of gpu is
   signal output_number : std_logic := '0';
   signal number_pixel : std_logic_vector(3 downto 0) := x"F";
 
+  signal controll_register : std_logic_vector(31 downto 0) := x"0000_0000";
+
   --RAM
   signal xaddress  : integer := 0;
   signal yaddress  : integer := 0;
@@ -116,7 +119,11 @@ architecture Behavioral of gpu is
 
 begin
 
-  gpuOut <= (others => 'Z'); 
+  -- Select mem or nums.
+  with TB_c select
+    gpuOut <= x"0000_000" & from_ram when "100",
+              controll_register when "101",
+              (others => 'Z') when others; 
 
 
   -- GPU clock, 25MHz from 100MHz
@@ -175,22 +182,21 @@ begin
   vsync <= vs;
 
 
-  -- COMMUNCATION WITH RAM  
-  with FB_c select
-    we <= '1' when "100",
-          '0' when others;
-
-  with FB_c select 
-    yaddress <= conv_integer(dbus(11 downto 4)) when "100",
-            yaddress when others;
-  
-  with FB_c select
-    xaddress <= conv_integer(dbus(20 downto 12)) when "100",
-            xaddress when others;
-
-  with FB_c select
-    to_ram <= data when "100",
-            to_ram when others;
+  process(clk) begin
+    if rising_edge(clk) then
+      case FB_c is
+        when "100" => -- GPU
+                we <= '1';
+                yaddress <= conv_integer(dbus(11 downto 4));
+                xaddress <= conv_integer(dbus(20 downto 12));
+                to_ram <= data;
+        when "101" => -- Control register
+                controll_register <= dbus;
+                we <= '0';
+        when others => we <= '0';
+      end case;
+    end if;
+  end process;
 
   ryaddress <= conv_integer(rad);
   rxaddress <= conv_integer(kol);
