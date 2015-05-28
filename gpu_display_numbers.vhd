@@ -47,7 +47,7 @@ architecture arch of gpu_display_numbers is
 
   -- Colors of numbers
   type color_t is array(0 to 3) of std_logic_vector(3 downto 0);
-  signal number_colors : color_t := (others <= x"F");
+  signal number_colors : color_t := (others => x"F");
 
   -- Bus stuff
   --alias dbus_number : std_logic_vector(6 downto 0) is dbus(6 downto 0);
@@ -189,7 +189,7 @@ begin
                    '0';  
 
   number_pixel <= number_colors(conv_integer(current_selected_number(1 downto 0)));
-  
+
 --with numbers_activated select
 --  output_number <=  
 --    when "100" => -- One number
