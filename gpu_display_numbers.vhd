@@ -17,14 +17,15 @@ entity gpu_display_numbers is
           FB_o : in std_logic_vector(2 downto 0);
           rxaddress  : in integer;
           ryaddress  : in integer;
-          output_number : out std_logic
+          output_number : out std_logic;
+          number_pixel : out std_logic_vector(3 downto 0)
         );
 end gpu_display_numbers;
 
 architecture arch of gpu_display_numbers is
 
   -- Select wich numbers to display or none.
-  signal enabled : std_logic := '0';
+  signal enabled : std_logic := '1';  -- DEBUG: Enable by default
   signal activated_count : std_logic_vector(1 downto 0) := "00";
   -- Number to currently write to display.
   signal current_selected_number : std_logic_vector(2 downto 0) := "100"; -- bit 2 toggles unselected.  
@@ -43,6 +44,10 @@ architecture arch of gpu_display_numbers is
   type number_t is array(0 to 3) of std_logic_vector(7 downto 0); -- 4 diffrent numbers upto 99.
   --signal display_numbers : number_t := (others => (others => '0'));
   signal display_numbers : number_t := (x"34", x"78", x"91", x"65"); -- BCD
+
+  -- Colors of numbers
+  type color_t is array(0 to 3) of std_logic_vector(3 downto 0);
+  signal number_colors : color_t := (others <= x"F");
 
   -- Bus stuff
   --alias dbus_number : std_logic_vector(6 downto 0) is dbus(6 downto 0);
@@ -174,8 +179,8 @@ begin
              ryaddress - 83 when others; 
 
   with selected_digit select
-    digit <= display_numbers(conv_integer(current_selected_number)(1 downto 0))(7 downto 4) when '1',
-             display_numbers(conv_integer(current_selected_number)(1 downto 0))(3 downto 0) when others;
+    digit <= display_numbers(conv_integer(current_selected_number(1 downto 0)))(7 downto 4) when '1',
+             display_numbers(conv_integer(current_selected_number(1 downto 0)))(3 downto 0) when others;
 
   -- Deside if gpu memory or number should be drawn.
   output_number <= numbers(conv_integer(digit))(y_num)(x_num) when 
@@ -183,6 +188,8 @@ begin
                         enabled = '1' else
                    '0';  
 
+  number_pixel <= number_colors(conv_integer(current_selected_number(1 downto 0)));
+  
 --with numbers_activated select
 --  output_number <=  
 --    when "100" => -- One number

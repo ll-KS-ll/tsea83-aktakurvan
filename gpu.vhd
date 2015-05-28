@@ -60,7 +60,8 @@ architecture Behavioral of gpu is
       FB_o : in std_logic_vector(2 downto 0);
       rxaddress  : in integer;
       ryaddress  : in integer;
-      output_number : out std_logic
+      output_number : out std_logic;
+      number_pixel : out std_logic_vector(3 downto 0)
     );
   end component;
 
@@ -77,6 +78,7 @@ architecture Behavioral of gpu is
   
   -- Display number
   signal output_number : std_logic := '0';
+  signal number_pixel : std_logic_vector(3 downto 0) := x"F";
 
   --RAM
   signal xaddress  : integer := 0;
@@ -201,7 +203,7 @@ begin
               if output_number = '0' then
                 video <= from_ram;
               else 
-                video <= "0010";
+                video <= number_pixel;
               end if;
           else
               video <= x"0";        
@@ -233,7 +235,8 @@ begin
       FB_o      => FB_c,
       rxaddress  =>  rxaddress,
       ryaddress  =>  ryaddress,
-      output_number => output_number
+      output_number => output_number,
+      number_pixel => number_pixel
     );
   
 end Behavioral;
