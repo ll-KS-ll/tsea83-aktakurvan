@@ -67,8 +67,6 @@ architecture arch of controller is
             x"0027_0100", -- 
             x"0034_0300", -- WGNUMS
             x"001E_0000", -- JSR
-		    x"000B_0300", -- 
-            x"001E_0000", -- JSR
             x"000B_0300", -- 
             x"0070_0000", -- AND
 		    x"0190_0000", --  
@@ -104,13 +102,14 @@ architecture arch of controller is
 		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
 		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
 		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
-		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000"
+		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
+        x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000"
 		    );
 begin
         -- K1 - Go to instruction 
         with OP select
 
-            K1 <=   X"0A" when "0000", -- WGNUMS        0
+            K1 <=   X"0A" when "0000", -- WGNUMS     0
                     X"0B" when "0001", -- JSR        1
                     X"0D" when "0010", -- AND        2
 	    	            X"11" when "0011", -- BRA        3
@@ -121,7 +120,7 @@ begin
 			              X"1B" when "1000", -- DEC        8
     				        X"1E" when "1001", -- LOAD       9
 	    			        X"1F" when "1010", -- STORE      A
-		    		        X"20" when "1011", -- SGPU     B
+		    		        X"20" when "1011", -- SGPU       B
                     x"26" when "1100", -- RSR        C
                     x"27" when "1101", -- OR         D
                     x"2A" when "1110", -- RGCR       F

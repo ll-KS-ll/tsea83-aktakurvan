@@ -31,9 +31,9 @@ architecture arch of areg is
             -- #########################
             -- ## Main Game functions ##
             -- #########################
-            0000=>x"1F00_02BC",		-- Initialize Gameborder/sidebar
-            0001=>x"0000_0000",		-- Initialize Player ScoreNumbers
-            0002=>x"0000_0000",		-- 
+            0000=>x"1F00_02BB",		-- Initialize Gameborder/sidebar
+            0001=>x"1F00_02EC",		-- Initialize Player ScoreNumbers
+            0002=>x"3000_0002",		-- BRA    49 (Ininity loop.)
             0003=>x"0000_0000",		--
             0004=>x"0000_0000",		--
             0005=>x"0000_0000",		--
@@ -129,7 +129,7 @@ architecture arch of areg is
             0734=>x"9600_03F1",		-- LOAD   color
             0735=>x"9700_03D9",		-- LOAD   direction
             -- -- Return to game
-            0746=>x"CF00_0000",   -- RSR
+            0736=>x"CF00_0000",   -- RSR
             -- #################
             -- ## Clear board ##
             -- #################
@@ -144,15 +144,15 @@ architecture arch of areg is
             0745=>x"6900_03EB",   -- CMP    yPos to end of GameBoard PM(1003)
             0746=>x"4000_02E1",   -- BNE    to address 737 if end hasnt been reached
             -- Go back to game
-            0747=>x"CF00_0000",		-- RSR    Go back to Game
+            0747=>x"CF00_0000",		-- RSR    
             -- ##########################
             -- ## Player Score Numbers ##
             -- ##########################
-            0748=>x"5000_003B",   -- WGCR   Enable Two players scors, and set to write color to Player 1
-            0749=>x"0000_0000",   -- STOREG Set player 1 score color
-            0750=>x"0000_0000",   -- 
-            0751=>x"0000_0000",   --
-            0752=>x"0000_0000",   --
+            0748=>x"5000_003B",   -- WGCR   Enable Two players score, and set to write color to Player 1
+            0749=>x"A200_0000",   -- STOREG Set player 1 score color
+            0750=>x"5000_0077",   -- WGCR   Set to write color to Player 2
+            0751=>x"A500_0000",   -- STOREG Set player 2 score color
+            0752=>x"CF00_0000",   -- RSR    
             0753=>x"0000_0000",   --
             0754=>x"0000_0000",   --
             0755=>x"0000_0000",   --
