@@ -31,9 +31,9 @@ architecture arch of areg is
             -- #########################
             -- ## Main Game functions ##
             -- #########################
-            0000=>x"1F00_02BC",		-- Initialize Game (draw game border/sidebar - set player 1/2 startpos/direction - clear board - Draw pl. init pos)
-            0001=>x"3000_0001",		-- BRA (Infinity loop.)
-            0002=>x"0000_0000",		--
+            0000=>x"1F00_02BC",		-- Initialize Gameborder/sidebar
+            0001=>x"0000_0000",		-- Initialize Player ScoreNumbers
+            0002=>x"0000_0000",		-- 
             0003=>x"0000_0000",		--
             0004=>x"0000_0000",		--
             0005=>x"0000_0000",		--
@@ -81,11 +81,11 @@ architecture arch of areg is
             0047=>x"0000_0000",		--
             0048=>x"0000_0000",		--
             0049=>x"3000_0031",		-- BRA    49 (Ininity loop.)
-
-            -- #####################
-            -- ## INITIALIZE GAME ##
-            -- #####################
+            -- ###################################
+            -- ## INITIALIZE GAMEBORDER/SIDEBAR ##
+            -- ###################################
             -- LOAD BORDER
+            0699=>x"5000_0001",   -- WGCR   Set GPU control register to write to GPU	
             0700=>x"9A00_03F7",		-- LOAD   border color from PM(1015) into GR10
             0701=>x"B800_0000",		-- STOREG write to GPU
             0702=>x"7800_0000",		-- INC    GR8
@@ -114,34 +114,64 @@ architecture arch of areg is
             0724=>x"7900_0000",		-- INC    yPos 
             0725=>x"6900_03EF",		-- CMP    yPos to end of screen
             0726=>x"4000_02CF",		-- BNE    to address 719 if end has been reached
-            -- LOAD PLAYERS
+            0727=>x"CF00_0000",   -- RSR
+            -- #############################
+            -- ## SET PLAYERS INIT VALUES ##
+            -- #############################
             --  -- Player 1
-            0727=>x"9000_03D4",		-- LOAD   xpos
-            0728=>x"9100_03D5",		-- LOAD   ypos
-            0729=>x"9200_03F2",		-- LOAD   color
-            0730=>x"9300_03D6",		-- LOAD   direction
+            0728=>x"9000_03D4",		-- LOAD   xpos
+            0729=>x"9100_03D5",		-- LOAD   ypos
+            0730=>x"9200_03F2",		-- LOAD   color
+            0731=>x"9300_03D6",		-- LOAD   direction
             --  -- Player 2
-            0731=>x"9400_03D7",		-- LOAD   xpos
-            0732=>x"9500_03D8",		-- LOAD   ypos
-            0733=>x"9600_03F1",		-- LOAD   color
-            0734=>x"9700_03D9",		-- LOAD   direction
-            -- Clear board
-            0735=>x"9A00_03F0",		-- LOAD   gameboard color (black) from PM(1008) into GR10
-            0736=>x"9900_03EA",   -- LOAD   gameboard start ypos from PM(1002) into GR9
-            0737=>x"9800_03EA",   -- LOAD   gameboard start xpos from PM(1002) into GR8
-            0738=>x"B800_0000",   -- STOREG write to GPU
-            0739=>x"7800_0000",   -- INC    xPos
-            0740=>x"6800_03EB",   -- CMP    xPos to end of GameBoard PM(1003)
-            0741=>x"4000_02E2",   -- BNE    to address 738 if end of GameBoard hasnt been reached
-            0742=>x"7900_0000",   -- INC    yPos 
-            0743=>x"6900_03EB",   -- CMP    yPos to end of GameBoard PM(1003)
-            0744=>x"4000_02E1",   -- BNE    to address 737 if end hasnt been reached
-            -- -- Draw Players init pos
-            0745=>x"B000_0000",   --
-            0746=>x"B400_0000",   --
+            0732=>x"9400_03D7",		-- LOAD   xpos
+            0733=>x"9500_03D8",		-- LOAD   ypos
+            0734=>x"9600_03F1",		-- LOAD   color
+            0735=>x"9700_03D9",		-- LOAD   direction
+            -- -- Return to game
+            0746=>x"CF00_0000",   -- RSR
+            -- #################
+            -- ## Clear board ##
+            -- #################
+            0737=>x"9A00_03F0",		-- LOAD   gameboard color (black) from PM(1008) into GR10
+            0738=>x"9900_03EA",   -- LOAD   gameboard start ypos from PM(1002) into GR9
+            0739=>x"9800_03EA",   -- LOAD   gameboard start xpos from PM(1002) into GR8
+            0740=>x"B800_0000",   -- STOREG write to GPU
+            0741=>x"7800_0000",   -- INC    xPos
+            0742=>x"6800_03EB",   -- CMP    xPos to end of GameBoard PM(1003)
+            0743=>x"4000_02E2",   -- BNE    to address 738 if end of GameBoard hasnt been reached
+            0744=>x"7900_0000",   -- INC    yPos 
+            0745=>x"6900_03EB",   -- CMP    yPos to end of GameBoard PM(1003)
+            0746=>x"4000_02E1",   -- BNE    to address 737 if end hasnt been reached
             -- Go back to game
             0747=>x"CF00_0000",		-- RSR    Go back to Game
-
+            -- ##########################
+            -- ## Player Score Numbers ##
+            -- ##########################
+            0748=>x"5000_003B",   -- WGCR   Enable Two players scors, and set to write color to Player 1
+            0749=>x"0000_0000",   -- STOREG Set player 1 score color
+            0750=>x"0000_0000",   -- 
+            0751=>x"0000_0000",   --
+            0752=>x"0000_0000",   --
+            0753=>x"0000_0000",   --
+            0754=>x"0000_0000",   --
+            0755=>x"0000_0000",   --
+            0756=>x"0000_0000",   --
+            0757=>x"0000_0000",   --
+            0758=>x"0000_0000",   --
+            0759=>x"0000_0000",   --
+            0760=>x"0000_0000",   --
+            0761=>x"0000_0000",   --
+            0762=>x"0000_0000",   --
+            0763=>x"0000_0000",   --
+            -- ##################################################
+            -- ## Store Player x to Player x in Program Memory ##            
+            -- ##################################################
+            0796=>x"A800_03DA",   -- STORE xpos to PM(0986)
+            0797=>x"A900_03DB",   -- STORE ypos to PM(0987)
+            0798=>x"AA00_03DC",   -- STORE direction to PM(0988)
+            -- -- Back to game
+            0799=>x"CF00_0000",   -- RSR
             -- ######################################
             -- ## Calculate next step for player x ##
             -- ######################################
@@ -149,45 +179,44 @@ architecture arch of areg is
             0800=>x"6A00_03DD",   -- CMP    Direction to N 
             0801=>x"4000_0324",   -- BNE    Jump to next check if not N
             0802=>x"8900_0000",   -- DEC    ypos
-            0803=>x"3000_0365",   -- BRA    Store Player x
+            0803=>x"3000_031C",   -- BRA    Store Player x
             -- -- NE
             0804=>x"6A00_03DE",   -- CMP    Direction to NE
             0805=>x"4000_0329",   -- BNE    Jump to next check if not NE
             0806=>x"7800_0000",   -- INC    xpos
             0807=>x"8900_0000",   -- DEC    ypos  
-            0808=>x"3000_0365",   -- BRA    Store Player x
+            0808=>x"3000_031C",   -- BRA    Store Player x
             -- -- E
             0809=>x"6A00_03DF",   -- CMP    Direction to E
             0810=>x"4000_032D",   -- BNE    Jump to next check if not E
             0811=>x"7800_0000",   -- INC    xpos
-            0812=>x"3000_0365",   -- BRA    Store Player x
+            0812=>x"3000_031C",   -- BRA    Store Player x
             -- -- SE
             0813=>x"6A00_03E0",   -- CMP    Direction to SE
             0814=>x"4000_0332",   -- BNE    Jump to next check if not SE
             0815=>x"7800_0000",   -- INC    xpos
             0816=>x"7900_0000",   -- INC    ypos
-            0817=>x"3000_0365",   -- BRA    Store Player x
+            0817=>x"3000_031C",   -- BRA    Store Player x
             -- -- S
             0818=>x"6A00_03E1",   -- CMP    Direction to S
             0819=>x"4000_0336",   -- BNE    Jump to next check if not S
             0820=>x"7900_0000",   -- INC    ypos
-            0821=>x"3000_0365",   -- BRA    Store Player x
+            0821=>x"3000_031C",   -- BRA    Store Player x
             -- -- SW
             0822=>x"6A00_03E2",   -- CMP    Direction to SW
             0823=>x"4000_033B",   -- BNE    Jump to next check if not SW
             0824=>x"8800_0000",   -- DEC    xpos
             0825=>x"7900_0000",   -- INC    ypos
-            0826=>x"3000_0365",   -- BRA    Store Player x
+            0826=>x"3000_031C",   -- BRA    Store Player x
             -- -- W
             0827=>x"6A00_03E3",   -- CMP    Direction to W
             0828=>x"4000_033F",   -- BNE    Jump to NW if not W
             0829=>x"8800_0000",   -- DEC    xpos
-            0830=>x"3000_0365",   -- BRA    Store Player x
+            0830=>x"3000_031C",   -- BRA    Store Player x
             -- -- NW
             0831=>x"7800_0000",   -- DEC    xpos
             0832=>x"7900_0000",   -- DEC    ypos
-            0833=>x"3000_0365",   -- BRA    Store Player x
-
+            0833=>x"3000_031C",   -- BRA    Store Player x
             -- ###################################
             -- ## Set Player 1 or 2 to Player x ##
             -- ###################################
@@ -221,15 +250,7 @@ architecture arch of areg is
             0867=>x"9700_03DC",   -- LOAD direction from PM(0988)
             -- -- Back to game
             0868=>x"CF00_0000",   -- RSR
-            -- ##################################################
-            -- ## Store Player x to Player x in Program Memory ##            
-            -- ##################################################
-            0869=>x"A800_03DA",   -- STORE xpos to PM(0986)
-            0870=>x"A900_03DB",   -- STORE ypos to PM(0987)
-            0871=>x"AA00_03DC",   -- STORE direction to PM(0988)
-            -- -- Back to game
-            0872=>x"CF00_0000",   -- RSR
-
+            
             -- ##################
             -- ## Draw Players ##
             -- ##################
@@ -239,7 +260,6 @@ architecture arch of areg is
             0874=>x"B400_0000",   -- STOREG write to GPU
             -- Back to Game
             0875=>x"CF00_0000",   -- RSR    
-
             -- ###############
             -- ## CONSTANTS ##
             -- ###############
