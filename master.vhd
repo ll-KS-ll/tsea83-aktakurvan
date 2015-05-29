@@ -29,6 +29,7 @@ architecture behaviour of master is
           clk, rst       : in     std_logic;
           gpu_dbus       : in     std_logic_vector(31 downto 0);
           gpuTakeBus     : out    std_logic_vector(2 downto 0);
+          gpu_tb         : out    std_logic_vector(2 downto 0);
           cpuOut         : out    std_logic_vector(31 downto 0);
           txd            : in     std_logic
          );
@@ -38,10 +39,11 @@ architecture behaviour of master is
     port (
           clk,rst             : in    std_logic;
           dbus                : in    std_logic_vector(31 downto 0);
+          TB_c                : in    std_logic_vector(2 downto 0);
           FB_c                : in    std_logic_vector(2 downto 0);
           gpuOut              : out   std_logic_vector(31 downto 0);
-          vgaRed, vgaGreen  : out   std_logic_vector (2 downto 0);
-          vgaBlue            : out   std_logic_vector (2 downto 1);
+          vgaRed, vgaGreen    : out   std_logic_vector (2 downto 0);
+          vgaBlue             : out   std_logic_vector (2 downto 1);
           hsync, vsync        : out   std_logic
          );
    end component;
@@ -49,6 +51,7 @@ architecture behaviour of master is
     -- Signals between components
     signal  gpuToCpu        : std_logic_vector(31 downto 0);
     signal  FB_gpu          : std_logic_vector(2 downto 0);
+    signal  TB_gpu          : std_logic_vector(2 downto 0);
     signal  cpuToGpu        : std_logic_vector(31 downto 0);
 
 begin
@@ -58,6 +61,7 @@ begin
       rst         =>  rst,
       gpu_dbus    =>  gpuToCpu,
       gpuTakeBus  =>  FB_gpu,
+      gpu_tb      =>  TB_gpu,
       cpuOut      =>  cpuToGpu,
       txd         =>  txd
       );
@@ -66,6 +70,7 @@ begin
       clk         =>  clk,
       rst         =>  rst,
       dbus        =>  cpuToGpu,
+      TB_c        =>  TB_gpu,
       FB_c        =>  FB_gpu,
       gpuOut      =>  gpuToCpu,
       vgaRed      =>  vgaRed,
