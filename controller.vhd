@@ -67,7 +67,7 @@ architecture arch of controller is
             x"0027_0100", -- 
             x"0070_0000", -- ADD
             x"0110_0000", -- 
-		        x"0026_0300", -- 
+		    x"0026_0300", -- 
             x"0070_0000", -- SUB
             x"0150_0000", -- 
             x"0026_0300", -- 
@@ -109,18 +109,19 @@ architecture arch of controller is
 begin
         -- K1 - Go to instruction 
         with OP select
-            K1 <=   X"0A" when "0000", -- ADD
-                    X"0D" when "0001", -- SUB
-                    X"10" when "0010", -- AND
-	    	        X"13" when "0011", -- BRA
-			        X"14" when "0100", -- BNE
-			        X"17" when "0101", -- HALT				       
-                    X"19" when "0110", -- CMP
-			        X"1B" when "0111", -- INC
-			        X"1E" when "1000", -- DEC
-    				X"21" when "1001", -- LOAD
-	    			X"22" when "1010", -- STORE
-		    		X"23" when "1011", -- STOREG
+            K1 <=   X"0A" when "0000", -- ADD        0
+                    X"0D" when "0001", -- SUB        1
+                    X"10" when "0010", -- AND        2
+	    	        X"13" when "0011", -- BRA        3
+			        X"14" when "0100", -- BNE        4
+			        X"17" when "0101", -- HALT       5		       
+                    X"19" when "0110", -- CMP        6
+			        X"1B" when "0111", -- INC        7
+			        X"1E" when "1000", -- DEC        8
+    				X"21" when "1001", -- LOAD       9
+	    			X"22" when "1010", -- STORE      A
+		    		X"23" when "1011", -- STOREG     B
+                    x"29" when "1100", -- BRE        C
 			    	X"00" when others;
 
         -- K2 - Choose adressing mode
