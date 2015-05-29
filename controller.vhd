@@ -68,9 +68,9 @@ architecture arch of controller is
             x"0070_0000", -- ADD
             x"0110_0000", -- 
 		    x"0026_0300", -- 
-            x"0070_0000", -- SUB
-            x"0150_0000", -- 
-            x"0026_0300", -- 
+            x"001E_0000", -- JSR
+            x"000B_0300", -- 
+            x"0000_0000", -- 
 		    x"0070_0000", -- AND 
             x"0190_0000", -- 
             x"0026_0300", -- 
@@ -96,9 +96,7 @@ architecture arch of controller is
 		    x"02C0_0E00", --
             x"0130_0000", --
             x"0024_0300", --
-            x"0208_092B", -- BRE
-		    x"0000_0300", --
-            x"000B_0300", --
+            x"0033_0300", -- RSR
             x"0070_0000", -- OR 
             x"01D0_0000", --
 		    x"0026_0300", -- 
@@ -114,7 +112,7 @@ begin
         -- K1 - Go to instruction 
         with OP select
             K1 <=   X"0A" when "0000", -- ADD        0
-                    X"0D" when "0001", -- SUB        1
+                    X"0D" when "0001", -- JSR        1
                     X"10" when "0010", -- AND        2
 	    	        X"13" when "0011", -- BRA        3
 			        X"14" when "0100", -- BNE        4
@@ -125,12 +123,12 @@ begin
     				X"21" when "1001", -- LOAD       9
 	    			X"22" when "1010", -- STORE      A
 		    		X"23" when "1011", -- STOREG     B
-                    x"29" when "1100", -- BRE        C
-                    x"2C" when "1101", -- OR         D
-                    x"2F" when "1110", -- RGCR       F
+                    x"29" when "1100", -- RSR        C
+                    x"2A" when "1101", -- OR         D
+                    x"2D" when "1110", -- RGCR       F
 			    	X"00" when others; -- 
 
-        -- K2 - Choose adressing mode
+        -- K2 - Choose adressing mode   
         with M select
             K2 <=   X"03" when "0000",    -- EA Direct
                     X"04" when "0001",    -- EA Imidiate
