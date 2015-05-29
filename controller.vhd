@@ -59,27 +59,25 @@ architecture arch of controller is
             x"0011_4000", -- 
             x"0000_8200", -- Decide EA  
             x"000F_0100", -- EA Direct   
-            x"001F_4100", -- EA Imediate
+            x"001F_0100", -- EA Imediate
             x"000F_0000", -- EA Indirect
             x"0017_0100", --
             x"0048_0000", --
             x"0230_8000", -- EA Indexed (Fel, väljer Gr3) 
             x"0027_0100", -- 
-            x"0070_0000", -- ADD
-            x"0110_0000", -- 
-		    x"0026_0300", -- 
+            x"0034_0300", -- WGNUMS
+            x"001E_0000", -- JSR
+		    x"000B_0300", -- 
             x"001E_0000", -- JSR
             x"000B_0300", -- 
-            x"0000_0000", -- 
-		    x"0070_0000", -- AND 
-            x"0190_0000", -- 
+            x"0070_0000", -- AND
+		    x"0190_0000", --  
             x"0026_0300", -- 
             x"000B_0300", -- BRA
 		    x"0208_0816", -- BNE
             x"0000_0300", -- 
             x"000B_0300", --  
             x"000D_0300", -- WGCR
-		    x"0000_0000", -- 
             x"0070_0000", -- CMP
             x"0150_0300", -- 
             x"0070_0000", -- INC
@@ -90,7 +88,7 @@ architecture arch of controller is
             x"0026_0300", -- 
             x"0016_0300", -- LOAD
 		    x"0032_0300", -- STORE
-            x"0070_0000", -- STOREG
+            x"0070_0000", -- SGPU
             x"0300_0E00", -- 
             x"0130_0000", --
 		    x"02C0_0E00", --
@@ -100,7 +98,7 @@ architecture arch of controller is
             x"0070_0000", -- OR 
             x"01D0_0000", --
 		    x"0026_0300", -- 
-            x"002E_0300", -- RGC    R
+            x"002E_0300", -- RGCR
             x"0000_0000", 
             x"0000_0000",
 		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
@@ -112,21 +110,21 @@ begin
         -- K1 - Go to instruction 
         with OP select
 
-            K1 <=   X"0A" when "0000", -- ADD        0
-                    X"0D" when "0001", -- JSR        1
-                    X"10" when "0010", -- AND        2
-	    	            X"13" when "0011", -- BRA        3
-			              X"14" when "0100", -- BNE        4
-			              X"17" when "0101", -- WGCR       5		       
-                    X"19" when "0110", -- CMP        6
-			              X"1B" when "0111", -- INC        7
-			              X"1E" when "1000", -- DEC        8
-    				        X"21" when "1001", -- LOAD       9
-	    			        X"22" when "1010", -- STORE      A
-		    		        X"23" when "1011", -- STOREG     B
-                    x"29" when "1100", -- RSR        C
-                    x"2A" when "1101", -- OR         D
-                    x"2D" when "1110", -- RGCR       F
+            K1 <=   X"0A" when "0000", -- WGNUMS        0
+                    X"0B" when "0001", -- JSR        1
+                    X"0D" when "0010", -- AND        2
+	    	            X"11" when "0011", -- BRA        3
+			              X"12" when "0100", -- BNE        4
+			              X"15" when "0101", -- WGCR       5		       
+                    X"16" when "0110", -- CMP        6
+			              X"18" when "0111", -- INC        7
+			              X"1B" when "1000", -- DEC        8
+    				        X"1E" when "1001", -- LOAD       9
+	    			        X"1F" when "1010", -- STORE      A
+		    		        X"20" when "1011", -- SGPU     B
+                    x"26" when "1100", -- RSR        C
+                    x"27" when "1101", -- OR         D
+                    x"2A" when "1110", -- RGCR       F
 			    	        X"00" when others; -- 
 
 
