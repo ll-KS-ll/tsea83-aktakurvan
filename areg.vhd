@@ -136,8 +136,8 @@ architecture arch of areg is
             0734=>x"9700_03D9",		-- Load direction
             -- Clear board
             0735=>x"0000_0000",		-- Load gameboard color (black) from PM(1008) into GR10
-            0736=>x"0000_0000",   --
-            0737=>x"0000_0000",   --
+            0736=>x"0000_0000",   -- Load gameboard start xpos from PM(1002) into GR8
+            0737=>x"0000_0000",   -- Load gameboard start ypos from PM(1003) into GR9
             0738=>x"0000_0000",   --
             0739=>x"0000_0000",   --
             0740=>x"0000_0000",   --
@@ -189,12 +189,12 @@ architecture arch of areg is
             -- ###############
             -- ## CONSTANTS ##
             -- ###############
-            0980=>x"0000_001E",   -- Player 1 - start - xpos
-            0981=>x"0000_001E",   -- Player 1 - start - ypos
-            0982=>x"0000_0003",   -- Player 1 - start - direction
-            0983=>x"0000_00D2",   -- Player 2 - start - xpos
-            0984=>x"0000_00D2",   -- Player 2 - start - ypos
-            0985=>x"0000_0007",   -- Player 2 - start - direction
+            0980=>x"0000_001E",   -- Player 1   start   xpos
+            0981=>x"0000_001E",   -- Player 1   start   ypos
+            0982=>x"0000_0003",   -- Player 1   start   direction
+            0983=>x"0000_00D2",   -- Player 2   start   xpos
+            0984=>x"0000_00D2",   -- Player 2   start   ypos
+            0985=>x"0000_0007",   -- Player 2   start   direction
             0986=>x"0000_0000",   -- 
             0987=>x"0000_0000",   -- 
             0988=>x"0000_0000",   -- 
@@ -211,12 +211,12 @@ architecture arch of areg is
             0999=>x"0000_0000",
             1000=>x"0000_0000",		-- 
             1001=>x"0000_0000",		-- 
-            1002=>x"0000_0000",		-- GameBoard  start  xpos
-            1003=>x"0000_0000",		-- Gameboard  end    xpos
-            1004=>x"0000_00EF",		-- GameBoard  W/H           239
+            1002=>x"0000_0001",		-- GameBoard  start  x/ypos 1
+            1003=>x"0000_00EE",		-- GameBoard  end    x/ypos 238
+            1004=>x"0000_00EF",		-- GameBorder W/H    x/ypos 239
             1005=>x"0000_00F0",		-- Sidebar    start  xpos   240
-            1006=>x"0000_0000",		-- Constant 0
-            1007=>x"0000_013F",	  -- Width screen 319	
+            1006=>x"0000_0000",		-- Constant                 0
+            1007=>x"0000_013F",	  -- GameScreen end    x/ypos 319	
             1008=>x"0000_0000",   -- Color Black
             1009=>x"0000_0001",   -- Color Magenta
             1010=>x"0000_0002",   -- Color Aqua
