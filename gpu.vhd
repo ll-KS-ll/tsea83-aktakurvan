@@ -84,7 +84,7 @@ architecture Behavioral of gpu is
   signal number_pixel : std_logic_vector(3 downto 0) := x"F";
 
   -- Control register
-  signal control_register : std_logic_vector(31 downto 0) := "00000000000000000000000000001111";
+  signal control_register : std_logic_vector(31 downto 0) := x"0000_0000";
   alias we : std_logic is control_register(0);
   alias num_flag : std_logic is control_register(4);
 

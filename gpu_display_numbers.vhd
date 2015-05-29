@@ -168,27 +168,10 @@ begin
 
   -- Deside if gpu memory or number should be drawn.
   output_number <= numbers(conv_integer(digit))(y_num)(x_num) when 
-                        current_selected_number(2) = '0' and 
-                        enabled = '1' else
+                        current_selected_number(2) = '0' and enabled = '1' and 
+                        activated_count >= current_selected_number(1 downto 0) else
                    '0';  
 
   number_pixel <= number_colors(conv_integer(current_selected_number(1 downto 0)));
-
---with numbers_activated select
---  output_number <=  
---    when "100" => -- One number
---    
---    when "101" => -- Two numbers
---
---    when"110" => -- Three numbers
-
---    when"111" => -- Four numbers
---
---    when"001" => -- Deactivate
---        numbers_activated <= "000";
---
---    when others => "000";
-
-
 
 end architecture; -- arch
