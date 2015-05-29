@@ -78,8 +78,8 @@ architecture arch of controller is
 		    x"0208_0816", -- BNE
             x"0000_0300", -- 
             x"000B_0300", --  
-            x"0000_0F00", -- HALT (not done)
-		    x"0026_0300", -- 
+            x"0035_0300", -- WGCR
+		    x"0000_0000", -- 
             x"0070_0000", -- CMP
             x"0150_0300", -- 
             x"0070_0000", -- INC
@@ -99,8 +99,12 @@ architecture arch of controller is
             x"0208_092B", -- BRE
 		    x"0000_0300", --
             x"000B_0300", --
-            x"0000_0000", x"0000_0000",
-		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
+            x"0070_0000", -- OR 
+            x"01D0_0000", --
+		    x"0026_0300", -- 
+            x"002E_0300", -- RGCR
+            x"0000_0000", 
+            x"0000_0000",
 		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
 		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
 		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
@@ -114,7 +118,7 @@ begin
                     X"10" when "0010", -- AND        2
 	    	        X"13" when "0011", -- BRA        3
 			        X"14" when "0100", -- BNE        4
-			        X"17" when "0101", -- HALT       5		       
+			        X"17" when "0101", -- WGCR       5		       
                     X"19" when "0110", -- CMP        6
 			        X"1B" when "0111", -- INC        7
 			        X"1E" when "1000", -- DEC        8
@@ -122,7 +126,9 @@ begin
 	    			X"22" when "1010", -- STORE      A
 		    		X"23" when "1011", -- STOREG     B
                     x"29" when "1100", -- BRE        C
-			    	X"00" when others;
+                    x"2C" when "1101", -- OR         D
+                    x"2F" when "1110", -- RGCR       F
+			    	X"00" when others; -- 
 
         -- K2 - Choose adressing mode
         with M select
