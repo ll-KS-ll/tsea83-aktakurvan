@@ -194,8 +194,12 @@ begin
 
   process(clk) begin
     if rising_edge(clk) then
-      ryaddress <= conv_integer(rad);
-      rxaddress <= conv_integer(kol);
+      if conv_integer(rad)<240 then
+        ryaddress <= conv_integer(rad);
+      end if;
+      if conv_integer(kol)<320 then
+        rxaddress <= conv_integer(kol);
+      end if;
     end if;
   end process;
 
