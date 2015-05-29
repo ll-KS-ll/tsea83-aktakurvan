@@ -31,12 +31,12 @@ architecture arch of areg is
             -- #########################
             -- ## Main Game functions ##
             -- #########################
-            0000=>x"3000_02BC",		-- Initialize Game (draw game border/sidebar - set player 1/2 startpos/direction - clear board)
+            0000=>x"3000_02BC",		-- Initialize Game (draw game border/sidebar - set player 1/2 startpos/direction - clear board - Draw pl. init pos)
             0001=>x"0000_0000",		-- 
-            0002=>x"3000_0352",		-- Player 1 => Player x
-            0003=>x"3000_0320",		-- Player x => Next step => Save player x
-            0004=>x"3000_035D",		-- Player x => Player 1
-            0005=>x"3000_0369",		-- Draw Players
+            0002=>x"0000_0000",		--
+            0003=>x"0000_0000",		--
+            0004=>x"0000_0000",		--
+            0005=>x"0000_0000",		--
             0006=>x"0000_0000",		--
             0007=>x"0000_0000",		--
             0008=>x"0000_0000",		--
@@ -140,7 +140,7 @@ architecture arch of areg is
             0745=>x"B000_0000",   --
             0746=>x"B400_0000",   --
             -- Go back to game
-            0747=>x"3000_0002",		-- BRA    Go back to Game
+            0747=>x"3000_0001",		-- RSR    Go back to Game
 
             -- ######################################
             -- ## Calculate next step for player x ##
@@ -205,7 +205,7 @@ architecture arch of areg is
             0858=>x"9900_03DB",   -- LOAD ypos to GR9
             0859=>x"9A00_03DC",   -- LOAD direction GR10
             -- -- Back to game
-            0860=>x"3000_0003",   -- BRA
+            0860=>x"0000_0000",   -- RSR
             -- ####################################
             -- ## Load Player x to Player 1 or 2 ##
             -- ####################################
@@ -214,13 +214,13 @@ architecture arch of areg is
             0862=>x"9100_03DB",   -- LOAD ypos from PM(0987)
             0863=>x"9300_03DC",   -- LOAD direction from PM(0988)
             -- -- Back to game
-            0864=>x"3000_0005",   -- BRA 
+            0864=>x"3000_0000",   -- RSR 
             -- -- Player 2 
             0865=>x"9400_03DA",   -- LOAD xpos from PM(0986)
             0866=>x"9500_03DB",   -- LOAD ypos from PM(0987)
             0867=>x"9700_03DC",   -- LOAD direction from PM(0988)
             -- -- Back to game
-            0868=>x"3000_0000",   -- BRA
+            0868=>x"0000_0000",   -- RSR
             -- ##################################################
             -- ## Store Player x to Player x in Program Memory ##            
             -- ##################################################
@@ -228,7 +228,7 @@ architecture arch of areg is
             0870=>x"A900_03DB",   -- STORE ypos to PM(0987)
             0871=>x"AA00_03DC",   -- STORE direction to PM(0988)
             -- -- Back to game
-            0872=>x"3000_0004",   -- BRA
+            0872=>x"0000_0000",   -- RSR
 
             -- ##################
             -- ## Draw Players ##
@@ -238,7 +238,7 @@ architecture arch of areg is
             -- -- Player 2
             0874=>x"B400_0000",   -- STOREG write to GPU
             -- Back to Game
-            0875=>x"3000_0006",   -- BRA    
+            0875=>x"0000_0000",   -- RSR    
 
             -- ###############
             -- ## CONSTANTS ##
