@@ -33,7 +33,7 @@ architecture arch of areg is
             -- #########################
             0000=>x"01F0_02BB",		-- Initialize Gameborder/sidebar
             0001=>x"01F0_02EC",		-- Initialize Player ScoreNumbers
-            0002=>x"0300_0002",		-- BRA    49 (Ininity loop.)
+            0002=>x"0300_0002",		-- BRA (Infinity loop.)
             0003=>x"0000_0000",		--
             0004=>x"0000_0000",		--
             0005=>x"0000_0000",		--
@@ -148,9 +148,9 @@ architecture arch of areg is
             -- ## Player Score Numbers ##
             -- ##########################
             0748=>x"0500_003B",   -- WGCR   Enable Two players score, and set to write color to Player 1
-            0749=>x"0A20_0000",   -- STOREG Set player 1 score color
+            0749=>x"0020_0000",   -- WGNUM  Set player 1 score color
             0750=>x"0500_0077",   -- WGCR   Set to write color to Player 2
-            0751=>x"0A50_0000",   -- STOREG Set player 2 score color
+            0751=>x"0050_0000",   -- WGNUM  Set player 2 score color
             0752=>x"0CF0_0000",   -- RSR
             0753=>x"0000_0000",   --
             0754=>x"0000_0000",   --

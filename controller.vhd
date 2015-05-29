@@ -75,7 +75,7 @@ architecture arch of controller is
 		    x"0190_0000", --  
             x"0026_0300", -- 
             x"000B_0300", -- BRA
-		    x"0208_080D", -- BNE
+		        x"0208_0813", -- BNE
             x"0000_0300", -- 
             x"000B_0300", --  
             x"000D_0300", -- WGCR
@@ -115,8 +115,8 @@ begin
             K1 <=   X"0A" when "000000", -- WGNUMS     0
                     X"0B" when "000001", -- JSR        1
                     X"0D" when "000010", -- AND        2
-	    	            X"11" when "000011", -- BRA        3
-			              X"12" when "000100", -- BNE        4
+	    	            X"10" when "000011", -- BRA        3
+			              X"11" when "000100", -- BNE        4
 			              X"14" when "000101", -- WGCR       5		       
                     X"15" when "000110", -- CMP        6
 			              X"17" when "000111", -- INC        7
