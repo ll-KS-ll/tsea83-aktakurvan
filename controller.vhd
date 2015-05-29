@@ -30,10 +30,13 @@ architecture arch of controller is
         signal IR           : std_logic_vector(31 downto 0)     := X"0000_0000";
         signal PC           : std_logic_vector(31 downto 0)     := X"0000_0000";
 
+        -- IR [0000 0000 0000 0000 0000 0000 0000 0000]
+        --     MMOO OOOO GGGG AAAA AAAA AAAA AAAA AAAA   
+
         --Instructions
-        alias OP            : std_logic_vector(3 downto 0)      is IR(31 downto 28);
-        alias GRx           : std_logic_vector(3 downto 0)      is IR(27 downto 24);
-        alias M             : std_logic_vector(3 downto 0)      is IR(23 downto 20);
+        alias M             : std_logic_vector(1 downto 0)      is IR(31 downto 30);
+        alias OP            : std_logic_vector(5 downto 0)      is IR(29 downto 24);
+        alias GRx           : std_logic_vector(3 downto 0)      is IR(23 downto 20);
         alias ADR           : std_logic_vector(19 downto 0)     is IR(19 downto 0); 
 
         --Micro-programcounters and K-nets
@@ -112,29 +115,29 @@ begin
         -- K1 - Go to instruction 
         with OP select
 
-            K1 <=   X"0A" when "0000", -- ADD        0
-                    X"0D" when "0001", -- JSR        1
-                    X"10" when "0010", -- AND        2
-	    	            X"13" when "0011", -- BRA        3
-			              X"14" when "0100", -- BNE        4
-			              X"17" when "0101", -- WGCR       5		       
-                    X"19" when "0110", -- CMP        6
-			              X"1B" when "0111", -- INC        7
-			              X"1E" when "1000", -- DEC        8
-    				        X"21" when "1001", -- LOAD       9
-	    			        X"22" when "1010", -- STORE      A
-		    		        X"23" when "1011", -- STOREG     B
-                    x"29" when "1100", -- RSR        C
-                    x"2A" when "1101", -- OR         D
-                    x"2D" when "1110", -- RGCR       F
-			    	        X"00" when others; -- 
+            K1 <=   X"0A" when "000000", -- ADD        0
+                    X"0D" when "000001", -- JSR        1
+                    X"10" when "000010", -- AND        2
+	    	        X"13" when "000011", -- BRA        3
+			        X"14" when "000100", -- BNE        4
+			        X"17" when "000101", -- WGCR       5		       
+                    X"19" when "000110", -- CMP        6
+			        X"1B" when "000111", -- INC        7
+			        X"1E" when "001000", -- DEC        8
+    				X"21" when "001001", -- LOAD       9
+	    			X"22" when "001010", -- STORE      A
+		    		X"23" when "001011", -- STOREG     B
+                    x"29" when "001100", -- RSR        C
+                    x"2A" when "001101", -- OR         D
+                    x"2D" when "001110", -- RGCR       F
+			    	X"00" when others; -- 
 
 
         -- K2 - Choose adressing mode   
         with M select
-            K2 <=   X"03" when "0000",    -- EA Direct
-                    X"04" when "0001",    -- EA Imidiate
-                    X"05" when "0010",    -- EA Indirect
+            K2 <=   X"03" when "00",    -- EA Direct
+                    X"04" when "01",    -- EA Imidiate
+                    X"05" when "10",    -- EA Indirect
                     X"08" when others;    -- EA Index
 
         -- uPC / SEQ
