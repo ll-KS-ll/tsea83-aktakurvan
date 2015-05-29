@@ -16,6 +16,7 @@ entity cpu is
         clk, rst        : in    std_logic;
         gpu_dbus        : in    std_logic_vector(31 downto 0);
         gpuTakeBus      : out   std_logic_vector(2 downto 0);
+        gpu_tb         : out    std_logic_vector(2 downto 0);
         cpuOut          : out   std_logic_vector(31 downto 0);
         txd             : in    std_logic
         );
@@ -154,7 +155,8 @@ begin
       cpuOut <= cpu_dbus;
       -- Send TB_c out from CPU so GPU can use it.
       gpuTakeBus <= FB_c;
-
+      gpu_tb <= TB_c;
+      
 end architecture;
         
 

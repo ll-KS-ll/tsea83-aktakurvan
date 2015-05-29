@@ -13,6 +13,7 @@ port (
         rxaddress  : in integer;
         ryaddress  : in integer;
         we        : in std_logic;
+        read_access : in std_logic;
         data_i    : in std_logic_vector(3 downto 0);
         data_o    : out std_logic_vector(3 downto 0)
      );
@@ -156,7 +157,11 @@ BEGIN
               when others => ram19(wPos) <= data_i;
             end case;
         end if;
-        rPos  <= rmemoryPos-ram_heigth*rRam;
+        if read_access = '1' then
+          rPos <= memoryPos-ram_heigth*wRam;
+        else
+          rPos  <= rmemoryPos-ram_heigth*rRam;
+        end if;
     end if;
 END PROCESS;
 
