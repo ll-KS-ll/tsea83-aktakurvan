@@ -15,6 +15,7 @@ entity gpu_display_numbers is
   Port  ( clk,rst : in std_logic;
           dbus : in std_logic_vector(31 downto 0);
           FB_o : in std_logic_vector(2 downto 0);
+          control_register : in std_logic_vector(31 downto 0);
           rxaddress  : in integer;
           ryaddress  : in integer;
           output_number : out std_logic;
@@ -24,9 +25,6 @@ end gpu_display_numbers;
 
 architecture arch of gpu_display_numbers is
 
-  -- Select wich numbers to display or none.
-  signal enabled : std_logic := '1';  -- DEBUG: Enable by default
-  signal activated_count : std_logic_vector(1 downto 0) := "00";
   -- Number to currently write to display.
   signal current_selected_number : std_logic_vector(2 downto 0) := "100"; -- bit 2 toggles unselected.  
   signal x_num, y_num : integer := 0; -- Col and row in digit.
@@ -50,9 +48,11 @@ architecture arch of gpu_display_numbers is
   signal number_colors : color_t := (others => x"F");
 
   -- Bus stuff
-  --alias dbus_number : std_logic_vector(6 downto 0) is dbus(6 downto 0);
-  --alias dbus_current_selected_number : std_logic_vector(1 downto 0) is dbus(11 downto 10);
-  --alias dbus_activate_number_code : std_logic_vector(2 downto 0) is dbus(31 downto 29);
+  alias enabled : std_logic is control_register(1); 
+  alias activated_count : std_logic_vector(1 downto 0) is control_register(3 downto 2);
+  alias num_flag : std_logic is control_register(4);
+  alias num_color_flag : std_logic is control_register(5);
+  alias selected_number : std_logic_vector(1 downto 0) is control_register(7 downto 6);
 
   signal bcd : std_logic_vector(11 downto 0) := x"000";
   signal temp : std_logic_vector(7 downto 0) := x"00";
@@ -98,49 +98,33 @@ begin
     if rising_edge(clk) then
       if rst = '1' then
         -- Reset
-        enabled <= '0';
-        activated_count <= "00";
         display_numbers <= (others => (others => '0'));
       elsif FB_o="101" then
-        -- [ewcc --dd dddd ddss]
-        -- e: Enable numbers.
-        -- w: Write, count of visible numbers
-        -- c: Count of numbers visible written if w=1
-        -- d: Data(number) to display
-        -- s: Select number.
-        -- e and w has to be 0 for d to be written.
-
-        -- Toggle activate
-        if dbus(31) = '1' then
-          enabled <= not enabled;
+        if num_flag = '1' then
+          if num_color_flag = '1' then 
+            -- Write color of number
+            number_colors(conv_integer(selected_number)) <= dbus(3 downto 0); 
+          else
+            -- Write number to display.
+            -- Convert binary number to bcd
+            bcd <= x"000";
+            temp <= dbus(9 downto 2);
+            for i in 0 to 7 loop
+              if bcd(3 downto 0) > 4 then
+                bcd(3 downto 0) <= bcd(3 downto 0) + 3;
+              end if;
+  
+              if bcd(7 downto 4) > 4 then
+                bcd(7 downto 4) <= bcd(7 downto 4) + 3;
+              end if;
+  
+              bcd <= bcd(10 downto 0) & temp(7);
+              temp <= temp(6 downto 0) & '0';
+            end loop;
+            -- Write bcd to displayed numbers.
+            display_numbers(conv_integer(selected_number)) <= bcd(7 downto 0);
+          end if;
         end if;
-        
-        -- Set number of visible numbers
-        if dbus(30) = '1' then
-          activated_count <= dbus(29 downto 28);
-        end if;
-
-        -- Write number to display.
-        if dbus(31 downto 30) = "00" then
-          -- Convert binary number to bcd
-          bcd <= x"000";
-          temp <= dbus(9 downto 2);
-          for i in 0 to 7 loop
-            if bcd(3 downto 0) > 4 then
-              bcd(3 downto 0) <= bcd(3 downto 0) + 3;
-            end if;
-
-            if bcd(7 downto 4) > 4 then
-              bcd(7 downto 4) <= bcd(7 downto 4) + 3;
-            end if;
-
-            bcd <= bcd(10 downto 0) & temp(7);
-            temp <= temp(6 downto 0) & '0';
-          end loop;
-          -- Write bcd to displayed numbers.
-          display_numbers(conv_integer(dbus(1 downto 0))) <= bcd(7 downto 0);
-        end if;
-
       end if;
     end if;
   end process;

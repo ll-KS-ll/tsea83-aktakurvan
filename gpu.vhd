@@ -49,6 +49,7 @@ architecture Behavioral of gpu is
           rxaddress  : in integer;
           ryaddress  : in integer;
           we        : in std_logic;
+          read_access : in std_logic;
           data_i    : in std_logic_vector(3 downto 0);
           data_o    : out std_logic_vector(3 downto 0)
           );
@@ -59,6 +60,7 @@ architecture Behavioral of gpu is
       clk, rst : in std_logic;
       dbus : in std_logic_vector(31 downto 0);
       FB_o : in std_logic_vector(2 downto 0);
+      control_register : in std_logic_vector(31 downto 0);
       rxaddress  : in integer;
       ryaddress  : in integer;
       output_number : out std_logic;
@@ -81,17 +83,19 @@ architecture Behavioral of gpu is
   signal output_number : std_logic := '0';
   signal number_pixel : std_logic_vector(3 downto 0) := x"F";
 
-  signal controll_register : std_logic_vector(31 downto 0) := x"0000_0000";
+  -- Control register
+  signal control_register : std_logic_vector(31 downto 0) := "00000000000000000000000000001111";
+  alias we : std_logic is control_register(0);
+  alias num_flag : std_logic is control_register(4);
 
   --RAM
   signal xaddress  : integer := 0;
   signal yaddress  : integer := 0;
   signal rxaddress  : integer := 0;
   signal ryaddress  : integer := 0;
-  signal we        : std_logic := '0';
   signal to_ram    : std_logic_vector(3 downto 0);
   signal from_ram    : std_logic_vector(3 downto 0);
-
+  signal read_access : std_logic := '0';
   -- Memory/Bus
   alias data : std_logic_vector(3 downto 0) is dbus(3 downto 0);
   signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
@@ -121,8 +125,8 @@ begin
 
   -- Select mem or nums.
   with TB_c select
-    gpuOut <= x"0000_000" & from_ram when "100",
-              controll_register when "101",
+    gpuOut <= x"0000_000" & from_ram when "111",
+              control_register when "101",
               (others => 'Z') when others; 
 
 
@@ -186,14 +190,18 @@ begin
     if rising_edge(clk) then
       case FB_c is
         when "100" => -- GPU
-                we <= '1';
-                yaddress <= conv_integer(dbus(11 downto 4));
-                xaddress <= conv_integer(dbus(20 downto 12));
-                to_ram <= data;
+                if num_flag = '0' then
+                  yaddress <= conv_integer(dbus(11 downto 4));
+                  xaddress <= conv_integer(dbus(20 downto 12));
+                  if we = '1' then
+                    to_ram <= data;
+                  else
+                    read_access <= '1';
+                  end if;
+                end if;
         when "101" => -- Control register
-                controll_register <= dbus;
-                we <= '0';
-        when others => we <= '0';
+                control_register <= dbus;
+        when others => read_access <= '0';
       end case;
     end if;
   end process;
@@ -230,6 +238,7 @@ begin
       rxaddress  =>  rxaddress,
       ryaddress  =>  ryaddress,
       we        =>  we,
+      read_access => read_access,
       data_i    =>  to_ram,
       data_o    =>  from_ram
       );
@@ -239,6 +248,7 @@ begin
       rst       => rst,
       dbus      => dbus,
       FB_o      => FB_c,
+      control_register => control_register,
       rxaddress  =>  rxaddress,
       ryaddress  =>  ryaddress,
       output_number => output_number,
