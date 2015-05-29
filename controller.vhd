@@ -96,9 +96,9 @@ architecture arch of controller is
 		    x"02C0_0E00", --
             x"0130_0000", --
             x"0024_0300", --
-            x"0000_0000",
-		    x"0000_0000",
-            x"0000_0000", 
+            x"0208_092B", -- BRE
+		    x"0000_0300", --
+            x"000B_0300", --
             x"0000_0000", x"0000_0000",
 		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
 		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
@@ -151,11 +151,16 @@ begin
                                     SuPC <= uPC+1;
                                     uPC <= uADR;
                         when "0111" => uPC <= SuPC;
+                                    -- Jump if Z=0
                         when "1000" =>
                                     if Z='0' then uPC <= uADR;
                                     else uPC <= uPC+1;
                                     end if;
-                        when "1001" => null; -- Undefined
+                                    -- Jump if Z=1
+                        when "1001" => 
+                                    if Z='1' then uPC <=uADR;
+                                    else uPC <= uPC+1;
+                                    end if;
                         when "1010" => 
                                     if C='1' then uPC <= uADR;
                                     else uPC <= uPC+1;
