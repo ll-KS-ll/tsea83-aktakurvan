@@ -31,15 +31,9 @@ architecture arch of areg is
             -- #########################
             -- ## Main Game functions ##
             -- #########################
-<<<<<<< HEAD
-            0000=>x"1F00_02BB",		-- Initialize Gameborder/sidebar
-            0001=>x"1F00_02EC",		-- Initialize Player ScoreNumbers
-            0002=>x"3000_0002",		-- BRA    49 (Ininity loop.)
-=======
-            0000=>x"01F0_02BC",		-- Initialize Gameborder/sidebar
-            0001=>x"0000_0000",		-- Initialize Player ScoreNumbers
-            0002=>x"0000_0000",		-- 
->>>>>>> 0e099c6314d66d4324354722574edb25351dc5f5
+            0000=>x"01F0_02BB",		-- Initialize Gameborder/sidebar
+            0001=>x"01F0_02EC",		-- Initialize Player ScoreNumbers
+            0002=>x"0300_0002",		-- BRA    49 (Ininity loop.)
             0003=>x"0000_0000",		--
             0004=>x"0000_0000",		--
             0005=>x"0000_0000",		--
@@ -134,12 +128,7 @@ architecture arch of areg is
             0733=>x"0950_03D8",		-- LOAD   ypos
             0734=>x"0960_03F1",		-- LOAD   color
             0735=>x"0970_03D9",		-- LOAD   direction
-            -- -- Return to game
-<<<<<<< HEAD
-            0736=>x"CF00_0000",   -- RSR
-=======
-            0746=>x"0CF0_0000",   -- RSR
->>>>>>> 0e099c6314d66d4324354722574edb25351dc5f5
+            0736=>x"0CF0_0000",   -- RSR
             -- #################
             -- ## Clear board ##
             -- #################
@@ -154,27 +143,15 @@ architecture arch of areg is
             0745=>x"0690_03EB",   -- CMP    yPos to end of GameBoard PM(1003)
             0746=>x"0400_02E1",   -- BNE    to address 737 if end hasnt been reached
             -- Go back to game
-<<<<<<< HEAD
-            0747=>x"CF00_0000",		-- RSR    
+            0747=>x"0CF0_0000",		-- RSR    
             -- ##########################
             -- ## Player Score Numbers ##
             -- ##########################
-            0748=>x"5000_003B",   -- WGCR   Enable Two players score, and set to write color to Player 1
-            0749=>x"A200_0000",   -- STOREG Set player 1 score color
-            0750=>x"5000_0077",   -- WGCR   Set to write color to Player 2
-            0751=>x"A500_0000",   -- STOREG Set player 2 score color
-            0752=>x"CF00_0000",   -- RSR    
-=======
-            0747=>x"0CF0_0000",		-- RSR    Go back to Game
-            -- ##########################
-            -- ## Player Score Numbers ##
-            -- ##########################
-            0748=>x"0500_003B",   -- WGCR   Enable Two players scors, and set to write color to Player 1
-            0749=>x"0000_0000",   -- STOREG Set player 1 score color
-            0750=>x"0000_0000",   -- 
-            0751=>x"0000_0000",   --
-            0752=>x"0000_0000",   --
->>>>>>> 0e099c6314d66d4324354722574edb25351dc5f5
+            0748=>x"0500_003B",   -- WGCR   Enable Two players score, and set to write color to Player 1
+            0749=>x"0A20_0000",   -- STOREG Set player 1 score color
+            0750=>x"0500_0077",   -- WGCR   Set to write color to Player 2
+            0751=>x"0A50_0000",   -- STOREG Set player 2 score color
+            0752=>x"0CF0_0000",   -- RSR
             0753=>x"0000_0000",   --
             0754=>x"0000_0000",   --
             0755=>x"0000_0000",   --
