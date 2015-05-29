@@ -151,11 +151,16 @@ begin
                                     SuPC <= uPC+1;
                                     uPC <= uADR;
                         when "0111" => uPC <= SuPC;
+                                    -- Jump if Z=0
                         when "1000" =>
                                     if Z='0' then uPC <= uADR;
                                     else uPC <= uPC+1;
                                     end if;
-                        when "1001" => null; -- Undefined
+                                    -- Jump if Z=1
+                        when "1001" => 
+                                    if Z='1' then uPC <=uADR;
+                                    else uPC <= uPC+1;
+                                    end if;
                         when "1010" => 
                                     if C='1' then uPC <= uADR;
                                     else uPC <= uPC+1;
