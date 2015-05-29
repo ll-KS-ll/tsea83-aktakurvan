@@ -75,7 +75,7 @@ architecture arch of controller is
 		    x"0190_0000", --  
             x"0026_0300", -- 
             x"000B_0300", -- BRA
-		    x"0208_0816", -- BNE
+		    x"0208_080D", -- BNE
             x"0000_0300", -- 
             x"000B_0300", --  
             x"000D_0300", -- WGCR
