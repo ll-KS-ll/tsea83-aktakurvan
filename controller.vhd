@@ -117,18 +117,18 @@ begin
                     X"0D" when "000010", -- AND        2
 	    	        X"11" when "000011", -- BRA        3
 			        X"12" when "000100", -- BNE        4
-			        X"15" when "000101", -- WGCR       5		       
-                    X"16" when "000110", -- CMP        6
-			        X"18" when "000111", -- INC        7
-			        X"1B" when "001000", -- DEC        8
-    				X"1E" when "001001", -- LOAD       9
-	    			X"1F" when "001010", -- STORE      A
-		    		X"20" when "001011", -- SGPU       B
-                    x"26" when "001100", -- RSR        C
-                    x"27" when "001101", -- OR         D
-                    x"2A" when "001110", -- RGCR       F
-                    x"00" when "001111", -- RGCR       F
-                    X"1E" when others; -- Default to LOAD when not implemented. 
+			        X"14" when "000101", -- WGCR       5		       
+                    X"15" when "000110", -- CMP        6
+			        X"17" when "000111", -- INC        7
+			        X"1A" when "001000", -- DEC        8
+    				X"1D" when "001001", -- LOAD       9
+	    			X"1E" when "001010", -- STORE      A
+		    		X"1F" when "001011", -- SGPU       B
+                    x"25" when "001100", -- RSR        C
+                    x"26" when "001101", -- OR         D
+                    x"29" when "001110", -- RGCR       E
+                    x"00" when "001111",
+                    X"1D" when others; -- Default to LOAD when not implemented. 
 
 
         -- K2 - Choose adressing mode   
