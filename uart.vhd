@@ -36,7 +36,7 @@ architecture Behavioral of uart is
     signal pulsenr : std_logic_vector(3 downto 0) := B"0000"; --current pulse number
     signal clknr : std_logic_vector(9 downto 0) := B"00000_00000"; --current clk number
     signal shiftreg : std_logic_vector(9 downto 0) := B"0_0000_0000_0"; -- 10 bit skiftregister
-    signal tal      : std_logic_vector(7 downto 0) := "0000";
+    signal tal      : std_logic_vector(7 downto 0) := B"0000_0000";
     
     constant ENDCLK : std_logic_vector(9 downto 0) := B"1101100011"; --867
     constant MIDCLK : std_logic_vector(9 downto 0) := B"0110110010"; --434
