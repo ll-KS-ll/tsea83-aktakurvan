@@ -35,7 +35,8 @@ architecture arch of greg is
 	    signal GR4, GR5, GR6, GR7       : std_logic_vector(31 downto 0) := X"0000_0000";
 	    signal GR8, GR9, GR10, GR11     : std_logic_vector(31 downto 0) := X"0000_0000";
         -- GR12-14 is for UART ONLY, 15 is special
-	    signal GR12, GR13, GR14, GR15   : std_logic_vector(31 downto 0) := X"0000_0000";
+	    signal GR12, GR13, GR14         : std_logic_vector(31 downto 0) := X"0000_0000";
+        signal Subroutine               : std_logic_vector(31 downto 0) := X"0000_0000";
         signal uartOut                  : std_logic_vector(7 downto 0);
 
 
@@ -58,7 +59,7 @@ begin
                             GR12    when "1100",
                             GR13    when "1101",
                             GR14    when "1110",
-                            GR15    when others;
+                            Subroutine when others;
 
 
         -- Input
@@ -77,7 +78,7 @@ begin
                     GR9 <= x"0000_0000";
                     GR10 <= x"0000_0000";
                     GR11 <= x"0000_0000";
-                    GR15 <= x"0000_0000";
+                    Subroutine <= x"0000_0000";
                 elsif FB_c="110" then
                     case GRx_c is
                         when "0000" => GR0 <= dbus;
@@ -92,7 +93,7 @@ begin
                         when "1001" => GR9 <= dbus;
                         when "1010" => GR10 <= dbus;
                         when "1011" => GR11 <= dbus;
-                        when others => GR15 <= dbus; -- GR12-14 is only modified by UART (hence they are missing here)
+                        when others => Subroutine <= dbus; -- GR12-14 is only modified by UART (hence they are missing here)
                     end case;
                 end if;  
             end if;       
