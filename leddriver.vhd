@@ -36,6 +36,21 @@ begin
        counter_r <= counter_r + 1;
        case v is -- 1:or släcker 0:or tänder
          when "0000_0000" => segments <= "0000001"; -- 0
+         when "0001_0000" => segments <= "0000001"; -- 0
+         when "0010_0000" => segments <= "0000001"; -- 0
+         when "0011_0000" => segments <= "0000001"; -- 0
+         when "0100_0000" => segments <= "0000001"; -- 0
+         when "0101_0000" => segments <= "0000001"; -- 0
+         when "0110_0000" => segments <= "0000001"; -- 0
+         when "0111_0000" => segments <= "0000001"; -- 0
+         when "1000_0000" => segments <= "0000001"; -- 0
+         when "1001_0000" => segments <= "0000001"; -- 0
+         when "1010_0000" => segments <= "0000001"; -- 0
+         when "1011_0000" => segments <= "0000001"; -- 0
+         when "1100_0000" => segments <= "0000001"; -- 0
+         when "1101_0000" => segments <= "0000001"; -- 0
+         when "1110_0000" => segments <= "0000001"; -- 0
+         when "1111_0000" => segments <= "0000001"; -- 0
          when "0000_0001" => segments <= "1001111"; -- 1
          when "0000_0010" => segments <= "0010010"; -- 2
          when "0000_0011" => segments <= "0000110"; -- 3
