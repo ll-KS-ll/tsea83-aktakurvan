@@ -41,15 +41,15 @@ architecture arch of areg is
             0005=>x"01F0_0369",		-- Draw Players
             0006=>x"01F0_027B",		-- Wait a bit before starting game
             -- One Game cycle
-            0007=>x"09B0_03E9",		-- Set so we do two steps before we set player direction again
+            0007=>x"09B0_03DF",		-- Set so we do three steps before we set player direction again
             0008=>x"0300_000A",		-- Check Collision Player 1 (NOT DONE)
             0009=>x"0000_0000",		-- Check Collision Player 2 (NOT DONE)
             0010=>x"0300_028A",		-- Advance Player 1 one step (Master subrutin! If moved edit Return Jump in subrutin)
             0011=>x"0300_028E",		-- Advance Player 2 one step (Master subrutin! If moved edit Return Jump in subrutin)
             0012=>x"01F0_0369",   -- Draw players
             0013=>x"01F0_0280",		-- GameSpeed control
-            0014=>x"06B0_03EE",		-- CMP  Check if we done two steps
-            0015=>x"08B0_0000",		-- DEC  two step check
+            0014=>x"06B0_03EE",		-- CMP  Check if we done three steps
+            0015=>x"08B0_0000",		-- DEC  three step check
             0016=>x"0400_0008",		-- BNE  0008  If not advance players one more step (SET CORRECT PLACE TO JUMP TO)
             0017=>x"01F0_0258",		-- Read new player 1 direction
             0018=>x"0300_0013",		-- Read new player 2 direction (NOT DONE)
@@ -80,7 +80,7 @@ architecture arch of areg is
             0043=>x"0000_0000",		--
             0044=>x"0000_0000",		--
             0045=>x"0000_0000",		--
-            0046=>x"0000_0000",		--
+            0046=>x"0000_0000",		--0
             0047=>x"0000_0000",		--
             0048=>x"0000_0000",		--
             0049=>x"0300_0031",		-- BRA    49 (Ininity loop.)
@@ -90,9 +90,9 @@ architecture arch of areg is
             -- -- Decide what kind of turn to do.
             0600=>x"06C0_03EE",   -- CMP    Check if GR12 == 0, if so exit function    
             0601=>x"1500_0268",   -- BEQ    Jump to 616 to exit function   
-            0602=>x"06C0_03E0",   -- CMP    Check if GR12 == 1, if so jump to left turn
+            0602=>x"06C0_03DE",   -- CMP    Check if GR12 == 1, if so jump to left turn
             0603=>x"1500_0263",   -- BEQ    Jump to 611 for left turn
-            -- -- Right turn
+            -- 123-- Right turn
             0604=>x"0630_03E4",   -- CMP    If player 1 direction == 7, set to 0.
             0605=>x"1500_0261",   -- BEQ    Jump to 609 
             0606=>x"0730_0000",   -- INC    Else, inc player 1 direction
