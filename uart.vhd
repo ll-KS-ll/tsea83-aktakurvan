@@ -26,7 +26,7 @@ architecture Behavioral of uart is
           rst   : in std_logic;
           seg   : out std_logic_vector(7 downto 0);
           an    : out std_logic_vector(3 downto 0);
-          value : in std_logic_vector(3 downto 0)
+          value : in std_logic_vector(7 downto 0)
           );
     end component;
 
@@ -36,7 +36,7 @@ architecture Behavioral of uart is
     signal pulsenr : std_logic_vector(3 downto 0) := B"0000"; --current pulse number
     signal clknr : std_logic_vector(9 downto 0) := B"00000_00000"; --current clk number
     signal shiftreg : std_logic_vector(9 downto 0) := B"0_0000_0000_0"; -- 10 bit skiftregister
-    signal tal      : std_logic_vector(3 downto 0) := "0000";
+    signal tal      : std_logic_vector(7 downto 0) := "0000";
     
     constant ENDCLK : std_logic_vector(9 downto 0) := B"1101100011"; --867
     constant MIDCLK : std_logic_vector(9 downto 0) := B"0110110010"; --434
@@ -111,7 +111,7 @@ begin
             if rst='1' then
                 uartOut <= (others => '0');
             elsif lp='1' then
-                tal(3 downto 0) <= shiftreg(4 downto 1);
+                tal(7 downto 0) <= shiftreg(8 downto 1);
                 uartOut(7 downto 0) <= shiftreg(8 downto 1); -- set dataregister
             end if;
         end if;
