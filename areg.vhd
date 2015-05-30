@@ -32,7 +32,7 @@ architecture arch of areg is
             -- ## Main Game functions ##
             -- #########################
             -- Initialize Game
-            0000=>x"01F0_02B9",		-- Initialize Gameborder/sidebar
+            0000=>x"01F0_02B8",		-- Initialize Gameborder/sidebar
             0001=>x"01F0_02D8",   -- Initialize players
             0002=>x"01F0_02ED",		-- Initialize Player ScoreNumbers
             -- Start New game
@@ -53,7 +53,7 @@ architecture arch of areg is
             0016=>x"0400_0008",		-- BNE  0008  If not advance players one more step (SET CORRECT PLACE TO JUMP TO)
             0017=>x"01F0_0258",		-- Read new player 1 direction
             0018=>x"0300_0013",		-- Read new player 2 direction (NOT DONE)
-            0019=>x"01F0_02C4",		-- Next Game cycle 0007
+            0019=>x"01F0_02C3",		-- Next Game cycle 0007
             0020=>x"0300_0007",		--
             0021=>x"0000_0000",		--
             0022=>x"0000_0000",		--
@@ -143,40 +143,40 @@ architecture arch of areg is
             -- ## INITIALIZE GAMEBORDER/SIDEBAR ##
             -- ###################################
             -- LOAD SIDEBAR
-            0697=>x"0500_0001",   -- WGCR   Set GPU control register to write to GPU
-            0698=>x"09A0_03F8",		-- LOAD   siderbar color (DarkGreenGrey) from PM(1016) into GR10
-            0699=>x"0990_03EE",   -- LOAD   sidebar ypos start to Gr9 (PM1006)
-            0700=>x"0980_03ED",		-- LOAD   sidebar xpos start to GR8 (PM1005)
-            0701=>x"0B80_0000",		-- STOREG write to GPU
-            0702=>x"0780_0000",		-- INC    xPos
-            0703=>x"0680_03EF",		-- CMP    xPos to end of screen
-            0704=>x"0400_02D0",		-- BNE    to address 720 if screen end hasnt been reached
-            0705=>x"0790_0000",		-- INC    yPos 
-            0706=>x"0690_03EF",		-- CMP    yPos to end of screen
-            0707=>x"0400_02CF",		-- BNE    to address 719 if end has been reached
+            0696=>x"0500_0001",   -- WGCR   Set GPU control register to write to GPU
+            0697=>x"09A0_03F8",		-- LOAD   siderbar color (DarkGreenGrey) from PM(1016) into GR10
+            0698=>x"0990_03EE",   -- LOAD   sidebar ypos start to Gr9 (PM1006)
+            0699=>x"0980_03ED",		-- LOAD   sidebar xpos start to GR8 (PM1005)
+            0700=>x"0B80_0000",		-- STOREG write to GPU
+            0701=>x"0780_0000",		-- INC    xPos
+            0702=>x"0680_03EF",		-- CMP    xPos to end of screen
+            0703=>x"0400_02BC",		-- BNE    to address 700 if screen end hasnt been reached
+            0704=>x"0790_0000",		-- INC    yPos 
+            0705=>x"0690_03EF",		-- CMP    yPos to end of screen
+            0706=>x"0400_02BB",		-- BNE    to address 699 if end has been reached
             -- LOAD BORDER
-            0708=>x"0500_0001",   -- WGCR   Set GPU control register to write to GPU
-            0709=>x"0980_03EE",   -- LOAD   Set ypos to 0	PM(1006)
-            0710=>x"0990_03EE",   -- LOAD   Set xpos to 0	PM(1006)
-            0711=>x"09A0_03F7",		-- LOAD   border color from PM(1015) into GR10
-            0712=>x"0B80_0000",		-- STOREG write to GPU
-            0713=>x"0780_0000",		-- INC    GR8
-            0714=>x"0680_03EC",		-- CMP    GR8 with PM(1004)
-            0715=>x"0400_02BD",		-- BNE    to address 0701
-            0716=>x"0B80_0000",		-- STOREG write to GPU
-            0717=>x"0790_0000",		-- INC    GR9
-            0718=>x"0690_03EC",		-- CMP    GR9 with PM(1004)
-            0719=>x"0400_02C1",		-- BNE    to address 0705
-            0720=>x"0B80_0000",		-- STOREG write to GPU
-            0721=>x"0880_0000",		-- DEC    GR8
-            0722=>x"0680_03EE",		-- CMP    GR8 with PM(1006)
-            0723=>x"0400_02C5",		-- BNE    to address 0709
-            0724=>x"0B80_0000",		-- STOREG write to GPU
-            0725=>x"0890_0000",		-- DEC    GR9
-            0726=>x"0690_03EE",		-- CMP    GR9 with PM(1006)
-            0727=>x"0400_02C9",		-- BNE    to address 713
+            0707=>x"0500_0001",   -- WGCR   Set GPU control register to write to GPU
+            0708=>x"0980_03EE",   -- LOAD   Set ypos to 0	PM(1006)
+            0709=>x"0990_03EE",   -- LOAD   Set xpos to 0	PM(1006)
+            0710=>x"09A0_03F7",		-- LOAD   border color from PM(1015) into GR10
+            0711=>x"0B80_0000",		-- STOREG write to GPU
+            0712=>x"0780_0000",		-- INC    GR8
+            0713=>x"0680_03EC",		-- CMP    GR8 with PM(1004)
+            0714=>x"0400_02C7",		-- BNE    to address 0711
+            0715=>x"0B80_0000",		-- STOREG write to GPU
+            0716=>x"0790_0000",		-- INC    GR9
+            0717=>x"0690_03EC",		-- CMP    GR9 with PM(1004)
+            0718=>x"0400_02CB",		-- BNE    to address 0715
+            0719=>x"0B80_0000",		-- STOREG write to GPU
+            0720=>x"0880_0000",		-- DEC    GR8
+            0721=>x"0680_03EE",		-- CMP    GR8 with PM(1006)
+            0722=>x"0400_02CF",		-- BNE    to address 0719
+            0723=>x"0B80_0000",		-- STOREG write to GPU
+            0724=>x"0890_0000",		-- DEC    GR9
+            0725=>x"0690_03EE",		-- CMP    GR9 with PM(1006)
+            0726=>x"0400_02D3",		-- BNE    to address 0723
             -- -- Back to game
-            0728=>x"0CF0_0000",   -- RSR
+            0727=>x"0CF0_0000",   -- RSR
             -- #############################
             -- ## SET PLAYERS INIT VALUES ##
             -- #############################
@@ -352,7 +352,7 @@ architecture arch of areg is
             0997=>x"0000_0000",   -- Player 1   current Score
             0998=>x"0000_0000",   -- Player 2   current Score
             0999=>x"000B_71B0",   -- GameSpeed          750000
-            1000=>x"0016_E360",		-- GameStart  delay   1500000
+            1000=>x"002D_C6C0",		-- GameStart  delay   1500000
             1001=>x"0000_0001",		-- Constant                 1
             1002=>x"0000_0001",		-- GameBoard  start  x/ypos 1
             1003=>x"0000_00EE",		-- GameBoard  end    x/ypos 238
