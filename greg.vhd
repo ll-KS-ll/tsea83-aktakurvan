@@ -106,19 +106,19 @@ begin
         --Uart To GR12-14
         process(clk) begin
             if rising_edge(clk) then
-                case uartOut is
+                case uartOut(3 downto 0) is
                     -- Player 1
-                    when x"00" => GR12 <= x"0000_0001"; -- Left turn(Q)
-                    when x"01" => GR12 <= x"0000_0000"; -- Stop turn(W)
-                    when x"02" => GR12 <= x"0000_0002"; -- Right turn(E)
+                    when x"1" => GR12 <= x"0000_0001"; -- Left turn(Q)
+                    when x"2" => GR12 <= x"0000_0000"; -- Stop turn(W)
+                    when x"3" => GR12 <= x"0000_0002"; -- Right turn(E)
                     -- Player 2
-                    when x"04" => GR13 <= x"0000_0001"; -- Left turn(I)
-                    when x"05" => GR13 <= x"0000_0000"; -- Stop turn(O)
-                    when x"06" => GR13 <= x"0000_0002"; -- Right turn(P)
+                    when x"4" => GR13 <= x"0000_0001"; -- Left turn(I)
+                    when x"5" => GR13 <= x"0000_0000"; -- Stop turn(O)
+                    when x"6" => GR13 <= x"0000_0002"; -- Right turn(P)
                     -- Player 3 (isn't implemented in the game) 
-                    when x"2A" => GR14 <= x"0000_0001"; -- Left turn(V)
-                    when x"32" => GR14 <= x"0000_0000"; -- Stop turn(B)
-                    when x"31" => GR14 <= x"0000_0002"; -- Right turn(N)
+                    when x"7" => GR14 <= x"0000_0001"; -- Left turn(V)
+                    when x"8" => GR14 <= x"0000_0000"; -- Stop turn(B)
+                    when x"9" => GR14 <= x"0000_0002"; -- Right turn(N)
                     when others => null;
                 end case;
             end if;

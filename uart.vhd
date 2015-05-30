@@ -112,7 +112,7 @@ begin
                 uartOut <= (others => '0');
             elsif lp='1' then
                 tal(3 downto 0) <= shiftreg(4 downto 1);
-                uartOut(7 downto 0) <= shiftreg(8 downto 1); -- set dataregister
+                uartOut(3 downto 0) <= shiftreg(4 downto 1); -- set dataregister
             end if;
         end if;
     end process;
