@@ -99,7 +99,7 @@ begin
       if rst = '1' then
         -- Reset
         display_numbers <= (others => (others => '0'));
-      elsif FB_o="101" then
+      elsif FB_o="100" then
         if num_flag = '1' then
           if num_color_flag = '1' then 
             -- Write color of number

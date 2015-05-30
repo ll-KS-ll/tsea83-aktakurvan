@@ -17,7 +17,9 @@ entity master is
           txd                 : in        std_logic;
           vgaRed, vgaGreen    : out       std_logic_vector (2 downto 0);
           vgaBlue             : out       std_logic_vector (2 downto 1);
-          hsync, vsync        : out       std_logic
+          hsync, vsync        : out       std_logic;
+          seg                 : out       std_logic_vector(7 downto 0);
+          an                  : out       std_logic_vector(3 downto 0)
         );
 end master;
 
@@ -31,7 +33,9 @@ architecture behaviour of master is
           gpuTakeBus     : out    std_logic_vector(2 downto 0);
           gpu_tb         : out    std_logic_vector(2 downto 0);
           cpuOut         : out    std_logic_vector(31 downto 0);
-          txd            : in     std_logic
+          txd            : in     std_logic;
+          seg            : out    std_logic_vector(7 downto 0);
+          an             : out    std_logic_vector(3 downto 0)
          );
   end component;
 --Instantiate GPU component
@@ -63,7 +67,9 @@ begin
       gpuTakeBus  =>  FB_gpu,
       gpu_tb      =>  TB_gpu,
       cpuOut      =>  cpuToGpu,
-      txd         =>  txd
+      txd         =>  txd,
+      seg         =>  seg,
+      an          =>  an
       );
 --Instantiate the GPU component
     comp_gpu : gpu port map (

@@ -121,7 +121,6 @@ architecture arch of controller is
             x"0248_083E", -- BRE        3C
             x"0000_0300", --
             x"000B_0300", --
-            x"0000_0000",
             x"0000_0000"
 		    );
 begin
@@ -149,7 +148,7 @@ begin
                     x"33" when "010010", -- LSL4       12
                     x"36" when "010011", -- LSL8       13
                     x"39" when "010100", -- LSR        14
-                    x"3C" when "010101", -- BRE        15
+                    x"3C" when "010101", -- BEQ        15
                     X"1D" when others; -- Default to LOAD when not implemented. 
 
 

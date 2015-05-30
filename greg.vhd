@@ -18,7 +18,9 @@ entity greg is
             gregOut         : out       std_logic_vector(31 downto 0);
             FB_c            : in        std_logic_vector(2 downto 0);
             GRx_c           : in        std_logic_vector(3 downto 0);
-            txd             : in        std_logic
+            txd             : in        std_logic;
+            seg             : out       std_logic_vector(7 downto 0);
+            an              : out       std_logic_vector(3 downto 0)
             );
 end greg;
 
@@ -27,7 +29,9 @@ architecture arch of greg is
             port(
                 clk, rst    : in    std_logic;
                 txd         : in    std_logic;
-                uartOut     : out   std_logic_vector(7 downto 0)
+                uartOut     : out   std_logic_vector(7 downto 0);
+                seg         : out   std_logic_vector(7 downto 0);
+                an          : out   std_logic_vector(3 downto 0)
                 );
         end component;  
         -- Registers
@@ -103,14 +107,14 @@ begin
             if rising_edge(clk) then
                 case uartOut is
                     -- Player 1
-                    when x"15" => GR12 <= x"0000_0001"; -- Left turn(Q)
-                    when x"1D" => GR12 <= x"0000_0000"; -- Stop turn(W)
-                    when x"24" => GR12 <= x"0000_0002"; -- Right turn(E)
+                    when x"00" => GR12 <= x"0000_0001"; -- Left turn(Q)
+                    when x"01" => GR12 <= x"0000_0000"; -- Stop turn(W)
+                    when x"02" => GR12 <= x"0000_0002"; -- Right turn(E)
                     -- Player 2
-                    when x"43" => GR13 <= x"0000_0001"; -- Left turn(I)
-                    when x"44" => GR13 <= x"0000_0000"; -- Stop turn(O)
-                    when x"4d" => GR13 <= x"0000_0002"; -- Right turn(P)
-                    -- Player 3 
+                    when x"04" => GR13 <= x"0000_0001"; -- Left turn(I)
+                    when x"05" => GR13 <= x"0000_0000"; -- Stop turn(O)
+                    when x"06" => GR13 <= x"0000_0002"; -- Right turn(P)
+                    -- Player 3 (isn't implemented in the game) 
                     when x"2A" => GR14 <= x"0000_0001"; -- Left turn(V)
                     when x"32" => GR14 <= x"0000_0000"; -- Stop turn(B)
                     when x"31" => GR14 <= x"0000_0002"; -- Right turn(N)
@@ -126,7 +130,9 @@ begin
         clk         => clk,
         rst         => rst,
         txd         => txd,
-        uartOut     => uartOut
+        uartOut     => uartOut,
+        seg         => seg,
+        an          => an
         );
 
 end architecture;

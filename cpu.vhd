@@ -18,7 +18,9 @@ entity cpu is
         gpuTakeBus      : out   std_logic_vector(2 downto 0);
         gpu_tb         : out    std_logic_vector(2 downto 0);
         cpuOut          : out   std_logic_vector(31 downto 0);
-        txd             : in    std_logic
+        txd             : in    std_logic;
+        seg             : out   std_logic_vector(7 downto 0);
+        an              : out   std_logic_vector(3 downto 0)
         );
 end cpu;
 
@@ -69,7 +71,9 @@ architecture behaviour of cpu is
             gregOut         : out       std_logic_vector(31 downto 0);
             FB_c            : in        std_logic_vector(2 downto 0);
             GRx_c           : in        std_logic_vector(3 downto 0);
-            txd             : in        std_logic
+            txd             : in        std_logic;
+            seg             : out       std_logic_vector(7 downto 0);
+            an              : out       std_logic_vector(3 downto 0)
           );
     end component;
     -- Sub-Module(Adress Register/Program Memory)
@@ -128,7 +132,9 @@ begin
         gregOut       =>  greg_dbus,
         FB_c          =>  FB_c,
         GRx_c         =>  GRx_c,
-        txd           =>  txd
+        txd           =>  txd,
+        seg           =>  seg,
+        an            =>  an
         );
 --Instantiate and do port map for Areg
   areg_comp : areg port map (
