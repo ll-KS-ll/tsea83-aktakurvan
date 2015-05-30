@@ -143,7 +143,13 @@ begin
                     x"25" when "001100", -- RSR        C
                     x"26" when "001101", -- OR         D
                     x"29" when "001110", -- RGCR       E
-                    x"00" when "001111",
+                    x"2A" when "001111", -- ADD        F
+                    x"2D" when "010000", -- SUB        10
+                    x"30" when "010001", -- LSL        11
+                    x"33" when "010010", -- LSL4       12
+                    x"36" when "010011", -- LSL8       13
+                    x"39" when "010100", -- LSR        14
+                    x"3C" when "010101", -- BRE        15
                     X"1D" when others; -- Default to LOAD when not implemented. 
 
 
