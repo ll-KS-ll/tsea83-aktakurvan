@@ -56,7 +56,7 @@ architecture arch of controller is
 		    alias uADR          : std_logic_vector(7 downto 0)      is uIR(7 downto 0); 
 
         -- uMem
-	    type uMem_t is array(0 to 63) of std_logic_vector(31 downto 0); -- Expand to 32 for simplicity.
+	    type uMem_t is array(0 to 127) of std_logic_vector(31 downto 0); -- Expand to 32 for simplicity.
 	    constant uMem : uMem_t := ( -- Memory for microprograming code.
 		    x"001F_0000", -- Hämtfas
             x"0011_4000", -- 
@@ -121,7 +121,12 @@ architecture arch of controller is
             x"0208_093E", -- BEQ        3C
             x"0000_0300", --
             x"000B_0300", --
-            x"0000_0000"
+            x"0070_0000", -- RGPU       3F
+            x"0300_0E00", --
+            x"0130_0E00", --
+            x"0024_0000", --
+            x"003E_0300", --
+            others => x"0000_0000"
 		    );
 begin
         -- K1 - Go to instruction 
@@ -149,6 +154,7 @@ begin
                     x"36" when "010011", -- LSL8       13
                     x"39" when "010100", -- LSR        14
                     x"3C" when "010101", -- BEQ        15
+                    x"3F" when "010110", -- RGPU       16
                     X"1D" when others; -- Default to LOAD when not implemented. 
 
 
