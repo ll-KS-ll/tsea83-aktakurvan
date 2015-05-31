@@ -40,73 +40,90 @@ architecture arch of areg is
             0004=>x"01F0_02E1",		-- Clear Board
             0005=>x"01F0_0369",		-- Draw Players
             0006=>x"01F0_027B",		-- Wait a bit before starting game
-            -- One Game cycle
-            0007=>x"09B0_03DF",		-- Set so we do three steps before we set player direction again
-            0008=>x"0300_000A",		-- Check Collision Player 1 (NOT DONE)
-            0009=>x"0000_0000",		-- Check Collision Player 2 (NOT DONE)
-            0010=>x"0300_028A",		-- Advance Player 1 one step (Master subrutin! If moved edit Return Jump in subrutin)
-            0011=>x"0300_028E",		-- Advance Player 2 one step (Master subrutin! If moved edit Return Jump in subrutin)
-            0012=>x"01F0_0369",   -- Draw players
-            0013=>x"01F0_0280",		-- GameSpeed control
-            0014=>x"06B0_03EE",		-- CMP  Check if we done three steps
-            0015=>x"08B0_0000",		-- DEC  three step check
-            0016=>x"0400_0008",		-- BNE  0008  If not advance players one more step (SET CORRECT PLACE TO JUMP TO)
-            0017=>x"01F0_0258",		-- Read new player 1 direction
-            0018=>x"0300_0013",		-- Read new player 2 direction (NOT DONE)
-            0019=>x"01F0_02C3",		-- Next Game cycle 0007
+            0007=>x"01F0_027B",		-- Wait a bit before starting game
+            -- One Game cycle     --          
+            0008=>x"01F0_0258",   -- Read and set player 1 direction
+            0009=>x"0300_028A",   -- Advance player 1 one step
+            0010=>x"01F0_0369",   -- Draw players
+            0011=>x"01F0_0280",   -- Game Speed
+            0012=>x"0300_0008",   -- Loop  
+            0013=>x"0000_0000",   --
+            0014=>x"0000_0000",   --
+            0015=>x"0000_0000",   --
+            0016=>x"0000_0000",   -- 
+            0017=>x"0000_0000",   -- 
+            0018=>x"0000_0000",   -- 
+            0019=>x"0000_0000",   --
             0020=>x"0300_0007",		--
             0021=>x"0000_0000",		--
             0022=>x"0000_0000",		--
-            0023=>x"0000_0000",		--
-            0024=>x"0000_0000",		--
-            0025=>x"0000_0000",		--
-            0026=>x"0000_0000",		--
-            0027=>x"0000_0000",		--
-            0028=>x"0000_0000",		--
-            0029=>x"0000_0000",		--
-            0030=>x"0000_0000",		--
-            0031=>x"0000_0000",		--
-            0032=>x"0000_0000",		--
-            0033=>x"0000_0000",		--
-            0034=>x"0000_0000",		--
-            0035=>x"0000_0000",		--
-            0036=>x"0000_0000",		--
-            0037=>x"0000_0000",		--
-            0038=>x"0000_0000",		--
-            0039=>x"0000_0000",		--
-            0040=>x"0000_0000",		--
-            0041=>x"0000_0000",		--
-            0042=>x"0000_0000",		--
-            0043=>x"0000_0000",		--
-            0044=>x"0000_0000",		--
-            0045=>x"0000_0000",		--
-            0046=>x"0000_0000",		--0
-            0047=>x"0000_0000",		--
-            0048=>x"0000_0000",		--
-            0049=>x"0300_0031",		-- BRA    49 (Ininity loop.)
-            -- #################################
-            -- ## Read new player 1 direction ##
-            -- #################################
-            -- -- Decide what kind of turn to do.
-            0600=>x"06C0_03EE",   -- CMP    Check if GR12 == 0, if so exit function    
-            0601=>x"1500_0268",   -- BEQ    Jump to 616 to exit function   
-            0602=>x"06C0_03DE",   -- CMP    Check if GR12 == 1, if so jump to left turn
-            0603=>x"1500_0263",   -- BEQ    Jump to 611 for left turn
-            -- 123-- Right turn
-            0604=>x"0630_03E4",   -- CMP    If player 1 direction == 7, set to 0.
-            0605=>x"1500_0261",   -- BEQ    Jump to 609 
-            0606=>x"0730_0000",   -- INC    Else, inc player 1 direction
-            0608=>x"0CF0_0000",   -- RSR    Back to game
-            0609=>x"0930_03EE",   -- LOAD   Set player 1 direction to 0
-            0610=>x"0CF0_0000",   -- RSR    Back to Game
-            -- -- Left Turn 
-            0611=>x"0630_03EE",   -- CMP    If Player 1 direction == 0, set to 7
-            0612=>x"1500_0267",   -- BEQ    Jump to 615
-            0613=>x"0830_0000",   -- DEC    Else, dec player 1 direction
-            0614=>x"0CF0_0000",   -- RSR    Back to game
-            0615=>x"0930_03E4",   -- LOAD   Set player 1 direction to 7
-            -- -- Back to game
-            0616=>x"0CF0_0000",   -- RSR
+
+            -- ##################################
+            -- ## Collision check for player 1 ##
+            -- ##################################
+            0500=>x"0000_0000",   -- 
+            0501=>x"0000_0000",   -- 
+            0502=>x"0000_0000",   -- 
+            0503=>x"0000_0000",   -- 
+            0504=>x"0000_0000",   -- 
+            0505=>x"0000_0000",   -- 
+            0506=>x"0000_0000",   -- 
+            0507=>x"0000_0000",   -- 
+            0508=>x"0000_0000",   -- 
+            0509=>x"0000_0000",   -- 
+            0510=>x"0000_0000",   -- 
+            0511=>x"0000_0000",   -- 
+            0512=>x"0000_0000",   -- 
+            0513=>x"0000_0000",   -- 
+            0514=>x"0000_0000",   -- 
+            0515=>x"0000_0000",   -- 
+            0516=>x"0000_0000",   -- 
+            0517=>x"0000_0000",   -- 
+            0518=>x"0000_0000",   -- 
+            0519=>x"0000_0000",   -- 
+            0520=>x"0000_0000",   -- 
+
+            -- #####################################
+            -- ## Read and set player 1 direction ##
+            -- #####################################
+            0600=>x"0AC0_03D0",   -- STORE    GR12 to PM(0976)  Store player 1 new turn direction
+            0601=>x"06C0_03D2",   -- CMP      GR12 to PM(0978)  CMP player 1 new turn direction to current turn direction
+            0602=>x"1500_025F",   -- BEQ      Jump to Decide Turn if equal                  
+            0603=>x"0980_03D0",   -- LOAD     PM(0976) to GR8   Load new turn direction to  GR8
+            0604=>x"0A80_03D2",   -- STORE    GR8 to PM(0978)   Store player 1 current turn direction
+            0605=>x"0300_0265",   -- BRA      Jump to 613            
+            -- -- Decide Turn
+            0607=>x"0980_03CD",   -- LOAD     PM(0973) to GR8   Load player 1 turn state   
+            0608=>x"0880_0000",   -- DEC      GR8               DEC it with 1
+            0609=>x"0A80_03CD",   -- STORE    GR8 to PM(0973)   Store player 1 turn state
+            0610=>x"0680_03EE",   -- CMP      GR8 to PM(1006)   Cmp it to 0  
+            0611=>x"1500_0265",   -- BEQ      Turn player and reset turn state (edit direction value)
+            0612=>x"0CF0_0000",   -- RSR      Back to Game
+            -- ## Change direction of player one and reset turn state ##
+            0613=>x"0980_03D2",   -- LOAD     PM(0978) to GR8   Load player 1 current turn direction
+            0614=>x"0680_03E9",   -- CMP      GR8 to PM(1001)   Check if left turn
+            0615=>x"1500_026B",   -- BEQ      Jump to left turn if equal  
+            0616=>x"0680_03DF",   -- CMP      GR8 to PM(0991)   Check if right turn 
+            0617=>x"1500_0271",   -- BEQ      Jump to right turn if equal
+            0618=>x"0300_0277",   -- BRA      Jump to end of function
+            -- -- Left turn
+            0619=>x"0630_03EE",   -- CMP      GR3 to PM(1006)   Check if 0
+            0620=>x"1500_026F",   -- BEQ      Jump to "set to 7"If 0 we need to set to 7
+            0621=>x"0830_0000",   -- DEC      Else just dec direction with one
+            0622=>x"0300_0277",   -- BRA      Jump to end of function
+            0623=>x"0930_03E4",   -- LOAD     PM(0996) to GR3   Set direction to 7      
+            0624=>x"0300_0277",   -- BRA      Jump to end of function
+            -- -- Right turn
+            0625=>x"0630_03E4",   -- CMP      GR3 to PM(0996)   Check if 7
+            0626=>x"1500_0275",   -- BEQ      Jump to "set to 0"If 7 we need to set to 0
+            0627=>x"0730_0000",   -- INC      Else we just inc direction with one
+            0628=>x"0300_0277",   -- BRA      Jump to end of function
+            0629=>x"0930_03EE",   -- LOAD     PM(1006) to GR3   Set direction to 0
+            0630=>x"0300_0277",   -- BRA      Jump to end of function
+            -- -- Reset turn state
+            0631=>x"0980_03CF",   -- LOAD     PM(0975) to GR8   Load turn state variable
+            0632=>x"0A80_03CD",   -- STORE    GR8 to PM(0973)   Store it into player 1s turn state
+            0633=>x"0CF0_0000",   -- RSR      Return from subrutine
             -- ######################
             -- ## Game start delay ##
             -- ######################
@@ -131,7 +148,7 @@ architecture arch of areg is
             0650=>x"01F0_0352",   -- JSR    Set player 1 to player x
             0651=>x"01F0_0320",   -- JSR    Advance Player x one step
             0652=>x"01F0_035D",   -- JSR    Set player x to Player 1
-            0653=>x"0300_000B",   -- BRA    Jump back to game
+            0653=>x"0300_000A",   -- BRA    Jump back to game
             -- ###############################
             -- ## Advance Player 2 one step ##
             -- ###############################
@@ -329,9 +346,16 @@ architecture arch of areg is
             0875=>x"0B40_0000",   -- STOREG write to GPU
             -- Back to Game
             0876=>x"0CF0_0000",   -- RSR    
-            -- ###############
-            -- ## CONSTANTS ##
-            -- ###############
+            -- ###########################
+            -- ## CONSTANTS & Variables ##
+            -- ###########################
+            0973=>x"0000_0003",   -- Player 1   turn    state
+            0974=>x"0000_0003",   -- Player 2   turn    state
+            0975=>x"0000_0003",   -- Turn sharpness variable
+            0976=>x"0000_0000",   -- Player 1   new     turn direction
+            0977=>x"0000_0000",   -- Player 2   new     turn direction
+            0978=>x"0000_0000",   -- Player 1   current turn direction
+            0979=>x"0000_0000",   -- Player 2   current turn direction
             0980=>x"0000_001E",   -- Player 1   start   xpos
             0981=>x"0000_001E",   -- Player 1   start   ypos
             0982=>x"0000_0003",   -- Player 1   start   direction
@@ -351,8 +375,8 @@ architecture arch of areg is
             0996=>x"0000_0007",   -- Direction  NW      7
             0997=>x"0000_0000",   -- Player 1   current Score
             0998=>x"0000_0000",   -- Player 2   current Score
-            0999=>x"000B_71B0",   -- GameSpeed          750000
-            1000=>x"002D_C6C0",		-- GameStart  delay   1500000
+            0999=>x"0007_A120",   -- GameSpeed          500000
+            1000=>x"0098_9680",		-- GameStart  delay   10000000
             1001=>x"0000_0001",		-- Constant                 1
             1002=>x"0000_0001",		-- GameBoard  start  x/ypos 1
             1003=>x"0000_00EE",		-- GameBoard  end    x/ypos 238
