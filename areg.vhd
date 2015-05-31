@@ -43,16 +43,15 @@ architecture arch of areg is
             0007=>x"01F0_027B",		-- Wait a bit before starting game
             -- One Game cycle     --          
             0008=>x"01F0_0258",   -- Read and set player 1 direction
-            0009=>x"0300_028A",   -- Advance player 1 one step
-            0010=>x"01F0_0369",   -- Draw players
-            0011=>x"01F0_0280",   -- Game Speed
-            0012=>x"0300_0008",   -- Loop  
-            0013=>x"0000_0000",   --
-            0014=>x"0000_0000",   --
-            0015=>x"0000_0000",   --
-            0016=>x"0000_0000",   -- 
-            0017=>x"0000_0000",   -- 
-            0018=>x"0000_0000",   -- 
+            0009=>x"0300_01F4",   -- Check collision player 1
+            0010=>x"0300_000C",   -- Read and set player 2 direction
+            0011=>x"0000_0000",   -- Check collision player 2
+            0012=>x"0300_028A",   -- Advance player 1 one step
+            0013=>x"0300_000E",   -- Advance player 2 one step
+            0014=>x"01F0_0369",   -- Draw players
+            0015=>x"01F0_0280",   -- Game Speed
+            0016=>x"0300_0008",   -- Loop  
+            0018=>x"0000_0000",   --
             0019=>x"0000_0000",   --
             0020=>x"0300_0007",		--
             0021=>x"0000_0000",		--
@@ -61,28 +60,42 @@ architecture arch of areg is
             -- ##################################
             -- ## Collision check for player 1 ##
             -- ##################################
-            0500=>x"0000_0000",   -- 
-            0501=>x"0000_0000",   -- 
-            0502=>x"0000_0000",   -- 
-            0503=>x"0000_0000",   -- 
-            0504=>x"0000_0000",   -- 
-            0505=>x"0000_0000",   -- 
-            0506=>x"0000_0000",   -- 
+            0500=>x"0300_024E",   -- BRA    Set player x to player 1 + one step
+            0501=>x"0500_0006",   -- WGCR   Set GPUCR to read from gpu
+            0502=>x"1680_0000",   -- RGPU   Get the color of position ahead of player 1
+            0503=>x"06A0_0000",   -- CMP    If black we can exit collision check
+            0504=>x"1500_000A",   -- BEQ    Exit collision check
+            0505=>x"0300_0251",   -- BRA    INC player 2 points and start new round    NOT DONE!!!!! (PM(0998) holds player 2 score)
+            0506=>x"0000_0000",   --
             0507=>x"0000_0000",   -- 
-            0508=>x"0000_0000",   -- 
+            0508=>x"0000_0000",   --  #### ERROR SOMEWHERE HERE; stops the game from running. ####
             0509=>x"0000_0000",   -- 
             0510=>x"0000_0000",   -- 
             0511=>x"0000_0000",   -- 
-            0512=>x"0000_0000",   -- 
-            0513=>x"0000_0000",   -- 
-            0514=>x"0000_0000",   -- 
+            0512=>x"0000_0000",   -- -- Else, set GPUCR to write to player 2 points
+            0513=>x"0000_0000",   -- -- INC player 2 points
+            0514=>x"0000_0000",   -- -- New round
             0515=>x"0000_0000",   -- 
             0516=>x"0000_0000",   -- 
             0517=>x"0000_0000",   -- 
             0518=>x"0000_0000",   -- 
             0519=>x"0000_0000",   -- 
             0520=>x"0000_0000",   -- 
-
+            -- ## Increase player 2 points by one ##
+            0570=>x"0300_0251",   -- Start new round
+            -- ## Set player x to player 1 + one step ##
+            0590=>x"01F0_0352",   -- Set player 1 to player x
+            0591=>x"01F0_0320",   -- Advance player x one step
+            0592=>x"0300_01F5",   -- Jump back to collision function.
+            -- ###############
+            -- ## New Round ##
+            -- ###############
+            0593=>x"01F0_02D8",   -- Reset player pos/directions
+            0594=>x"01F0_02E1",   -- Clear board
+            0595=>x"01F0_0369",   -- Draw players
+            0596=>x"01F0_027B",   -- Wait 
+            0597=>x"01F0_027B",   -- Wait
+            0598=>x"0300_0008",   -- Jump to game loop
             -- #####################################
             -- ## Read and set player 1 direction ##
             -- #####################################
@@ -98,7 +111,7 @@ architecture arch of areg is
             0609=>x"0A80_03CD",   -- STORE    GR8 to PM(0973)   Store player 1 turn state
             0610=>x"0680_03EE",   -- CMP      GR8 to PM(1006)   Cmp it to 0  
             0611=>x"1500_0265",   -- BEQ      Turn player and reset turn state (edit direction value)
-            0612=>x"0CF0_0000",   -- RSR      Back to Game
+            0612=>x"0CF0_0000",   -- RSR      Return from subrutine
             -- ## Change direction of player one and reset turn state ##
             0613=>x"0980_03D2",   -- LOAD     PM(0978) to GR8   Load player 1 current turn direction
             0614=>x"0680_03E9",   -- CMP      GR8 to PM(1001)   Check if left turn
@@ -148,7 +161,7 @@ architecture arch of areg is
             0650=>x"01F0_0352",   -- JSR    Set player 1 to player x
             0651=>x"01F0_0320",   -- JSR    Advance Player x one step
             0652=>x"01F0_035D",   -- JSR    Set player x to Player 1
-            0653=>x"0300_000A",   -- BRA    Jump back to game
+            0653=>x"0300_000D",   -- BRA    Jump back to game
             -- ###############################
             -- ## Advance Player 2 one step ##
             -- ###############################
