@@ -4,13 +4,14 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- Library for arithmetic functions with Signed or Unsigned values
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
--- ====== Info ======
+-- ====== GPU Information ======
 --
 -- GPU displays at a resolution of 640x480.
 -- The memory contains 320x240 (76800) pixles that are displayed.
 -- These can be writen and read through x and y coordinates.
 --
--- The GPU has three modules. One for it's ram, one for numbers and one for chars. 
+-- The GPU has three modules. One for it's ram, one for numbers and one for chars.
+-- Documentation for the modules exists in respective module.
 --
 -- The GPU uses a Control Register to deciede what to do with the data from the bus.
 -- GCR: [---- ---- ---- ---- ---- -kji hgfe dcba]
@@ -39,6 +40,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 -- y: Y position to write/read to/from.
 -- c: Color to write to memory. 
 --
+--
 
 entity gpu is 
   Port  ( clk,rst           : in std_logic;
@@ -53,6 +55,10 @@ entity gpu is
 end gpu;
 
 architecture Behavioral of gpu is
+  
+  -- ################################
+  -- ## Components for the modules ##
+  -- ################################
   component ram
       port (
           clk       : in std_logic;
@@ -92,11 +98,14 @@ architecture Behavioral of gpu is
         );
   end component;
 
+  -- #########################
+  -- ## Signals for the GPU ##
+  -- #########################
+
   -- VGA
   signal mod_4 : std_logic_vector(1 downto 0) := "00";
   signal xctr,yctr : std_logic_vector(10 downto 0) := "00000000000";
-  signal hs : std_logic := '1';
-  signal vs : std_logic := '1';
+  signal hs, vs : std_logic := '1';
   signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
   --
   alias rad : std_logic_vector(8 downto 0) is yctr(9 downto 1);
@@ -105,28 +114,26 @@ architecture Behavioral of gpu is
   alias ypix : std_logic_vector(1 downto 0) is yctr(1 downto 0);
   
   -- Display number
-  signal output_number : std_logic := '0';
-  signal number_pixel : std_logic_vector(3 downto 0) := x"F";
+  signal output_number : std_logic := '0';                    -- Flag for number overlay.
+  signal number_pixel : std_logic_vector(3 downto 0) := x"F"; -- Data to display from number.
 
   -- Character module
-  signal cxaddress, cyaddress : integer := 0;
-  signal from_char : std_logic_vector(3 downto 0) := x"0";
-  signal write_char : std_logic := '0';
+  signal cxaddress, cyaddress : integer := 0;               -- Chars write addresses.
+  signal from_char : std_logic_vector(3 downto 0) := x"0";  -- Read data from chars module
+  signal write_char : std_logic := '0';                     -- Flag for writing pixels of chars
 
   -- Control register
   signal control_register : std_logic_vector(31 downto 0) := x"0000_0000";
-  alias w : std_logic is control_register(0);
-  alias num_flag : std_logic is control_register(4);
+  alias w : std_logic is control_register(0);         -- Write flag in control register
+  alias num_flag : std_logic is control_register(4);  -- Enable nums module.
 
   --RAM
-  signal xaddress  : integer := 0;
-  signal yaddress  : integer := 0;
-  signal rxaddress  : integer := 0;
-  signal ryaddress  : integer := 0;
-  signal to_ram    : std_logic_vector(3 downto 0);
-  signal from_ram    : std_logic_vector(3 downto 0);
-  signal we        : std_logic := '0';
-  signal read_access : std_logic := '0';
+  signal xaddress, yaddress : integer := 0;       -- GPU read/write addresses
+  signal rxaddress, ryaddress : integer := 0;     -- VGA read addresses
+  signal to_ram : std_logic_vector(3 downto 0);   -- Write data to memory
+  signal from_ram : std_logic_vector(3 downto 0); -- Read data from memory
+  signal we : std_logic := '0';                   -- Write enable in ram
+  signal read_access : std_logic := '0';          -- Flag for read from memory
   
   -- Memory/Bus
   alias data : std_logic_vector(3 downto 0) is dbus(3 downto 0);
@@ -223,18 +230,21 @@ begin
                 if num_flag = '0' then
                   we <= w;
                   if w = '1' then
+                    -- Write
                     to_ram <= data;
                     xaddress <= conv_integer(dbus(20 downto 12));
                     yaddress <= conv_integer(dbus(11 downto 4));
                   else
-                    read_access <= '1';
-                    xaddress <= conv_integer(dbus(16 downto 8));
-                    yaddress <= conv_integer(dbus(7 downto 0));
+                    -- Read
+                    --read_access <= '1';
+                    rxaddress <= conv_integer(dbus(16 downto 8));
+                    ryaddress <= conv_integer(dbus(7 downto 0));
                   end if;
                 end if;
         when "101" => -- Control register
                 control_register <= dbus;
-        when others => 
+        when others => -- Nothing to the GPU
+                -- Char module, write
                 if write_char = '1' then
                   xaddress <= cxaddress;
                   yaddress <= cyaddress;                  
@@ -243,25 +253,36 @@ begin
                 else
                   we <= '0';
                 end if;
-                read_access <= '0';
+                
+                -- Set read address for RAM
+                if conv_integer(rad)<240 then
+                  ryaddress <= conv_integer(rad);
+                end if;
+                if conv_integer(kol)<320 then
+                  rxaddress <= conv_integer(kol);
+                end if;
+                
+                --read_access <= '0';
       end case;
     end if;
   end process;
 
   -- Set read x and y addresses for VGA.
-  process(clk) begin
-    if rising_edge(clk) then
-      if conv_integer(rad)<240 then
-        ryaddress <= conv_integer(rad);
-      end if;
-      if conv_integer(kol)<320 then
-        rxaddress <= conv_integer(kol);
-      end if;
-    end if;
-  end process;
+  --process(clk) begin
+  --  if rising_edge(clk) then
+  --    if FB_c != "100" or w = '0' then
+  --      if conv_integer(rad)<240 then
+  --        ryaddress <= conv_integer(rad);
+  --      end if;
+  --      if conv_integer(kol)<320 then
+  --        rxaddress <= conv_integer(kol);
+  --      end if;
+  --    end if;
+  --  end if;
+  --end process;
 
 
-  -- VGA read from GPU Memory.
+  -- VGA set pixel data
   process(clk) begin
     if rising_edge(clk) then
        if mod_4=3 then
@@ -278,12 +299,16 @@ begin
     end if;
   end process;
 
-  -- Color
+  -- Output pixel to the VGA
   vgaRed(2 downto 0) <= colors(conv_integer(video))(7 downto 5);
   vgaGreen(2 downto 0) <= colors(conv_integer(video))(4 downto 2);
   vgaBlue(2 downto 1) <= colors(conv_integer(video))(1 downto 0);
 
-  -- Modules as components
+
+
+  -- ########################################
+  -- ## Port maps for the module components ##
+  -- ########################################
 
   comp_ram : ram port map (
       clk       =>  clk,

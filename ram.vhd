@@ -1,31 +1,58 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
+-- Library arithmetic functions with Signed or Unsigned values
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+-- ====== RAM module ======
+--
+-- The RAM module is the memory of the GPU.
+--
+-- The VGA and the GPU uses different address signals.  
+-- Both read and write can be done from the RAM. 
+-- Write operations is done synchronously while read access is done asynchronously
+-- so that block RAMs is used. It's possible to write and read simultaneously.
+--
+-- The memory can store 320x240 pixels. One pixel is 4 bits large and is used to
+-- selcet the color to output to the screen.
+--
+-- Internally the memory is devided into block RAMs at a size of 4x4096. This is
+-- because the Nexys 3 only has block RAMs up to this size. There is 20 internal
+-- block RAMs to create one big memory in a size of 4x81920. Not all space is used, 
+-- only 320x240 pixels are displayed. The actually used size is 4x76800.
+--
+-- The internall memory is linear but x,y coordinates is used to address pixels in
+-- the memory.
+--
+-- To write to the memory specify the xadress, yadress and set write enabled.
+-- To read from memory using the GPU, specify the xadress, yadress and set read_access.
+-- To read from memory using the VGA, specify the rxadress, ryadress and disable read_access.
+-- 
 
 entity ram is
 port (
-        clk       : in std_logic;
-        xaddress  : in integer;
-        yaddress  : in integer;
-        rxaddress  : in integer;
-        ryaddress  : in integer;
-        we        : in std_logic;
-        read_access : in std_logic;
-        data_i    : in std_logic_vector(3 downto 0);
-        data_o    : out std_logic_vector(3 downto 0)
+        clk       : in std_logic;   -- System clock 
+        xaddress  : in integer;     -- X address for the GPU
+        yaddress  : in integer;     -- Y address for the GPU
+        rxaddress : in integer;     -- X address for the VGA
+        ryaddress : in integer;     -- Y address for the VGA
+        we        : in std_logic;   -- Write Enable
+        read_access : in std_logic; -- Flag to select to read from VGA or GPU  
+        data_i    : in std_logic_vector(3 downto 0);  -- Data in from the GPU
+        data_o    : out std_logic_vector(3 downto 0)  -- Data out to the GPU
      );
 end ram;
 
 architecture Behavioral of ram is
-
+  
+  -- Constant of the height for one ram block.
   constant ram_heigth : integer := 4096;
 
+  -- Ram layout 
   subtype tmp is std_logic_vector(3 downto 0);
   type ram_t is array (0 to 4095) of tmp;
 
+  -- 20 diffrent ram blocks to create one big storage.
   signal ram0 : ram_t := (others => "0000");
   signal ram1 : ram_t := (others => "0000");
   signal ram2 : ram_t := (others => "0000");
@@ -47,7 +74,7 @@ architecture Behavioral of ram is
   signal ram18 : ram_t := (others => "0000");
   signal ram19 : ram_t := (others => "0000");
 
-
+  -- Use block ram in the FPGA.
   attribute ram_style: string;
   attribute ram_style of ram0 : signal is "block";
   attribute ram_style of ram1 : signal is "block";
@@ -70,21 +97,23 @@ architecture Behavioral of ram is
   attribute ram_style of ram18 : signal is "block";
   attribute ram_style of ram19 : signal is "block";
 
-  signal memoryPos : integer := 0;
-  signal rmemoryPos : integer := 0;
+  -- Linear memory positions to read and write to/from.
+  signal memoryPos : integer := 0;  -- Used by the GPU
+  signal rmemoryPos : integer := 0; -- Used by the VGA, only read
 
-  signal wRam : integer := 0;
-  signal rRam : integer := 0;
-  signal wPos : integer := 0;
-  signal rPos : integer := 0;
+  -- Control signals for the 20 block rams.
+  signal wRam : integer := 0; -- Selects ram to use for the GPU
+  signal rRam : integer := 0; -- Selctts ram to use for the VGA
+  signal wPos : integer := 0; -- Position in a block ram, GPU
+  signal rPos : integer := 0; -- Position in a block ram, VGA
 
 begin
 
-  --rmemoryPos <= ryaddress*320 + rxaddress;
-  
+  -- Convert x,y coordinats to a linear position in the memory. 
   memoryPos <=  yaddress*320 + xaddress;
   rmemoryPos <= ryaddress*320 + rxaddress;
-    
+  
+  -- Select block ram to use for the GPU
   wRam  <=  0 when memoryPos<ram_heigth   else
             1 when memoryPos<ram_heigth*2 else
             2 when memoryPos<ram_heigth*3 else
@@ -106,6 +135,7 @@ begin
             18 when memoryPos<ram_heigth*19 else
             19;
 
+  -- Select block ram to use for the VGA
   rRam  <=  0 when rmemoryPos<ram_heigth   else
             1 when rmemoryPos<ram_heigth*2 else
             2 when rmemoryPos<ram_heigth*3 else
@@ -126,14 +156,17 @@ begin
             17 when rmemoryPos<ram_heigth*18 else
             18 when rmemoryPos<ram_heigth*19 else
             19;
-      
-   wPos  <=  memoryPos-ram_heigth*wRam;
+  
+  -- Convert memory position into positon in the block ram, GPU
+  wPos  <=  memoryPos-ram_heigth*wRam;
 
---process for read and write operation.
+-- Process write operation.
 PROCESS(clk)
 BEGIN
     if(rising_edge(clk)) then
+        -- Write if write enbled.
         if(we='1') then
+            -- Write to the memory
             case wRam is             
               when 0 => ram0(wPos) <= data_i;
               when 1 => ram1(wPos) <= data_i;
@@ -157,14 +190,17 @@ BEGIN
               when others => ram19(wPos) <= data_i;
             end case;
         end if;
-        if read_access = '1' then
-          rPos <= memoryPos-ram_heigth*wRam;
-        else
+
+        -- Select to read from GPU or VGA coordinates.
+        --if read_access = '1' then
+        --  rPos <= memoryPos-ram_heigth*wRam;
+        --else
           rPos  <= rmemoryPos-ram_heigth*rRam;
-        end if;
+        --end if;
     end if;
 END PROCESS;
 
+  -- Read from the memory
   with rRam select             
     data_o <= ram0(rPos) when 0,
               ram1(rPos) when 1,
