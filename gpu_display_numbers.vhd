@@ -40,8 +40,7 @@ architecture arch of gpu_display_numbers is
   
   -- Numbers to display
   type number_t is array(0 to 3) of std_logic_vector(7 downto 0); -- 4 diffrent numbers upto 99.
-  --signal display_numbers : number_t := (others => (others => '0'));
-  signal display_numbers : number_t := (x"34", x"78", x"91", x"65"); -- BCD
+  signal display_numbers : number_t := (others => (others => '0'));
 
   -- Colors of numbers
   type color_t is array(0 to 3) of std_logic_vector(3 downto 0);
