@@ -123,7 +123,7 @@ begin
             -- Write number to display.
             -- Convert binary number to bcd
             bcd <= x"000";
-            temp <= dbus(9 downto 2);
+            temp <= dbus(7 downto 0);
             for i in 0 to 7 loop
               if bcd(3 downto 0) > 4 then
                 bcd(3 downto 0) <= bcd(3 downto 0) + 3;
