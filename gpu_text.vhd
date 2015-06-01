@@ -6,19 +6,25 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 
--- ====== Letters ======
+-- ====== Characters module ======
 --
--- One letter is 5x7 pixlar in size.
+-- The characters module is a helper to write characters to the display.
+-- By sending x and y coordinates, color to use and the character to display
+-- this module writes it to the memory at specified location. This makes it
+-- a lot easier to have text in the program.    
 --
 -- The location to draw a character is set by xpos and ypos. 
 -- After a characters has been draw, xpos is incremented by the width
 -- of one charecter. This makes it possible to write words by just setting
--- a stort possition and then send all the letters to the character module.
+-- a stort possition and then send all the characters to the character module.
 --
 -- It takes 35 clock cycles to draw one character.
--- A memory of size 64 acts as a buffer to compensate for slow write.
--- It's possible to send several charecters in a row and have all written
--- as soon as possible. 
+-- A memory of size 64 acts as a buffer to compensate for slow write times.
+-- Thanx to this buffer it's possible to send several charecters in a row and 
+-- have all written as soon as possible. 
+--
+--
+-- One letter is 5x7 pixlar in size.
 --
 --
 -- Character: Decimal Hex
@@ -56,7 +62,6 @@ architecture arch of gpu_text is
   -- Integers for indexing pixel in letter.
   signal x_char, y_char : integer := 0;
   -- Integers for indexing memory.
-  --signal x_mem, y_mem : integer := 0;
   signal xpos : std_logic_vector(8 downto 0) := '0' & x"00";
   signal ypos : std_logic_vector(7 downto 0) := x"00";
   signal color : std_logic_vector(3 downto 0) := x"0";
@@ -207,16 +212,6 @@ architecture arch of gpu_text is
   																four, five, six, seven,
   																eight, nine, zero, dot,
   																blargh);
-
-  -- DEBUG: Used to draw all letters to the screen.
-  signal cy : integer := 0;
-  signal cx : integer := 0;
-  signal xa : integer := 4;
-  signal ya : integer := 4;
-  signal index : integer := 0;
-  signal flag : std_logic := '0';
-  signal nope : std_logic := '0';
-
 begin
 	
 	process(clk) begin

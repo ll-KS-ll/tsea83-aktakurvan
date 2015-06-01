@@ -1,15 +1,37 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
+-- Library for arithmetic functions with Signed or Unsigned values
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
--- library UNISIM;
--- use UNISIM.VComponents.all;
+-- ====== Numbers module ======
+--
+-- The numbers module is an overlay score board. If enabeled there will be
+-- 1 to 3 visible numbers to the right of the screen. It's possible to select
+-- color of the numbers and write their values. Biggest value that can be displayed
+-- is 99. It's possible to write bigger values than this but there is no support for it.
+-- Funky stuff might happen so don't do that.
+-- This module is useful for games that needs a score board with 1 to 4 scores.  
+--
+--
+-- Every choice for numbers are controlled by the GPU:s control register.
+-- 
+-- For numbers to even be visible the number module has to be enabled.
+-- The amount of visible numbers is selected in the control register. 
+-- To write to numbers the number flag has to be one.
+-- When writing colors to number the number flag and the number color flag has to be one.
+-- To select wich number to write to, set selceted number in the control register. 
+--
+-- One number is 4x7 pixels in size. There is a padding of 2 between digits of a number.
+-- Between numbers there is a padding of 10 pixels. 
+-- Numbers are displayed from 280 to 290 on the x-axis and 32 to 90 on the y-axis.
+--  
+-- 
+-- Numbers are retrived from the bus as binary numbers and then converted to 
+-- binary coded decimals. The reason for this is that numbers are treated as 
+-- two digit numbers and displayed somewhat like a 7-segment display would.
+-- 
 
 entity gpu_display_numbers is 
   Port  ( clk,rst : in std_logic;
@@ -27,32 +49,26 @@ architecture arch of gpu_display_numbers is
 
   -- Number to currently write to display.
   signal current_selected_number : std_logic_vector(2 downto 0) := "100"; -- bit 2 toggles unselected.  
-  signal x_num, y_num : integer := 0; -- Col and row in digit.
-  signal digit : std_logic_vector(3 downto 0); -- One single digit of the number;
-  signal selected_digit : std_logic := '0'; -- Which digit is active/supposed to be drawn.
-
-  --constant x_num_loc : integer := 280; -- Left corner of digits
-  --constant y_num_loc : integer := 32;  -- Left corner of digits
-  --constant w_num : integer := 4;       -- Width of digit
-  --constant h_num : integer := 7;       -- Height of digit
-  --constant py_num : integer := 10;     -- Padding y-led between digits 
-  --constant px_num : integer := 2;      -- Padding x-led between digits 
+  signal x_num, y_num : integer := 0;           -- Col and row in digit.
+  signal digit : std_logic_vector(3 downto 0);  -- One single digit of the number;
+  signal selected_digit : std_logic := '0';     -- Which digit is active/supposed to be drawn.
   
   -- Numbers to display
   type number_t is array(0 to 3) of std_logic_vector(7 downto 0); -- 4 diffrent numbers upto 99.
-  signal display_numbers : number_t := (others => (others => '0'));
+  signal display_numbers : number_t := (others => (others => '0')); -- Storage for the 4 numbers.
 
   -- Colors of numbers
   type color_t is array(0 to 3) of std_logic_vector(3 downto 0);
-  signal number_colors : color_t := (others => x"F");
+  signal number_colors : color_t := (others => x"F"); -- Color of the 4 numbers.
 
-  -- Bus stuff
+  -- Map signals from the control register.
   alias enabled : std_logic is control_register(1); 
   alias activated_count : std_logic_vector(1 downto 0) is control_register(3 downto 2);
   alias num_flag : std_logic is control_register(4);
   alias num_color_flag : std_logic is control_register(5);
   alias selected_number : std_logic_vector(1 downto 0) is control_register(7 downto 6);
 
+  -- Varibles used when converting binary number to binary coded decimal.
   signal bcd : std_logic_vector(11 downto 0) := x"000";
   signal temp : std_logic_vector(7 downto 0) := x"00";
 
@@ -171,6 +187,7 @@ begin
                         activated_count >= current_selected_number(1 downto 0) else
                    '0';  
 
+  -- Set color for number.
   number_pixel <= number_colors(conv_integer(current_selected_number(1 downto 0)));
 
 end architecture; -- arch
