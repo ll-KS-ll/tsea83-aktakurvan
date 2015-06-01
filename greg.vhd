@@ -18,7 +18,9 @@ entity greg is
             gregOut         : out       std_logic_vector(31 downto 0);
             FB_c            : in        std_logic_vector(2 downto 0);
             GRx_c           : in        std_logic_vector(3 downto 0);
-            txd             : in        std_logic
+            txd             : in        std_logic;
+            seg             : out       std_logic_vector(7 downto 0);
+            an              : out       std_logic_vector(3 downto 0)
             );
 end greg;
 
@@ -27,7 +29,9 @@ architecture arch of greg is
             port(
                 clk, rst    : in    std_logic;
                 txd         : in    std_logic;
-                uartOut     : out   std_logic_vector(7 downto 0)
+                uartOut     : out   std_logic_vector(7 downto 0);
+                seg         : out   std_logic_vector(7 downto 0);
+                an          : out   std_logic_vector(3 downto 0)
                 );
         end component;  
         -- Registers
@@ -35,7 +39,8 @@ architecture arch of greg is
 	    signal GR4, GR5, GR6, GR7       : std_logic_vector(31 downto 0) := X"0000_0000";
 	    signal GR8, GR9, GR10, GR11     : std_logic_vector(31 downto 0) := X"0000_0000";
         -- GR12-14 is for UART ONLY, 15 is special
-	    signal GR12, GR13, GR14, GR15   : std_logic_vector(31 downto 0) := X"0000_0000";
+	    signal GR12, GR13, GR14         : std_logic_vector(31 downto 0) := X"0000_0000";
+        signal Subroutine               : std_logic_vector(31 downto 0) := X"0000_0000";
         signal uartOut                  : std_logic_vector(7 downto 0);
 
 
@@ -58,7 +63,7 @@ begin
                             GR12    when "1100",
                             GR13    when "1101",
                             GR14    when "1110",
-                            GR15    when others;
+                            Subroutine when others;
 
 
         -- Input
@@ -77,7 +82,7 @@ begin
                     GR9 <= x"0000_0000";
                     GR10 <= x"0000_0000";
                     GR11 <= x"0000_0000";
-                    GR15 <= x"0000_0000";
+                    Subroutine <= x"0000_0000";
                 elsif FB_c="110" then
                     case GRx_c is
                         when "0000" => GR0 <= dbus;
@@ -92,7 +97,7 @@ begin
                         when "1001" => GR9 <= dbus;
                         when "1010" => GR10 <= dbus;
                         when "1011" => GR11 <= dbus;
-                        when others => GR15 <= dbus; -- GR12-14 is only modified by UART (hence they are missing here)
+                        when others => Subroutine <= dbus; -- GR12-14 is only modified by UART (hence they are missing here)
                     end case;
                 end if;  
             end if;       
@@ -101,19 +106,17 @@ begin
         --Uart To GR12-14
         process(clk) begin
             if rising_edge(clk) then
-                case uartOut is
+                case uartOut(7 downto 0) is
                     -- Player 1
-                    when x"15" => GR12 <= x"0000_0001"; -- Left turn(Q)
-                    when x"1D" => GR12 <= x"0000_0000"; -- Stop turn(W)
-                    when x"24" => GR12 <= x"0000_0002"; -- Right turn(E)
+                    when B"0111_0001" => GR12 <= x"0000_0001"; -- Left turn(Q)
+                    when B"0111_0111" => GR12 <= x"0000_0000"; -- Stop turn(W)
+                    when B"0110_0101" => GR12 <= x"0000_0002"; -- Right turn(E)
                     -- Player 2
-                    when x"43" => GR13 <= x"0000_0001"; -- Left turn(I)
-                    when x"44" => GR13 <= x"0000_0000"; -- Stop turn(O)
-                    when x"4d" => GR13 <= x"0000_0002"; -- Right turn(P)
-                    -- Player 3 
-                    when x"2A" => GR14 <= x"0000_0001"; -- Left turn(V)
-                    when x"32" => GR14 <= x"0000_0000"; -- Stop turn(B)
-                    when x"31" => GR14 <= x"0000_0002"; -- Right turn(N)
+                    when B"01101001" => GR13 <= x"0000_0001"; -- Left turn(I)
+                    when B"01101111" => GR13 <= x"0000_0000"; -- Stop turn(O)
+                    when B"01110000" => GR13 <= x"0000_0002"; -- Right turn(P)
+                    -- Game commands
+                    when B"01100010" => GR14 <= x"0000_0001"; -- Pause
                     when others => null;
                 end case;
             end if;
@@ -126,7 +129,9 @@ begin
         clk         => clk,
         rst         => rst,
         txd         => txd,
-        uartOut     => uartOut
+        uartOut     => uartOut,
+        seg         => seg,
+        an          => an
         );
 
 end architecture;

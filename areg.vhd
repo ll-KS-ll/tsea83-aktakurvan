@@ -31,89 +31,168 @@ architecture arch of areg is
             -- #########################
             -- ## Main Game functions ##
             -- #########################
-            0000=>x"01F0_02BC",		-- Initialize Gameborder/sidebar
-            0001=>x"0000_0000",		-- Initialize Player ScoreNumbers
-            0002=>x"0000_0000",		-- 
-            0003=>x"0000_0000",		--
-            0004=>x"0000_0000",		--
-            0005=>x"0000_0000",		--
-            0006=>x"0000_0000",		--
-            0007=>x"0000_0000",		--
-            0008=>x"0000_0000",		--
-            0009=>x"0000_0000",		--
-            0010=>x"0000_0000",		--
-            0011=>x"0000_0000",		--
-            0012=>x"0000_0000",		--
-            0013=>x"0000_0000",		--
-            0014=>x"0000_0000",		--
-            0015=>x"0000_0000",		--
-            0016=>x"0000_0000",		--
-            0017=>x"0000_0000",		--
-            0018=>x"0000_0000",		--
-            0019=>x"0000_0000",		--
-            0020=>x"0000_0000",		--
+            -- Initialize Game
+            0000=>x"01F0_02B8",		-- Initialize Gameborder/sidebar
+            0001=>x"01F0_02D8",   -- Initialize players
+            0002=>x"01F0_02ED",		-- Initialize Player ScoreNumbers
+            -- Start New game
+            0003=>x"01F0_02F2",   -- Reset playerscores
+            0004=>x"01F0_02E1",		-- Clear Board
+            0005=>x"01F0_0369",		-- Draw Players
+            0006=>x"01F0_027B",		-- Wait a bit before starting game
+            0007=>x"01F0_027B",		-- Wait a bit before starting game
+            -- One Game cycle     --          
+            0008=>x"01F0_0258",   -- Read and set player 1 direction
+            0009=>x"0300_028A",   -- Advance player 1 one step
+            0010=>x"01F0_0369",   -- Draw players
+            0011=>x"01F0_0280",   -- Game Speed
+            0012=>x"0300_0008",   -- Loop  
+            0013=>x"0000_0000",   --
+            0014=>x"0000_0000",   --
+            0015=>x"0000_0000",   --
+            0016=>x"0000_0000",   -- 
+            0017=>x"0000_0000",   -- 
+            0018=>x"0000_0000",   -- 
+            0019=>x"0000_0000",   --
+            0020=>x"0300_0007",		--
             0021=>x"0000_0000",		--
             0022=>x"0000_0000",		--
-            0023=>x"0000_0000",		--
-            0024=>x"0000_0000",		--
-            0025=>x"0000_0000",		--
-            0026=>x"0000_0000",		--
-            0027=>x"0000_0000",		--
-            0028=>x"0000_0000",		--
-            0029=>x"0000_0000",		--
-            0030=>x"0000_0000",		--
-            0031=>x"0000_0000",		--
-            0032=>x"0000_0000",		--
-            0033=>x"0000_0000",		--
-            0034=>x"0000_0000",		--
-            0035=>x"0000_0000",		--
-            0036=>x"0000_0000",		--
-            0037=>x"0000_0000",		--
-            0038=>x"0000_0000",		--
-            0039=>x"0000_0000",		--
-            0040=>x"0000_0000",		--
-            0041=>x"0000_0000",		--
-            0042=>x"0000_0000",		--
-            0043=>x"0000_0000",		--
-            0044=>x"0000_0000",		--
-            0045=>x"0000_0000",		--
-            0046=>x"0000_0000",		--
-            0047=>x"0000_0000",		--
-            0048=>x"0000_0000",		--
-            0049=>x"0300_0031",		-- BRA    49 (Ininity loop.)
+
+            -- ##################################
+            -- ## Collision check for player 1 ##
+            -- ##################################
+            0500=>x"0000_0000",   -- 
+            0501=>x"0000_0000",   -- 
+            0502=>x"0000_0000",   -- 
+            0503=>x"0000_0000",   -- 
+            0504=>x"0000_0000",   -- 
+            0505=>x"0000_0000",   -- 
+            0506=>x"0000_0000",   -- 
+            0507=>x"0000_0000",   -- 
+            0508=>x"0000_0000",   -- 
+            0509=>x"0000_0000",   -- 
+            0510=>x"0000_0000",   -- 
+            0511=>x"0000_0000",   -- 
+            0512=>x"0000_0000",   -- 
+            0513=>x"0000_0000",   -- 
+            0514=>x"0000_0000",   -- 
+            0515=>x"0000_0000",   -- 
+            0516=>x"0000_0000",   -- 
+            0517=>x"0000_0000",   -- 
+            0518=>x"0000_0000",   -- 
+            0519=>x"0000_0000",   -- 
+            0520=>x"0000_0000",   -- 
+
+            -- #####################################
+            -- ## Read and set player 1 direction ##
+            -- #####################################
+            0600=>x"0AC0_03D0",   -- STORE    GR12 to PM(0976)  Store player 1 new turn direction
+            0601=>x"06C0_03D2",   -- CMP      GR12 to PM(0978)  CMP player 1 new turn direction to current turn direction
+            0602=>x"1500_025F",   -- BEQ      Jump to Decide Turn if equal                  
+            0603=>x"0980_03D0",   -- LOAD     PM(0976) to GR8   Load new turn direction to  GR8
+            0604=>x"0A80_03D2",   -- STORE    GR8 to PM(0978)   Store player 1 current turn direction
+            0605=>x"0300_0265",   -- BRA      Jump to 613            
+            -- -- Decide Turn
+            0607=>x"0980_03CD",   -- LOAD     PM(0973) to GR8   Load player 1 turn state   
+            0608=>x"0880_0000",   -- DEC      GR8               DEC it with 1
+            0609=>x"0A80_03CD",   -- STORE    GR8 to PM(0973)   Store player 1 turn state
+            0610=>x"0680_03EE",   -- CMP      GR8 to PM(1006)   Cmp it to 0  
+            0611=>x"1500_0265",   -- BEQ      Turn player and reset turn state (edit direction value)
+            0612=>x"0CF0_0000",   -- RSR      Back to Game
+            -- ## Change direction of player one and reset turn state ##
+            0613=>x"0980_03D2",   -- LOAD     PM(0978) to GR8   Load player 1 current turn direction
+            0614=>x"0680_03E9",   -- CMP      GR8 to PM(1001)   Check if left turn
+            0615=>x"1500_026B",   -- BEQ      Jump to left turn if equal  
+            0616=>x"0680_03DF",   -- CMP      GR8 to PM(0991)   Check if right turn 
+            0617=>x"1500_0271",   -- BEQ      Jump to right turn if equal
+            0618=>x"0300_0277",   -- BRA      Jump to end of function
+            -- -- Left turn
+            0619=>x"0630_03EE",   -- CMP      GR3 to PM(1006)   Check if 0
+            0620=>x"1500_026F",   -- BEQ      Jump to "set to 7"If 0 we need to set to 7
+            0621=>x"0830_0000",   -- DEC      Else just dec direction with one
+            0622=>x"0300_0277",   -- BRA      Jump to end of function
+            0623=>x"0930_03E4",   -- LOAD     PM(0996) to GR3   Set direction to 7      
+            0624=>x"0300_0277",   -- BRA      Jump to end of function
+            -- -- Right turn
+            0625=>x"0630_03E4",   -- CMP      GR3 to PM(0996)   Check if 7
+            0626=>x"1500_0275",   -- BEQ      Jump to "set to 0"If 7 we need to set to 0
+            0627=>x"0730_0000",   -- INC      Else we just inc direction with one
+            0628=>x"0300_0277",   -- BRA      Jump to end of function
+            0629=>x"0930_03EE",   -- LOAD     PM(1006) to GR3   Set direction to 0
+            0630=>x"0300_0277",   -- BRA      Jump to end of function
+            -- -- Reset turn state
+            0631=>x"0980_03CF",   -- LOAD     PM(0975) to GR8   Load turn state variable
+            0632=>x"0A80_03CD",   -- STORE    GR8 to PM(0973)   Store it into player 1s turn state
+            0633=>x"0CF0_0000",   -- RSR      Return from subrutine
+            -- ######################
+            -- ## Game start delay ##
+            -- ######################
+            0635=>x"0980_03E8",   -- LOAD   Gamestart delay => GR8
+            0636=>x"0880_0000",   -- DEC    GR8
+            0637=>x"0680_03EE",   -- CMP    GR8 to 0
+            0638=>x"0400_027C",   -- BNE    Jump back to 636 if not equal
+            -- -- Back to game
+            0639=>x"0CF0_0000",   -- RSR
+            -- ################
+            -- ## Game speed ##
+            -- ################
+            0640=>x"0980_03E7",   -- LOAD   Gamespeed => GR8
+            0641=>x"0880_0000",   -- DEC    GR8
+            0642=>x"0680_03EE",   -- CMP    GR8 to 0
+            0643=>x"0400_0281",   -- BNE    Jump back to 641 if not equal
+            -- -- Back to game
+            0644=>x"0CF0_0000",   -- RSR
+            -- ###############################
+            -- ## Advance Player 1 one step ##
+            -- ###############################
+            0650=>x"01F0_0352",   -- JSR    Set player 1 to player x
+            0651=>x"01F0_0320",   -- JSR    Advance Player x one step
+            0652=>x"01F0_035D",   -- JSR    Set player x to Player 1
+            0653=>x"0300_000A",   -- BRA    Jump back to game
+            -- ###############################
+            -- ## Advance Player 2 one step ##
+            -- ###############################
+            0654=>x"01F0_0356",   -- JSR    Set player 2 to player x
+            0655=>x"01F0_0320",   -- JSR    Advance Player x one step
+            0656=>x"01F0_0361",   -- JSR    Set player x to Player 2
+            0657=>x"0300_000C",   -- BRA    Jump back to game
             -- ###################################
             -- ## INITIALIZE GAMEBORDER/SIDEBAR ##
             -- ###################################
-            -- LOAD BORDER
-            0699=>x"0500_0001",   -- WGCR   Set GPU control register to write to GPU	
-            0700=>x"09A0_03F7",		-- LOAD   border color from PM(1015) into GR10
-            0701=>x"0B80_0000",		-- STOREG write to GPU
-            0702=>x"0780_0000",		-- INC    GR8
-            0703=>x"0680_03EC",		-- CMP    GR8 with PM(1004)
-            0704=>x"0400_02BD",		-- BNE    to address 0701
-            0705=>x"0B80_0000",		-- STOREG write to GPU
-            0706=>x"0790_0000",		-- INC    GR9
-            0707=>x"0690_03EC",		-- CMP    GR9 with PM(1004)
-            0708=>x"0400_02C1",		-- BNE    to address 0705
-            0709=>x"0B80_0000",		-- STOREG write to GPU
-            0710=>x"0880_0000",		-- DEC    GR8
-            0711=>x"0680_03EE",		-- CMP    GR8 with PM(1006)
-            0712=>x"0400_02C5",		-- BNE    to address 0709
-            0713=>x"0B80_0000",		-- STOREG write to GPU
-            0714=>x"0890_0000",		-- DEC    GR9
-            0715=>x"0690_03EE",		-- CMP    GR9 with PM(1006)
-            0716=>x"0400_02C9",		-- BNE    to address 713
             -- LOAD SIDEBAR
-            0717=>x"09A0_03F8",		-- LOAD   siderbar color from PM(1016) into GR10
-            0718=>x"0990_03EE",   -- LOAD   sidebar ypos start to Gr9 (PM1006)
-            0719=>x"0980_03ED",		-- LOAD   sidebar xpos start to GR8 (PM1005)
-            0720=>x"0B80_0000",		-- STOREG write to GPU
-            0721=>x"0780_0000",		-- INC    xPos
-            0722=>x"0680_03EF",		-- CMP    xPos to end of screen
-            0723=>x"0400_02D0",		-- BNE    to address 720 if screen end hasnt been reached
-            0724=>x"0790_0000",		-- INC    yPos 
-            0725=>x"0690_03EF",		-- CMP    yPos to end of screen
-            0726=>x"0400_02CF",		-- BNE    to address 719 if end has been reached
+            0696=>x"0500_0001",   -- WGCR   Set GPU control register to write to GPU
+            0697=>x"09A0_03F8",		-- LOAD   siderbar color (DarkGreenGrey) from PM(1016) into GR10
+            0698=>x"0990_03EE",   -- LOAD   sidebar ypos start to Gr9 (PM1006)
+            0699=>x"0980_03ED",		-- LOAD   sidebar xpos start to GR8 (PM1005)
+            0700=>x"0B80_0000",		-- STOREG write to GPU
+            0701=>x"0780_0000",		-- INC    xPos
+            0702=>x"0680_03EF",		-- CMP    xPos to end of screen
+            0703=>x"0400_02BC",		-- BNE    to address 700 if screen end hasnt been reached
+            0704=>x"0790_0000",		-- INC    yPos 
+            0705=>x"0690_03EF",		-- CMP    yPos to end of screen
+            0706=>x"0400_02BB",		-- BNE    to address 699 if end has been reached
+            -- LOAD BORDER
+            0707=>x"0500_0001",   -- WGCR   Set GPU control register to write to GPU
+            0708=>x"0980_03EE",   -- LOAD   Set ypos to 0	PM(1006)
+            0709=>x"0990_03EE",   -- LOAD   Set xpos to 0	PM(1006)
+            0710=>x"09A0_03F7",		-- LOAD   border color from PM(1015) into GR10
+            0711=>x"0B80_0000",		-- STOREG write to GPU
+            0712=>x"0780_0000",		-- INC    GR8
+            0713=>x"0680_03EC",		-- CMP    GR8 with PM(1004)
+            0714=>x"0400_02C7",		-- BNE    to address 0711
+            0715=>x"0B80_0000",		-- STOREG write to GPU
+            0716=>x"0790_0000",		-- INC    GR9
+            0717=>x"0690_03EC",		-- CMP    GR9 with PM(1004)
+            0718=>x"0400_02CB",		-- BNE    to address 0715
+            0719=>x"0B80_0000",		-- STOREG write to GPU
+            0720=>x"0880_0000",		-- DEC    GR8
+            0721=>x"0680_03EE",		-- CMP    GR8 with PM(1006)
+            0722=>x"0400_02CF",		-- BNE    to address 0719
+            0723=>x"0B80_0000",		-- STOREG write to GPU
+            0724=>x"0890_0000",		-- DEC    GR9
+            0725=>x"0690_03EE",		-- CMP    GR9 with PM(1006)
+            0726=>x"0400_02D3",		-- BNE    to address 0723
+            -- -- Back to game
             0727=>x"0CF0_0000",   -- RSR
             -- #############################
             -- ## SET PLAYERS INIT VALUES ##
@@ -128,42 +207,47 @@ architecture arch of areg is
             0733=>x"0950_03D8",		-- LOAD   ypos
             0734=>x"0960_03F1",		-- LOAD   color
             0735=>x"0970_03D9",		-- LOAD   direction
-            -- -- Return to game
-            0746=>x"0CF0_0000",   -- RSR
+            0736=>x"0CF0_0000",   -- RSR
             -- #################
             -- ## Clear board ##
             -- #################
-            0737=>x"09A0_03F0",		-- LOAD   gameboard color (black) from PM(1008) into GR10
-            0738=>x"0990_03EA",   -- LOAD   gameboard start ypos from PM(1002) into GR9
-            0739=>x"0980_03EA",   -- LOAD   gameboard start xpos from PM(1002) into GR8
-            0740=>x"0B80_0000",   -- STOREG write to GPU
-            0741=>x"0780_0000",   -- INC    xPos
-            0742=>x"0680_03EB",   -- CMP    xPos to end of GameBoard PM(1003)
-            0743=>x"0400_02E2",   -- BNE    to address 738 if end of GameBoard hasnt been reached
-            0744=>x"0790_0000",   -- INC    yPos 
-            0745=>x"0690_03EB",   -- CMP    yPos to end of GameBoard PM(1003)
-            0746=>x"0400_02E1",   -- BNE    to address 737 if end hasnt been reached
-            -- Go back to game
-            0747=>x"0CF0_0000",		-- RSR    Go back to Game
-            -- ##########################
-            -- ## Player Score Numbers ##
-            -- ##########################
-            0748=>x"0500_003B",   -- WGCR   Enable Two players scors, and set to write color to Player 1
-            0749=>x"0000_0000",   -- STOREG Set player 1 score color
-            0750=>x"0000_0000",   -- 
-            0751=>x"0000_0000",   --
-            0752=>x"0000_0000",   --
-            0753=>x"0000_0000",   --
-            0754=>x"0000_0000",   --
-            0755=>x"0000_0000",   --
-            0756=>x"0000_0000",   --
-            0757=>x"0000_0000",   --
-            0758=>x"0000_0000",   --
-            0759=>x"0000_0000",   --
-            0760=>x"0000_0000",   --
-            0761=>x"0000_0000",   --
-            0762=>x"0000_0000",   --
-            0763=>x"0000_0000",   --
+            -- -- Set GPUCR
+            0737=>x"0500_0007",   -- WGCR   Set so CPU writes to GPU
+            -- -- Clear Board
+            0738=>x"09A0_03F0",		-- LOAD   gameboard color (black) from PM(1008) into GR10
+            0739=>x"0990_03EA",   -- LOAD   gameboard start ypos from PM(1002) into GR9
+            0740=>x"0980_03EA",   -- LOAD   gameboard start xpos from PM(1002) into GR8
+            0741=>x"0B80_0000",   -- STOREG write to GPU
+            0742=>x"0780_0000",   -- INC    xPos
+            0743=>x"0680_03EB",   -- CMP    xPos to end of GameBoard PM(1003)
+            0744=>x"0400_02E5",   -- BNE    to address 741 if end of GameBoard hasnt been reached
+            0745=>x"0790_0000",   -- INC    yPos 
+            0746=>x"0690_03EB",   -- CMP    yPos to end of GameBoard PM(1003)
+            0747=>x"0400_02E4",   -- BNE    to address 740 if end hasnt been reached
+            -- -- Back to game
+            0748=>x"0CF0_0000",		-- RSR    
+            -- #################################
+            -- ## Enable Player Score Numbers ##
+            -- #################################
+            0749=>x"0500_003B",   -- WGCR   Enable Two players score, and set to write color to Player 1
+            0750=>x"0020_0000",   -- WGNUM  Set player 1 score color
+            0751=>x"0500_0077",   -- WGCR   Set to write color to Player 2
+            0752=>x"0060_0000",   -- WGNUM  Set player 2 score color
+            -- -- Back to game
+            0753=>x"0CF0_0000",   -- RSR
+            -- #########################
+            -- ## Reset player scores ##
+            -- #########################
+            -- -- Reset score in PM
+            0754=>x"0980_03EE",   -- LOAD   0 => GR8  
+            0755=>x"0A80_03E5",   -- STORE  0 => Player 1   Score
+            0756=>x"0A80_03E6",   -- STORE  0 => Player 2   Score   
+            0757=>x"0500_0017",   -- WGCR   Set to write to Player 1 score on screen
+            0758=>x"0080_0000",   -- WGNUM
+            0759=>x"0500_0057",   -- WGCR   Set to write to Player 2 score on screen
+            0760=>x"0080_0000",   -- WGNUM
+            -- -- Back to game
+            0761=>x"0CF0_0000",   -- RSR
             -- ##################################################
             -- ## Store Player x to Player x in Program Memory ##            
             -- ##################################################
@@ -214,8 +298,8 @@ architecture arch of areg is
             0829=>x"0880_0000",   -- DEC    xpos
             0830=>x"0300_031C",   -- BRA    Store Player x
             -- -- NW
-            0831=>x"0780_0000",   -- DEC    xpos
-            0832=>x"0790_0000",   -- DEC    ypos
+            0831=>x"0880_0000",   -- DEC    xpos
+            0832=>x"0890_0000",   -- DEC    ypos
             0833=>x"0300_031C",   -- BRA    Store Player x
             -- ###################################
             -- ## Set Player 1 or 2 to Player x ##
@@ -254,15 +338,24 @@ architecture arch of areg is
             -- ##################
             -- ## Draw Players ##
             -- ##################
+            -- -- Set GPUCR
+            0873=>x"0500_0007",   -- WGCR   Set so CPU writes to GPU
             -- -- Player 1
-            0873=>x"0B00_0000",   -- STOREG write to GPU
+            0874=>x"0B00_0000",   -- STOREG write to GPU
             -- -- Player 2
-            0874=>x"0B40_0000",   -- STOREG write to GPU
+            0875=>x"0B40_0000",   -- STOREG write to GPU
             -- Back to Game
-            0875=>x"0CF0_0000",   -- RSR    
-            -- ###############
-            -- ## CONSTANTS ##
-            -- ###############
+            0876=>x"0CF0_0000",   -- RSR    
+            -- ###########################
+            -- ## CONSTANTS & Variables ##
+            -- ###########################
+            0973=>x"0000_0003",   -- Player 1   turn    state
+            0974=>x"0000_0003",   -- Player 2   turn    state
+            0975=>x"0000_0003",   -- Turn sharpness variable
+            0976=>x"0000_0000",   -- Player 1   new     turn direction
+            0977=>x"0000_0000",   -- Player 2   new     turn direction
+            0978=>x"0000_0000",   -- Player 1   current turn direction
+            0979=>x"0000_0000",   -- Player 2   current turn direction
             0980=>x"0000_001E",   -- Player 1   start   xpos
             0981=>x"0000_001E",   -- Player 1   start   ypos
             0982=>x"0000_0003",   -- Player 1   start   direction
@@ -280,11 +373,11 @@ architecture arch of areg is
             0994=>x"0000_0005",   -- Direction  SW      5
             0995=>x"0000_0006",   -- Direction  W       6
             0996=>x"0000_0007",   -- Direction  NW      7
-            0997=>x"0000_0000",   --
-            0998=>x"0000_0000",   --           
-            0999=>x"0000_0000",   --
-            1000=>x"0000_0000",		-- 
-            1001=>x"0000_0000",		-- 
+            0997=>x"0000_0000",   -- Player 1   current Score
+            0998=>x"0000_0000",   -- Player 2   current Score
+            0999=>x"0007_A120",   -- GameSpeed          500000
+            1000=>x"0098_9680",		-- GameStart  delay   10000000
+            1001=>x"0000_0001",		-- Constant                 1
             1002=>x"0000_0001",		-- GameBoard  start  x/ypos 1
             1003=>x"0000_00EE",		-- GameBoard  end    x/ypos 238
             1004=>x"0000_00EF",		-- GameBorder W/H    x/ypos 239

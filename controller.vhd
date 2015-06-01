@@ -56,7 +56,7 @@ architecture arch of controller is
 		    alias uADR          : std_logic_vector(7 downto 0)      is uIR(7 downto 0); 
 
         -- uMem
-	    type uMem_t is array(0 to 63) of std_logic_vector(31 downto 0); -- Expand to 32 for simplicity.
+	    type uMem_t is array(0 to 127) of std_logic_vector(31 downto 0); -- Expand to 32 for simplicity.
 	    constant uMem : uMem_t := ( -- Memory for microprograming code.
 		    x"001F_0000", -- Hämtfas
             x"0011_4000", -- 
@@ -68,67 +68,95 @@ architecture arch of controller is
             x"0048_0000", --
             x"0230_8000", -- EA Indexed (Fel, väljer Gr3) 
             x"0027_0100", -- 
-            x"0034_0300", -- WGNUMS
-            x"001E_0000", -- JSR
-		    x"000B_0300", -- 
-            x"001E_0000", -- JSR
+            x"0034_0300", -- WGNUMS     0A
+            x"001E_0000", -- JSR        0B
             x"000B_0300", -- 
-            x"0070_0000", -- AND
+            x"0070_0000", -- AND        0D
 		    x"0190_0000", --  
             x"0026_0300", -- 
-            x"000B_0300", -- BRA
-		    x"0208_0816", -- BNE
+            x"000B_0300", -- BRA        10
+		    x"0208_0813", -- BNE        11
             x"0000_0300", -- 
             x"000B_0300", --  
-            x"000D_0300", -- WGCR
-            x"0070_0000", -- CMP
+            x"000D_0300", -- WGCR       14
+            x"0070_0000", -- CMP        15
             x"0150_0300", -- 
-            x"0070_0000", -- INC
+            x"0070_0000", -- INC        17
             x"0280_0000", --  
             x"0026_0300", -- 
-		    x"0070_0000", -- DEC
+		    x"0070_0000", -- DEC        1A
             x"03A8_0000", -- 
             x"0026_0300", -- 
-            x"0016_0300", -- LOAD
-		    x"0032_0300", -- STORE
-            x"0070_0000", -- SGPU
+            x"0016_0300", -- LOAD       1D
+		    x"0032_0300", -- STORE      1E
+            x"0070_0000", -- SGPU       1F
             x"0300_0E00", -- 
             x"0130_0000", --
 		    x"02C0_0E00", --
             x"0130_0000", --
             x"0024_0300", --
-            x"0033_0300", -- RSR
-            x"0070_0000", -- OR 
+            x"0033_0300", -- RSR        25
+            x"0070_0000", -- OR         26
             x"01D0_0000", --
 		    x"0026_0300", -- 
-            x"002E_0300", -- RGCR
-            x"0000_0000", 
-            x"0000_0000",
-		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
-		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
-		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000",
-		    x"0000_0000", x"0000_0000", x"0000_0000", x"0000_0000"
+            x"002E_0300", -- RGCR       29
+            x"0070_0000", -- ADD        2A
+            x"0110_0000", --
+		    x"0026_0300", --
+            x"0070_0000", -- SUB        2D
+            x"0150_0000", --
+            x"0026_0300", --
+		    x"0070_0000", -- LSL        30 
+            x"0240_0000", --
+            x"0026_0300", --
+            x"0070_0000", -- LSL 4      33
+		    x"02C0_0000", --
+            x"0026_0300", --
+            x"0070_0000", -- LSL 8      36         
+            x"0300_0000", --
+		    x"0026_0300", -- 
+            x"0070_0000", -- LSR        39
+            x"0340_0000", --
+            x"0026_0300", --
+            x"0208_093E", -- BEQ        3C
+            x"0000_0300", --
+            x"000B_0300", --
+            x"0070_0000", -- RGPU       3F
+            x"0300_0E00", --
+            x"0130_0E00", --
+            x"0024_0000", --
+            x"003E_0300", --
+            others => x"0000_0000"
 		    );
 begin
         -- K1 - Go to instruction 
         with OP select
+
             K1 <=   X"0A" when "000000", -- WGNUMS     0
                     X"0B" when "000001", -- JSR        1
                     X"0D" when "000010", -- AND        2
-	    	        X"11" when "000011", -- BRA        3
-			        X"12" when "000100", -- BNE        4
-			        X"15" when "000101", -- WGCR       5		       
-                    X"16" when "000110", -- CMP        6
-			        X"18" when "000111", -- INC        7
-			        X"1B" when "001000", -- DEC        8
-    				X"1E" when "001001", -- LOAD       9
-	    			X"1F" when "001010", -- STORE      A
-		    		X"20" when "001011", -- SGPU       B
-                    x"26" when "001100", -- RSR        C
-                    x"27" when "001101", -- OR         D
-                    x"2A" when "001110", -- RGCR       F
-                    x"00" when "001111", -- RGCR       F
-                    X"1E" when others; -- Default to LOAD when not implemented. 
+	    	            X"10" when "000011", -- BRA        3
+			              X"11" when "000100", -- BNE        4
+			              X"14" when "000101", -- WGCR       5		       
+                    X"15" when "000110", -- CMP        6
+			              X"17" when "000111", -- INC        7
+			              X"1A" when "001000", -- DEC        8
+    				        X"1D" when "001001", -- LOAD       9
+	    			        X"1E" when "001010", -- STORE      A
+		    		        X"1F" when "001011", -- SGPU       B
+                    x"25" when "001100", -- RSR        C
+                    x"26" when "001101", -- OR         D
+                    x"29" when "001110", -- RGCR       E
+                    x"2A" when "001111", -- ADD        F
+                    x"2D" when "010000", -- SUB        10
+                    x"30" when "010001", -- LSL        11
+                    x"33" when "010010", -- LSL4       12
+                    x"36" when "010011", -- LSL8       13
+                    x"39" when "010100", -- LSR        14
+                    x"3C" when "010101", -- BEQ        15
+                    x"3F" when "010110", -- RGPU       16
+                    X"1D" when others; -- Default to LOAD when not implemented. 
+
 
         -- K2 - Choose adressing mode   
         with M select
@@ -153,19 +181,19 @@ begin
                                     if Z='0' then uPC <= uADR;
                                     else uPC <= uPC+1;
                                     end if;
-                        when "0101" => uPC <= uADR;
+                        when "0101" => 
+                                    uPC <= uADR;
                         when "0110" => 
                                     SuPC <= uPC+1;
                                     uPC <= uADR;
-                        when "0111" => uPC <= SuPC;
-                                    -- Jump if Z=0
+                        when "0111" => 
+                                    uPC <= SuPC;                                    
                         when "1000" =>
-                                    if Z='0' then uPC <= uADR;
+                                    if Z='0' then uPC <= uADR; -- Jump if Z=0
                                     else uPC <= uPC+1;
                                     end if;
-                                    -- Jump if Z=1
                         when "1001" => 
-                                    if Z='1' then uPC <=uADR;
+                                    if Z='1' then uPC <=uADR; -- Jump if Z=1
                                     else uPC <= uPC+1;
                                     end if;
                         when "1010" => 
