@@ -43,14 +43,15 @@ architecture arch of areg is
             0007=>x"01F0_027B",		-- Wait a bit before starting game
             -- One Game cycle     --          
             0008=>x"01F0_0258",   -- Read and set player 1 direction
-            0009=>x"0300_01F4",   -- Check collision player 1
-            0010=>x"0300_000C",   -- Read and set player 2 direction
-            0011=>x"0000_0000",   -- Check collision player 2
+            0009=>x"0300_000A",   -- Check collision player 1
+            0010=>x"01F0_0212",   -- Read and set player 2 direction
+            0011=>x"0300_000C",   -- Check collision player 2
             0012=>x"0300_028A",   -- Advance player 1 one step
-            0013=>x"0300_000E",   -- Advance player 2 one step
-            0014=>x"01F0_0369",   -- Draw players
-            0015=>x"01F0_0280",   -- Game Speed
-            0016=>x"0300_0008",   -- Loop  
+            0013=>x"0300_028E",   -- Advance player 2 one step
+            0014=>x"01F0_0292",   -- Check if its time to do holes for the two players, if so do it.
+            0015=>x"01F0_0369",   -- Draw players
+            0016=>x"01F0_0280",   -- Game Speed
+            0017=>x"0300_0008",   -- Loop  
             0018=>x"0000_0000",   --
             0019=>x"0000_0000",   --
             0020=>x"0300_0007",		--
@@ -65,7 +66,7 @@ architecture arch of areg is
             0502=>x"1680_0000",   -- RGPU   Get the color of position ahead of player 1
             0503=>x"06A0_0000",   -- CMP    If black we can exit collision check
             0504=>x"1500_000A",   -- BEQ    Exit collision check
-            0505=>x"0300_0251",   -- BRA    INC player 2 points and start new round    NOT DONE!!!!! (PM(0998) holds player 2 score)
+            0505=>x"0300_023A",   -- BRA    INC player 2 points and start new round    NOT DONE!!!!! (PM(0998) holds player 2 score)
             0506=>x"0000_0000",   --
             0507=>x"0000_0000",   -- 
             0508=>x"0000_0000",   --  #### ERROR SOMEWHERE HERE; stops the game from running. ####
@@ -81,6 +82,49 @@ architecture arch of areg is
             0518=>x"0000_0000",   -- 
             0519=>x"0000_0000",   -- 
             0520=>x"0000_0000",   -- 
+            
+            -- #####################################
+            -- ## Read and set player 2 direction ##
+            -- #####################################
+            0530=>x"0AD0_03D1",   -- STORE    GR13 to PM(0977)  Store player 2 new turn direction
+            0531=>x"06D0_03D3",   -- CMP      GR13 to PM(0979)  CMP player 2 new turn direction to current turn direction
+            0532=>x"1500_0218",   -- BEQ      Jump to Decide Turn if equal                  
+            0533=>x"0980_03D1",   -- LOAD     PM(0977) to GR8   Load new turn direction to  GR8
+            0534=>x"0A80_03D3",   -- STORE    GR8 to PM(0979)   Store player 2 current turn direction
+            0535=>x"0300_021E",   -- BRA      Jump to 542           
+            -- -- Decide Turn
+            0536=>x"0980_03CE",   -- LOAD     PM(0974) to GR8   Load player 2 turn state   
+            0537=>x"0880_0000",   -- DEC      GR8               DEC it with 1
+            0538=>x"0A80_03CE",   -- STORE    GR8 to PM(0974)   Store player 2 turn state
+            0539=>x"0680_03EE",   -- CMP      GR8 to PM(1006)   Cmp it to 0  
+            0540=>x"1500_021E",   -- BEQ      Turn player and reset turn state (edit direction value)
+            0541=>x"0CF0_0000",   -- RSR      Return from subrutine
+            -- ## Change direction of player two and reset turn state ##
+            0542=>x"0980_03D3",   -- LOAD     PM(0979) to GR8   Load player 2 current turn direction
+            0543=>x"0680_03E9",   -- CMP      GR8 to PM(1001)   Check if left turn
+            0544=>x"1500_0224",   -- BEQ      Jump to left turn if equal  
+            0545=>x"0680_03DF",   -- CMP      GR8 to PM(0991)   Check if right turn 
+            0546=>x"1500_022A",   -- BEQ      Jump to right turn if equal
+            0547=>x"0300_0230",   -- BRA      Jump to end of function
+            -- -- Left turn
+            0548=>x"0670_03EE",   -- CMP      GR7 to PM(1006)   Check if 0
+            0549=>x"1500_0228",   -- BEQ      Jump to "set to 7"If 0 we need to set to 7
+            0550=>x"0870_0000",   -- DEC      Else just dec direction with one
+            0551=>x"0300_0230",   -- BRA      Jump to end of function
+            0552=>x"0970_03E4",   -- LOAD     PM(0996) to GR7   Set direction to 7      
+            0553=>x"0300_0230",   -- BRA      Jump to end of function
+            -- -- Right turn
+            0554=>x"0670_03E4",   -- CMP      GR7 to PM(0996)   Check if 7
+            0555=>x"1500_022E",   -- BEQ      Jump to "set to 0"If 7 we need to set to 0
+            0556=>x"0770_0000",   -- INC      Else we just inc direction with one
+            0557=>x"0300_0230",   -- BRA      Jump to end of function
+            0558=>x"0970_03EE",   -- LOAD     PM(1006) to GR7   Set direction to 0
+            0559=>x"0300_0230",   -- BRA      Jump to end of function
+            -- -- Reset turn state
+            0560=>x"0980_03CF",   -- LOAD     PM(0975) to GR8   Load turn state variable
+            0561=>x"0A80_03CE",   -- STORE    GR8 to PM(0974)   Store it into player 2s turn state
+            0562=>x"0CF0_0000",   -- RSR      Return from subrutine  
+
             -- ## Increase player 2 points by one ##
             0570=>x"0300_0251",   -- Start new round
             -- ## Set player x to player 1 + one step ##
@@ -107,10 +151,10 @@ architecture arch of areg is
             0605=>x"0300_0265",   -- BRA      Jump to 613            
             -- -- Decide Turn
             0607=>x"0980_03CD",   -- LOAD     PM(0973) to GR8   Load player 1 turn state   
-            0608=>x"0880_0000",   -- DEC      GR8               DEC it with 1
-            0609=>x"0A80_03CD",   -- STORE    GR8 to PM(0973)   Store player 1 turn state
-            0610=>x"0680_03EE",   -- CMP      GR8 to PM(1006)   Cmp it to 0  
-            0611=>x"1500_0265",   -- BEQ      Turn player and reset turn state (edit direction value)
+            0608=>x"0680_03EE",   -- CMP      GR8 to PM(1006)   Cmp it to 0  
+            0609=>x"1500_0265",   -- BEQ      Turn player and reset turn state (edit direction value)
+            0610=>x"0880_0000",   -- DEC      GR8               DEC it with 1
+            0611=>x"0A80_03CD",   -- STORE    GR8 to PM(0973)   Store player 1 turn state
             0612=>x"0CF0_0000",   -- RSR      Return from subrutine
             -- ## Change direction of player one and reset turn state ##
             0613=>x"0980_03D2",   -- LOAD     PM(0978) to GR8   Load player 1 current turn direction
@@ -168,7 +212,37 @@ architecture arch of areg is
             0654=>x"01F0_0356",   -- JSR    Set player 2 to player x
             0655=>x"01F0_0320",   -- JSR    Advance Player x one step
             0656=>x"01F0_0361",   -- JSR    Set player x to Player 2
-            0657=>x"0300_000C",   -- BRA    Jump back to game
+            0657=>x"0300_000E",   -- BRA    Jump back to game
+            -- ############################
+            -- ## Do holes in the snakes ##
+            -- ############################
+            -- -- Player 1
+            0658=>x"0980_03CB",   -- LOAD   PM(0971) to GR8   Load player 1 steps left to hole       
+            0659=>x"0680_03EE",   -- CMP    GR8 to PM(1006)   Check if zero
+            0660=>x"1500_029B",   -- BEQ    Jump to "Im a hole" if true
+            0661=>x"0880_0000",   -- DEC    GR8               Dec it with one otherwise
+            0662=>x"0A80_03CB",   -- STORE  GR8 to PM(0971)   Store it back to steps left to hole
+            -- -- Player 2
+            0663=>x"0CF0_0000",   -- Return to game (player 2 holes not active yet)
+            0664=>x"0000_0000",   --
+            0665=>x"0000_0000",   --
+            0666=>x"0000_0000",   --
+            -- ## Im a hole ##
+            -- -- Player 1
+            0667=>x"0980_03C8",   -- LOAD   PM(0968) to GR8   Load player 1 steps as hole left
+            0668=>x"0680_03EE",   -- CMP    GR8 to PM(1006)   Check if zero
+            0669=>x"1500_02A2",   -- BEQ    Jump to reset player to normal if true
+            0670=>x"0880_0000",   -- DEC    GR8               Dec steps left as hole by 1
+            0671=>x"0A80_03C8",   -- STORE  GR8 to PM(0968)   Store it back into PM
+            0672=>x"0920_03F0",   -- LOAD   PM(1008) to GR2   Set player 1 color to black
+            0673=>x"0300_0297",   -- BRA    Jump to player 2 check
+            -- -- -- ## Reset player 1 ##
+            0674=>x"0920_03F2",   -- LOAD   PM(1010) to GR2   Set player 1 color to normal again
+            0675=>x"0980_03CA",   -- LOAD   PM(0970) to GR8   Load steps left to next hole to GR8
+            0676=>x"0A80_03CB",   -- STORE  GR8 to PM(0971)   Store it to player 1 steps left to next hole
+            0677=>x"0980_03C7",   -- LOAD   PM(0967) to GR8   Load steps as hole to gr8
+            0678=>x"0A80_03C8",   -- STORE  GR8 to PM(0968)   Store it to players steps as hole
+            0679=>x"0300_0297",   -- BRA    Jump to player 2 check
             -- ###################################
             -- ## INITIALIZE GAMEBORDER/SIDEBAR ##
             -- ###################################
@@ -362,6 +436,12 @@ architecture arch of areg is
             -- ###########################
             -- ## CONSTANTS & Variables ##
             -- ###########################
+            0967=>x"0000_0002",   -- Gap Wideness
+            0968=>x"0000_0000",   -- Player 1   gap     state           
+            0969=>x"0000_0000",   -- Player 2   gap     state
+            0970=>x"0000_0023",   -- Distance Between holes
+            0971=>x"0000_000D",   -- Player 1   hole    steps left to hole-time
+            0972=>x"0000_0008",   -- Player 2   hole    steps left to hole-time
             0973=>x"0000_0003",   -- Player 1   turn    state
             0974=>x"0000_0003",   -- Player 2   turn    state
             0975=>x"0000_0003",   -- Turn sharpness variable
@@ -388,7 +468,7 @@ architecture arch of areg is
             0996=>x"0000_0007",   -- Direction  NW      7
             0997=>x"0000_0000",   -- Player 1   current Score
             0998=>x"0000_0000",   -- Player 2   current Score
-            0999=>x"0007_A120",   -- GameSpeed          500000
+            0999=>x"0006_1A80",   -- GameSpeed          500000
             1000=>x"0098_9680",		-- GameStart  delay   10000000
             1001=>x"0000_0001",		-- Constant                 1
             1002=>x"0000_0001",		-- GameBoard  start  x/ypos 1
