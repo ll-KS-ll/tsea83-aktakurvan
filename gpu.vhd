@@ -1,15 +1,44 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
+-- Library for arithmetic functions with Signed or Unsigned values
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
---use IEEE.STD_LOGIC_NUMERIC.ALL;
---use IEEE.STD_LOGIC_ARITH.ALL;
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
--- library UNISIM;
--- use UNISIM.VComponents.all;
+
+-- ====== Info ======
+--
+-- GPU displays at a resolution of 640x480.
+-- The memory contains 320x240 (76800) pixles that are displayed.
+-- These can be writen and read through x and y coordinates.
+--
+-- The GPU has three modules. One for it's ram, one for numbers and one for chars. 
+--
+-- The GPU uses a Control Register to deciede what to do with the data from the bus.
+-- GCR: [---- ---- ---- ---- ---- -kji hgfe dcba]
+--
+-- a:    Read/Write. (0/1)
+-- b:    Enable number module.
+-- c-d:  Amount of active numbers in nums module. 0-3
+-- e:    Write to nums module.
+-- f:    Write color to nums.
+-- h-g:  Selected number in nums module. 0-3
+-- i:    Write to char module.
+-- j-k:  Choose datatype (xpos/ypos/color/char) in char module. (00/01/10/11)
+--
+--
+-- When reading and writing to GPU Memory, the data on the bus is split into sections.
+-- 
+-- The last 4 bits is the data (color) to read or to be writen.
+-- Bit 11-4, 8 bits (256) is used to index rows in memory.
+-- Bit 20-12, 9 (512) is used to index columns in memory.
+-- Bit 31 is used to signal read or write. 1 for read, 0 for write.
+--
+-- GM: [---- ---- ---x xxxx xxxx yyyy yyyy cccc] Write
+-- GM: [---- ---- ---- ---x xxxx xxxx yyyy yyyy] Read
+-- 
+-- x: X position to write/read to/from.
+-- y: Y position to write/read to/from.
+-- c: Color to write to memory. 
+--
 
 entity gpu is 
   Port  ( clk,rst           : in std_logic;
@@ -22,23 +51,6 @@ entity gpu is
           hsync, vsync      : out std_logic
         );
 end gpu;
-
--- ====== Info ======
--- GPU displays at a resolution of 640x480.
--- The memory contains 320x240 (76800) pixles that are displayed.
--- These can be writen and read through x and y coordinates.
--- The memory internal is a long row of 4 bits arrays.
---
--- When reading and writing to GPU Memory, the data on the bus is split into sections.
--- 
--- The last 4 bits is the data (color) to read or to be writen.
--- Bit 11-4, 8 bits (256) is used to index rows in memory.
--- Bit 20-12, 9 (512) is used to index columns in memory.
--- Bit 31 is used to signal read or write. 1 for read, 0 for write.
---
--- GM: [f--- ---- ---x xxxx xxxx yyyy yyyy cccc]
--- 
--- 
 
 architecture Behavioral of gpu is
   component ram
@@ -85,7 +97,8 @@ architecture Behavioral of gpu is
   signal xctr,yctr : std_logic_vector(10 downto 0) := "00000000000";
   signal hs : std_logic := '1';
   signal vs : std_logic := '1';
-
+  signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
+  --
   alias rad : std_logic_vector(8 downto 0) is yctr(9 downto 1);
   alias kol : std_logic_vector(8 downto 0) is xctr(9 downto 1);
   alias xpix : std_logic_vector(1 downto 0) is xctr(1 downto 0);
@@ -97,7 +110,7 @@ architecture Behavioral of gpu is
 
   -- Character module
   signal cxaddress, cyaddress : integer := 0;
-  signal from_char : std_logic_vector(3 downto 0) := x"F";
+  signal from_char : std_logic_vector(3 downto 0) := x"0";
   signal write_char : std_logic := '0';
 
   -- Control register
@@ -114,9 +127,9 @@ architecture Behavioral of gpu is
   signal from_ram    : std_logic_vector(3 downto 0);
   signal we        : std_logic := '0';
   signal read_access : std_logic := '0';
+  
   -- Memory/Bus
   alias data : std_logic_vector(3 downto 0) is dbus(3 downto 0);
-  signal video : std_logic_vector (3 downto 0) := "0000"; -- Color from memory.
 
   -- Color palette
   type color_t is array (0 to 15) of std_logic_vector (7 downto 0);
@@ -140,7 +153,7 @@ architecture Behavioral of gpu is
 
 begin
 
-  -- Select mem or nums.
+  -- GPU Read
   with TB_c select
     gpuOut <= x"0000_000" & from_ram when "111",
               control_register when "101",
@@ -202,19 +215,21 @@ begin
   hsync <= hs;
   vsync <= vs;
 
-
+  -- GPU Write
   process(clk) begin
     if rising_edge(clk) then
       case FB_c is
         when "100" => -- GPU
                 if num_flag = '0' then
-                  yaddress <= conv_integer(dbus(11 downto 4));
-                  xaddress <= conv_integer(dbus(20 downto 12));
                   we <= w;
                   if w = '1' then
                     to_ram <= data;
+                    xaddress <= conv_integer(dbus(20 downto 12));
+                    yaddress <= conv_integer(dbus(11 downto 4));
                   else
                     read_access <= '1';
+                    xaddress <= conv_integer(dbus(16 downto 8));
+                    yaddress <= conv_integer(dbus(7 downto 0));
                   end if;
                 end if;
         when "101" => -- Control register
@@ -233,6 +248,7 @@ begin
     end if;
   end process;
 
+  -- Set read x and y addresses for VGA.
   process(clk) begin
     if rising_edge(clk) then
       if conv_integer(rad)<240 then
@@ -245,7 +261,7 @@ begin
   end process;
 
 
-  -- R GPU Memory.
+  -- VGA read from GPU Memory.
   process(clk) begin
     if rising_edge(clk) then
        if mod_4=3 then
@@ -267,6 +283,8 @@ begin
   vgaGreen(2 downto 0) <= colors(conv_integer(video))(4 downto 2);
   vgaBlue(2 downto 1) <= colors(conv_integer(video))(1 downto 0);
 
+  -- Modules as components
+
   comp_ram : ram port map (
       clk       =>  clk,
       xaddress  =>  xaddress,
@@ -280,7 +298,7 @@ begin
       );
 
   comp_num : gpu_display_numbers port map (
-      clk       =>  clk,
+      clk       => clk,
       rst       => rst,
       dbus      => dbus,
       FB_o      => FB_c,
@@ -292,7 +310,7 @@ begin
     );
 
   comp_text : gpu_text port map (
-      clk       =>  clk,
+      clk       => clk,
       rst       => rst,
       dbus      => dbus,
       FB_o      => FB_c,
