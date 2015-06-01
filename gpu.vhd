@@ -68,6 +68,18 @@ architecture Behavioral of gpu is
     );
   end component;
 
+  component gpu_text is 
+    port  ( clk,rst : in std_logic;
+          dbus : in std_logic_vector(31 downto 0);
+          FB_o : in std_logic_vector(2 downto 0);
+          control_register : in std_logic_vector(31 downto 0);
+          xaddress  : out integer;
+          yaddress  : out integer;
+          to_ram : out std_logic_vector(3 downto 0);
+          write_char : out std_logic
+        );
+  end component;
+
   -- VGA
   signal mod_4 : std_logic_vector(1 downto 0) := "00";
   signal xctr,yctr : std_logic_vector(10 downto 0) := "00000000000";
@@ -83,9 +95,14 @@ architecture Behavioral of gpu is
   signal output_number : std_logic := '0';
   signal number_pixel : std_logic_vector(3 downto 0) := x"F";
 
+  -- Character module
+  signal cxaddress, cyaddress : integer := 0;
+  signal from_char : std_logic_vector(3 downto 0) := x"F";
+  signal write_char : std_logic := '0';
+
   -- Control register
   signal control_register : std_logic_vector(31 downto 0) := x"0000_0000";
-  alias we : std_logic is control_register(0);
+  alias w : std_logic is control_register(0);
   alias num_flag : std_logic is control_register(4);
 
   --RAM
@@ -95,6 +112,7 @@ architecture Behavioral of gpu is
   signal ryaddress  : integer := 0;
   signal to_ram    : std_logic_vector(3 downto 0);
   signal from_ram    : std_logic_vector(3 downto 0);
+  signal we        : std_logic := '0';
   signal read_access : std_logic := '0';
   -- Memory/Bus
   alias data : std_logic_vector(3 downto 0) is dbus(3 downto 0);
@@ -117,9 +135,8 @@ architecture Behavioral of gpu is
       x"00",
       x"00",
       x"00",
-      x"00",
-      x"FF"); -- White      F
-
+      x"DB", -- Darker White  E
+      x"FF"); -- White        F
 
 begin
 
@@ -193,7 +210,8 @@ begin
                 if num_flag = '0' then
                   yaddress <= conv_integer(dbus(11 downto 4));
                   xaddress <= conv_integer(dbus(20 downto 12));
-                  if we = '1' then
+                  we <= w;
+                  if w = '1' then
                     to_ram <= data;
                   else
                     read_access <= '1';
@@ -201,7 +219,16 @@ begin
                 end if;
         when "101" => -- Control register
                 control_register <= dbus;
-        when others => read_access <= '0';
+        when others => 
+                if write_char = '1' then
+                  xaddress <= cxaddress;
+                  yaddress <= cyaddress;                  
+                  to_ram <= from_char;
+                  we <= '1';
+                else
+                  we <= '0';
+                end if;
+                read_access <= '0';
       end case;
     end if;
   end process;
@@ -262,6 +289,18 @@ begin
       ryaddress  =>  ryaddress,
       output_number => output_number,
       number_pixel => number_pixel
+    );
+
+  comp_text : gpu_text port map (
+      clk       =>  clk,
+      rst       => rst,
+      dbus      => dbus,
+      FB_o      => FB_c,
+      control_register => control_register,
+      xaddress  =>  cxaddress,
+      yaddress  =>  cyaddress,
+      to_ram => from_char,
+      write_char => write_char
     );
   
 end Behavioral;
