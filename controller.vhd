@@ -125,6 +125,7 @@ architecture arch of controller is
             x"0300_0E00", --
             x"0130_0E00", --
             x"0024_0000", --
+            x"0000_0000", -- Let gpu work
             x"003E_0300", --
             others => x"0000_0000"
 		    );

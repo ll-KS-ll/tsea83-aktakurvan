@@ -107,6 +107,8 @@ architecture Behavioral of ram is
   signal wPos : integer := 0; -- Position in a block ram, GPU
   signal rPos : integer := 0; -- Position in a block ram, VGA
 
+  signal test : integer := 0;
+
 begin
 
   -- Convert x,y coordinats to a linear position in the memory. 
@@ -136,7 +138,7 @@ begin
             19;
 
   -- Select block ram to use for the VGA
-  rRam  <=  0 when rmemoryPos<ram_heigth   else
+  test  <=  0 when rmemoryPos<ram_heigth   else
             1 when rmemoryPos<ram_heigth*2 else
             2 when rmemoryPos<ram_heigth*3 else
             3 when rmemoryPos<ram_heigth*4 else
@@ -195,6 +197,7 @@ BEGIN
         --if read_access = '1' then
         --  rPos <= memoryPos-ram_heigth*wRam;
         --else
+          rRam <= test;
           rPos  <= rmemoryPos-ram_heigth*rRam;
         --end if;
     end if;

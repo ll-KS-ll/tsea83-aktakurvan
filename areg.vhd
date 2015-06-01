@@ -43,7 +43,7 @@ architecture arch of areg is
             0007=>x"01F0_027B",		-- Wait a bit before starting game
             -- One Game cycle     --      
             0008=>x"01F0_0258",   -- Read and set player 1 direction
-            0009=>x"0300_000A",   -- Check collision player 1    
+            0009=>x"0300_01F4",   -- Check collision player 1    
             0010=>x"01F0_0212",   -- Read and set player 2 direction
             0011=>x"0300_000C",   -- Check collision player 2
             0012=>x"0300_028A",   -- Advance player 1 one step
@@ -63,13 +63,13 @@ architecture arch of areg is
             -- ##################################
             0500=>x"0300_024E",   -- BRA    Set player x to player 1 + one step
             0501=>x"09A0_03F0",   -- LOAD   PM(1008) to GR10    Set GR10 to x"0000_0000"
-            0502=>x"0500_0006",   -- WGCR   Set GPUCR to read from gpu
-            0503=>x"1680_0000",   -- RGPU   Read from GPU
-            0504=>x"0500_0017",   -- WGCR   set to write to numbers
-            0505=>x"00A0_0000",   -- WGNUMS  
+            0502=>x"0980_03DA",   -- LOAD   PM(0986) to GR8
+            0503=>x"0990_03DB",   -- LOAD   PM(0987) to GR9
+            0504=>x"0500_0006",   -- WGCR   Set GPUCR to read from gpu
+            0505=>x"1680_0000",   -- RGPU   Read from GPU
             0506=>x"06A0_03EE",   -- CMP    If black we can exit collision check
             0507=>x"1500_000A",   -- BEQ    Exit collision check
-            0508=>x"0300_0007",   -- BRA    INC player 2 points and start new round    NOT DONE!!!!! (PM(0998) holds player 2 score)
+            0508=>x"0300_020C",   -- BRA    INC player 2 points and start new round(PM(0998) holds player 2 score)
             0509=>x"0000_0000",   --
             0510=>x"0000_0000",   -- 
             0511=>x"0000_0000",   --  #### ERROR SOMEWHERE HERE; stops the game from running. ####
@@ -81,7 +81,16 @@ architecture arch of areg is
             0517=>x"0000_0000",   -- 
             0518=>x"0000_0000",   -- 
             0519=>x"0000_0000",   -- 
-            0520=>x"0000_0000",   -- 
+            0520=>x"0000_0000",   --
+            -- ##############################
+            -- ## Increase player 2 points ##
+            -- ##############################
+            0524=>x"0980_03E6",   -- LOAD     PM(0998) to GR8   Player 2 points
+            0525=>x"0780_0000",   -- INC      Inc GR8           INC player 2 points
+            0526=>x"0500_0057",   -- WGCR     Set to write to player 2 points
+            0527=>x"0080_0000",   -- WGNUM    Write it on screen
+            0528=>x"0A80_03E6",   -- STORE    GR8 to PM(0998)   Store player 2 points
+            0529=>x"0300_0251",   -- BRA      Reset game board
             
             -- #####################################
             -- ## Read and set player 2 direction ##
