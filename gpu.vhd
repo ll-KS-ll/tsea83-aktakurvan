@@ -236,9 +236,9 @@ begin
                     yaddress <= conv_integer(dbus(11 downto 4));
                   else
                     -- Read
-                    read_access <= '1';
-                    xaddress <= conv_integer(dbus(16 downto 8));
-                    yaddress <= conv_integer(dbus(7 downto 0));
+                    --read_access <= '1';
+                    rxaddress <= conv_integer(dbus(16 downto 8));
+                    ryaddress <= conv_integer(dbus(7 downto 0));
                   end if;
                 end if;
         when "101" => -- Control register
@@ -253,22 +253,33 @@ begin
                 else
                   we <= '0';
                 end if;
-                read_access <= '0';
+                
+                -- Set read address for RAM
+                if conv_integer(rad)<240 then
+                  ryaddress <= conv_integer(rad);
+                end if;
+                if conv_integer(kol)<320 then
+                  rxaddress <= conv_integer(kol);
+                end if;
+                
+                --read_access <= '0';
       end case;
     end if;
   end process;
 
   -- Set read x and y addresses for VGA.
-  process(clk) begin
-    if rising_edge(clk) then
-      if conv_integer(rad)<240 then
-        ryaddress <= conv_integer(rad);
-      end if;
-      if conv_integer(kol)<320 then
-        rxaddress <= conv_integer(kol);
-      end if;
-    end if;
-  end process;
+  --process(clk) begin
+  --  if rising_edge(clk) then
+  --    if FB_c != "100" or w = '0' then
+  --      if conv_integer(rad)<240 then
+  --        ryaddress <= conv_integer(rad);
+  --      end if;
+  --      if conv_integer(kol)<320 then
+  --        rxaddress <= conv_integer(kol);
+  --      end if;
+  --    end if;
+  --  end if;
+  --end process;
 
 
   -- VGA set pixel data

@@ -192,11 +192,11 @@ BEGIN
         end if;
 
         -- Select to read from GPU or VGA coordinates.
-        if read_access = '1' then
-          rPos <= memoryPos-ram_heigth*wRam;
-        else
+        --if read_access = '1' then
+        --  rPos <= memoryPos-ram_heigth*wRam;
+        --else
           rPos  <= rmemoryPos-ram_heigth*rRam;
-        end if;
+        --end if;
     end if;
 END PROCESS;
 
