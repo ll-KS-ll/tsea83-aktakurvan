@@ -41,9 +41,9 @@ architecture arch of areg is
             0005=>x"01F0_0369",		-- Draw Players
             0006=>x"01F0_027B",		-- Wait a bit before starting game
             0007=>x"01F0_027B",		-- Wait a bit before starting game
-            -- One Game cycle     --          
+            -- One Game cycle     --      
             0008=>x"01F0_0258",   -- Read and set player 1 direction
-            0009=>x"0300_000A",   -- Check collision player 1
+            0009=>x"0300_000A",   -- Check collision player 1    
             0010=>x"01F0_0212",   -- Read and set player 2 direction
             0011=>x"0300_000C",   -- Check collision player 2
             0012=>x"0300_028A",   -- Advance player 1 one step
@@ -62,17 +62,17 @@ architecture arch of areg is
             -- ## Collision check for player 1 ##
             -- ##################################
             0500=>x"0300_024E",   -- BRA    Set player x to player 1 + one step
-            0501=>x"0500_0006",   -- WGCR   Set GPUCR to read from gpu
-            0502=>x"1680_0000",   -- RGPU   Get the color of position ahead of player 1
-            0503=>x"06A0_0000",   -- CMP    If black we can exit collision check
-            0504=>x"1500_000A",   -- BEQ    Exit collision check
-            0505=>x"0300_023A",   -- BRA    INC player 2 points and start new round    NOT DONE!!!!! (PM(0998) holds player 2 score)
-            0506=>x"0000_0000",   --
-            0507=>x"0000_0000",   -- 
-            0508=>x"0000_0000",   --  #### ERROR SOMEWHERE HERE; stops the game from running. ####
-            0509=>x"0000_0000",   -- 
+            0501=>x"09A0_03F0",   -- LOAD   PM(1008) to GR10    Set GR10 to x"0000_0000"
+            0502=>x"0500_0006",   -- WGCR   Set GPUCR to read from gpu
+            0503=>x"1680_0000",   -- RGPU   Read from GPU
+            0504=>x"0500_0017",   -- WGCR   set to write to numbers
+            0505=>x"00A0_0000",   -- WGNUMS  
+            0506=>x"06A0_03EE",   -- CMP    If black we can exit collision check
+            0507=>x"1500_000A",   -- BEQ    Exit collision check
+            0508=>x"0300_0007",   -- BRA    INC player 2 points and start new round    NOT DONE!!!!! (PM(0998) holds player 2 score)
+            0509=>x"0000_0000",   --
             0510=>x"0000_0000",   -- 
-            0511=>x"0000_0000",   -- 
+            0511=>x"0000_0000",   --  #### ERROR SOMEWHERE HERE; stops the game from running. ####
             0512=>x"0000_0000",   -- -- Else, set GPUCR to write to player 2 points
             0513=>x"0000_0000",   -- -- INC player 2 points
             0514=>x"0000_0000",   -- -- New round
@@ -134,10 +134,10 @@ architecture arch of areg is
             -- ###############
             -- ## New Round ##
             -- ###############
-            0593=>x"01F0_02D8",   -- Reset player pos/directions
-            0594=>x"01F0_02E1",   -- Clear board
-            0595=>x"01F0_0369",   -- Draw players
-            0596=>x"01F0_027B",   -- Wait 
+            0593=>x"01F0_027B",   -- Wait 
+            0594=>x"01F0_02D8",   -- Reset player pos/directions
+            0595=>x"01F0_02E1",   -- Clear board
+            0596=>x"01F0_0369",   -- Draw players
             0597=>x"01F0_027B",   -- Wait
             0598=>x"0300_0008",   -- Jump to game loop
             -- #####################################
@@ -437,8 +437,8 @@ architecture arch of areg is
             -- ## CONSTANTS & Variables ##
             -- ###########################
             0967=>x"0000_0002",   -- Gap Wideness
-            0968=>x"0000_0000",   -- Player 1   gap     state           
-            0969=>x"0000_0000",   -- Player 2   gap     state
+            0968=>x"0000_0002",   -- Player 1   gap     state           
+            0969=>x"0000_0002",   -- Player 2   gap     state
             0970=>x"0000_0023",   -- Distance Between holes
             0971=>x"0000_000D",   -- Player 1   hole    steps left to hole-time
             0972=>x"0000_0008",   -- Player 2   hole    steps left to hole-time
