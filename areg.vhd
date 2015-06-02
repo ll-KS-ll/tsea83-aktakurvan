@@ -28,9 +28,9 @@ architecture arch of areg is
         type pMem_t is array(0 to 1023) of std_logic_vector(31 downto 0);
 
         signal pMem : pMem_t := ( -- Program memory
-            -- #########################
-            -- ## Main Game functions ##
-            -- #########################
+            -- ##################
+            -- ## Game Program ##
+            -- ##################
             -- Initialize Game
             0000=>x"01F0_02B8",		-- Initialize Gameborder/sidebar
             0001=>x"01F0_02D8",   -- Initialize players
@@ -45,43 +45,69 @@ architecture arch of areg is
             0008=>x"01F0_0258",   -- Read and set player 1 direction
             0009=>x"0300_01F4",   -- Check collision player 1    
             0010=>x"01F0_0212",   -- Read and set player 2 direction
-            0011=>x"0300_000C",   -- Check collision player 2
+            0011=>x"0300_01FD",   -- Check collision player 2
             0012=>x"0300_028A",   -- Advance player 1 one step
             0013=>x"0300_028E",   -- Advance player 2 one step
             0014=>x"01F0_0292",   -- Check if its time to do holes for the two players, if so do it.
             0015=>x"01F0_0369",   -- Draw players
-            0016=>x"01F0_0280",   -- Game Speed
-            0017=>x"0300_0008",   -- Loop  
-            0018=>x"0000_0000",   --
-            0019=>x"0000_0000",   --
-            0020=>x"0300_0007",		--
-            0021=>x"0000_0000",		--
-            0022=>x"0000_0000",		--
+            0016=>x"0300_01EA",   -- Check if a player has won
+            0017=>x"0300_01E0",   -- Restart game if B-button has been pressed
+            0018=>x"01F0_0280",   -- Game Speed
+            0019=>x"0300_0008",   -- Loop  
 
+            -- ###############################################
+            -- ## Restart game if B-button has been pressed ##
+            -- ###############################################
+            0480=>x"06E0_03E9",   -- CMP    GR14 to PM(1001)  Check if 1 (if so restart game) 
+            0481=>x"1500_0000",   -- BEQ    Restart game
+            0482=>x"0300_0012",   -- BRA    Back to gameloop
+            -- ########################################################
+            -- ## Check if a player has won, if so, reset everything ##
+            -- ########################################################
+            0490=>x"0980_03E5",   -- LOAD   PM(0997) to GR8   Load Player 1 score
+            0491=>x"0680_03E2",   -- CMP    GR8 to PM(0994)   Check if 5
+            0492=>x"1500_01F1",   -- BEQ    If so jump to GAME OVER
+            0493=>x"0980_03E6",   -- LOAD   PM(0998) to GR8   Load Player 2 score
+            0494=>x"0680_03E2",   -- CMP    GR8 to pm(0994)   Check if 5
+            0495=>x"1500_01F1",   -- BEQ    If so jump to GAME OVER
+            0496=>x"0300_0011",   -- BRA    Return to game
+            -- -- GAME OVER
+            0497=>x"01F0_027B",   -- JSR    Wait for a while
+            0498=>x"01F0_027B",   -- JSR    Wait a bit longer
+            0499=>x"0300_0000",   -- Reset  EVERYTHING to start a new game
             -- ##################################
             -- ## Collision check for player 1 ##
             -- ##################################
             0500=>x"0300_024E",   -- BRA    Set player x to player 1 + one step
             0501=>x"09A0_03F0",   -- LOAD   PM(1008) to GR10    Set GR10 to x"0000_0000"
-            0502=>x"0980_03DA",   -- LOAD   PM(0986) to GR8
-            0503=>x"0990_03DB",   -- LOAD   PM(0987) to GR9
+            0502=>x"0980_03DA",   -- LOAD   PM(0986) to GR8     Load player x xpos
+            0503=>x"0990_03DB",   -- LOAD   PM(0987) to GR9     Load player x ypos
             0504=>x"0500_0006",   -- WGCR   Set GPUCR to read from gpu
             0505=>x"1680_0000",   -- RGPU   Read from GPU
             0506=>x"06A0_03EE",   -- CMP    If black we can exit collision check
             0507=>x"1500_000A",   -- BEQ    Exit collision check
-            0508=>x"0300_020C",   -- BRA    INC player 2 points and start new round(PM(0998) holds player 2 score)
-            0509=>x"0000_0000",   --
-            0510=>x"0000_0000",   -- 
-            0511=>x"0000_0000",   --  #### ERROR SOMEWHERE HERE; stops the game from running. ####
-            0512=>x"0000_0000",   -- -- Else, set GPUCR to write to player 2 points
-            0513=>x"0000_0000",   -- -- INC player 2 points
-            0514=>x"0000_0000",   -- -- New round
-            0515=>x"0000_0000",   -- 
-            0516=>x"0000_0000",   -- 
-            0517=>x"0000_0000",   -- 
-            0518=>x"0000_0000",   -- 
-            0519=>x"0000_0000",   -- 
-            0520=>x"0000_0000",   --
+            0508=>x"0300_020C",   -- BRA    INC player 2 points and start new round
+            -- ##################################
+            -- ## Collision check for player 2 ##
+            -- ##################################
+            0509=>x"0300_024B",   -- BRA    Set player x to player 2 + one step
+            0510=>x"09A0_03F0",   -- LOAD   PM(1008) to GR10    Set GR10 to x"0000_0000"
+            0511=>x"0980_03DA",   -- LOAD   PM(0986) to GR8     Load player x xpos
+            0512=>x"0990_03DB",   -- LOAD   PM(0987) to GR9     Load player x ypos
+            0513=>x"0500_0006",   -- WGCR   Set GPUCR to read from gpu
+            0514=>x"1680_0000",   -- RGPU   Read from GPU
+            0515=>x"06A0_03EE",   -- CMP    If black we can exit collision check
+            0516=>x"1500_000C",   -- BEQ    Exit collision check
+            0517=>x"0300_0206",   -- BRA    INC player 1 points and start new round
+            -- ##############################
+            -- ## Increase player 1 points ##
+            -- ##############################
+            0518=>x"0980_03E5",   -- LOAD     PM(0997) to GR8   Player 1 points
+            0519=>x"0780_0000",   -- INC      INC GR8           Inc Player 1 points
+            0520=>x"0500_0017",   -- WGCR     Set to write to player 1 points
+            0521=>x"0080_0000",   -- WGNUM    Write it on screen
+            0522=>x"0A80_03E5",   -- STORE    GR8 to PM(0997)   Store player 1 points
+            0523=>x"0300_0251",   -- BRA      Reset game board
             -- ##############################
             -- ## Increase player 2 points ##
             -- ##############################
@@ -103,10 +129,10 @@ architecture arch of areg is
             0535=>x"0300_021E",   -- BRA      Jump to 542           
             -- -- Decide Turn
             0536=>x"0980_03CE",   -- LOAD     PM(0974) to GR8   Load player 2 turn state   
-            0537=>x"0880_0000",   -- DEC      GR8               DEC it with 1
-            0538=>x"0A80_03CE",   -- STORE    GR8 to PM(0974)   Store player 2 turn state
-            0539=>x"0680_03EE",   -- CMP      GR8 to PM(1006)   Cmp it to 0  
-            0540=>x"1500_021E",   -- BEQ      Turn player and reset turn state (edit direction value)
+            0537=>x"0680_03EE",   -- CMP      GR8 to PM(1006)   Cmp it to 0  
+            0538=>x"1500_021E",   -- BEQ      Turn player and reset turn state (edit direction value)
+            0539=>x"0880_0000",   -- DEC      GR8               DEC it with 1
+            0540=>x"0A80_03CE",   -- STORE    GR8 to PM(0974)   Store player 2 turn state
             0541=>x"0CF0_0000",   -- RSR      Return from subrutine
             -- ## Change direction of player two and reset turn state ##
             0542=>x"0980_03D3",   -- LOAD     PM(0979) to GR8   Load player 2 current turn direction
@@ -133,10 +159,15 @@ architecture arch of areg is
             0560=>x"0980_03CF",   -- LOAD     PM(0975) to GR8   Load turn state variable
             0561=>x"0A80_03CE",   -- STORE    GR8 to PM(0974)   Store it into player 2s turn state
             0562=>x"0CF0_0000",   -- RSR      Return from subrutine  
-
-            -- ## Increase player 2 points by one ##
-            0570=>x"0300_0251",   -- Start new round
+            -- #########################################
+            -- ## Set player x to player 2 + one step ##
+            -- #########################################
+            0587=>x"01F0_0356",   -- Set player 2 to player x
+            0588=>x"01F0_0320",   -- Advance player x one step
+            0589=>x"0300_01FE",   -- Jump back to collision function.
+            -- #########################################
             -- ## Set player x to player 1 + one step ##
+            -- #########################################
             0590=>x"01F0_0352",   -- Set player 1 to player x
             0591=>x"01F0_0320",   -- Advance player x one step
             0592=>x"0300_01F5",   -- Jump back to collision function.
@@ -148,7 +179,7 @@ architecture arch of areg is
             0595=>x"01F0_02E1",   -- Clear board
             0596=>x"01F0_0369",   -- Draw players
             0597=>x"01F0_027B",   -- Wait
-            0598=>x"0300_0008",   -- Jump to game loop
+            0598=>x"0300_0010",   -- Jump to game loop end (check for winner)
             -- #####################################
             -- ## Read and set player 1 direction ##
             -- #####################################
@@ -228,30 +259,47 @@ architecture arch of areg is
             -- -- Player 1
             0658=>x"0980_03CB",   -- LOAD   PM(0971) to GR8   Load player 1 steps left to hole       
             0659=>x"0680_03EE",   -- CMP    GR8 to PM(1006)   Check if zero
-            0660=>x"1500_029B",   -- BEQ    Jump to "Im a hole" if true
+            0660=>x"1500_029D",   -- BEQ    Jump to "Im a hole" if true
             0661=>x"0880_0000",   -- DEC    GR8               Dec it with one otherwise
             0662=>x"0A80_03CB",   -- STORE  GR8 to PM(0971)   Store it back to steps left to hole
             -- -- Player 2
-            0663=>x"0CF0_0000",   -- Return to game (player 2 holes not active yet)
-            0664=>x"0000_0000",   --
-            0665=>x"0000_0000",   --
-            0666=>x"0000_0000",   --
-            -- ## Im a hole ##
+            0663=>x"0980_03CC",   -- LOAD   PM(0972) to GR8   Load player 2 steps left to hole
+            0664=>x"0680_03EE",   -- CMP    GR8 to PM(1006)   Check if zero
+            0665=>x"1500_02AA",   -- BEQ    Jump to "I'm a hole" if true
+            0666=>x"0880_0000",   -- DEC    GR8               Dec it with one otherwise
+            0667=>x"0A80_03CC",   -- STORE  GR8 to PM(0972)   Store it back to steps left to hole
+            0668=>x"0CF0_0000",   -- RSR    Return from subrutine
+            -- ## Im a hole ##  
             -- -- Player 1
-            0667=>x"0980_03C8",   -- LOAD   PM(0968) to GR8   Load player 1 steps as hole left
-            0668=>x"0680_03EE",   -- CMP    GR8 to PM(1006)   Check if zero
-            0669=>x"1500_02A2",   -- BEQ    Jump to reset player to normal if true
-            0670=>x"0880_0000",   -- DEC    GR8               Dec steps left as hole by 1
-            0671=>x"0A80_03C8",   -- STORE  GR8 to PM(0968)   Store it back into PM
-            0672=>x"0920_03F0",   -- LOAD   PM(1008) to GR2   Set player 1 color to black
-            0673=>x"0300_0297",   -- BRA    Jump to player 2 check
+            0669=>x"0980_03C8",   -- LOAD   PM(0968) to GR8   Load player 1 steps as hole left
+            0670=>x"0680_03EE",   -- CMP    GR8 to PM(1006)   Check if zero
+            0671=>x"1500_02A4",   -- BEQ    Jump to reset player to normal if true
+            0672=>x"0880_0000",   -- DEC    GR8               Dec steps left as hole by 1
+            0673=>x"0A80_03C8",   -- STORE  GR8 to PM(0968)   Store it back into PM
+            0674=>x"0920_03F0",   -- LOAD   PM(1008) to GR2   Set player 1 color to black
+            0675=>x"0300_0297",   -- BRA    Jump to player 2 check
             -- -- -- ## Reset player 1 ##
-            0674=>x"0920_03F2",   -- LOAD   PM(1010) to GR2   Set player 1 color to normal again
-            0675=>x"0980_03CA",   -- LOAD   PM(0970) to GR8   Load steps left to next hole to GR8
-            0676=>x"0A80_03CB",   -- STORE  GR8 to PM(0971)   Store it to player 1 steps left to next hole
-            0677=>x"0980_03C7",   -- LOAD   PM(0967) to GR8   Load steps as hole to gr8
-            0678=>x"0A80_03C8",   -- STORE  GR8 to PM(0968)   Store it to players steps as hole
-            0679=>x"0300_0297",   -- BRA    Jump to player 2 check
+            0676=>x"0920_03F2",   -- LOAD   PM(1010) to GR2   Set player 1 color to normal again
+            0677=>x"0980_03CA",   -- LOAD   PM(0970) to GR8   Load steps left to next hole to GR8
+            0678=>x"0A80_03CB",   -- STORE  GR8 to PM(0971)   Store it to player 1 steps left to next hole
+            0679=>x"0980_03C7",   -- LOAD   PM(0967) to GR8   Load steps as hole to gr8
+            0680=>x"0A80_03C8",   -- STORE  GR8 to PM(0968)   Store it to players steps as hole
+            0681=>x"0300_0297",   -- BRA    Jump to player 2 check
+            -- -- Player 2
+            0682=>x"0980_03C9",   -- LOAD   PM(0969) to GR8   Load player 2 steps as hole left
+            0683=>x"0680_03EE",   -- CMP    GR8 to PM(1006)   Check if zero
+            0684=>x"1500_02B1",   -- BEQ    Jump to reset player to normal if true
+            0685=>x"0880_0000",   -- DEC    GR8               Dec steps left as hole by 1
+            0686=>x"0A80_03C9",   -- STORE  GR8 to PM(0969)   Store it back into PM
+            0687=>x"0960_03F0",   -- LOAD   PM(1008) to GR6   Set player 2 color to black
+            0688=>x"0CF0_0000",   -- RSR    Return from subrutine
+            -- -- -- ## Reset player 2 ##
+            0689=>x"0960_03F1",   -- LOAD   PM(1009) to GR6   Set player 2 color to normal again
+            0690=>x"0980_03CA",   -- LOAD   PM(0970) to GR8   Load steps left to next hole to GR8
+            0691=>x"0A80_03CC",   -- STORE  GR8 to PM(0972)   Store it to player 1 steps left to next hole
+            0692=>x"0980_03C7",   -- LOAD   PM(0967) to GR8   Load steps as hole to gr8
+            0693=>x"0A80_03C9",   -- STORE  GR8 to PM(0969)   Store it to players steps as hole
+            0694=>x"0CF0_0000",   -- RSR    Return from subrtuine
             -- ###################################
             -- ## INITIALIZE GAMEBORDER/SIDEBAR ##
             -- ###################################
@@ -481,7 +529,7 @@ architecture arch of areg is
             1000=>x"0098_9680",		-- GameStart  delay   10000000
             1001=>x"0000_0001",		-- Constant                 1
             1002=>x"0000_0001",		-- GameBoard  start  x/ypos 1
-            1003=>x"0000_00EE",		-- GameBoard  end    x/ypos 238
+            1003=>x"0000_00EF",		-- GameBoard  end    x/ypos 239
             1004=>x"0000_00EF",		-- GameBorder W/H    x/ypos 239
             1005=>x"0000_00F0",		-- Sidebar    start  xpos   240
             1006=>x"0000_0000",		-- Constant                 0

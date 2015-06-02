@@ -110,13 +110,15 @@ begin
                     -- Player 1
                     when B"0111_0001" => GR12 <= x"0000_0001"; -- Left turn(Q)
                     when B"0111_0111" => GR12 <= x"0000_0000"; -- Stop turn(W)
+                                         GR14 <= x"0000_0000";  
                     when B"0110_0101" => GR12 <= x"0000_0002"; -- Right turn(E)
                     -- Player 2
                     when B"01101001" => GR13 <= x"0000_0001"; -- Left turn(I)
                     when B"01101111" => GR13 <= x"0000_0000"; -- Stop turn(O)
+                                        GR14 <= x"0000_0000";
                     when B"01110000" => GR13 <= x"0000_0002"; -- Right turn(P)
                     -- Game commands
-                    when B"01100010" => GR14 <= x"0000_0001"; -- Pause
+                    when B"01100010" => GR14 <= x"0000_0001"; -- Restart game
                     when others => null;
                 end case;
             end if;
