@@ -8,10 +8,12 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 --
 -- The RAM module is the memory of the GPU.
 --
--- The VGA and the GPU uses different address signals.  
 -- Both read and write can be done from the RAM. 
 -- Write operations is done synchronously while read access is done asynchronously
 -- so that block RAMs is used. It's possible to write and read simultaneously.
+-- Therefore read and write accesss uses different address signals.  
+--
+-- Reading takes one clock cycle before it is read. 
 --
 -- The memory can store 320x240 pixels. One pixel is 4 bits large and is used to
 -- selcet the color to output to the screen.
@@ -25,19 +27,17 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 -- the memory.
 --
 -- To write to the memory specify the xadress, yadress and set write enabled.
--- To read from memory using the GPU, specify the xadress, yadress and set read_access.
--- To read from memory using the VGA, specify the rxadress, ryadress and disable read_access.
+-- To read from memory specify the rxadress, ryadress.
 -- 
 
 entity ram is
 port (
         clk       : in std_logic;   -- System clock 
-        xaddress  : in integer;     -- X address for the GPU
-        yaddress  : in integer;     -- Y address for the GPU
-        rxaddress : in integer;     -- X address for the VGA
-        ryaddress : in integer;     -- Y address for the VGA
+        xaddress  : in integer;     -- Write x address
+        yaddress  : in integer;     -- Write y address
+        rxaddress : in integer;     -- Read x address
+        ryaddress : in integer;     -- Read y address 
         we        : in std_logic;   -- Write Enable
-        read_access : in std_logic; -- Flag to select to read from VGA or GPU  
         data_i    : in std_logic_vector(3 downto 0);  -- Data in from the GPU
         data_o    : out std_logic_vector(3 downto 0)  -- Data out to the GPU
      );
@@ -98,14 +98,14 @@ architecture Behavioral of ram is
   attribute ram_style of ram19 : signal is "block";
 
   -- Linear memory positions to read and write to/from.
-  signal memoryPos : integer := 0;  -- Used by the GPU
-  signal rmemoryPos : integer := 0; -- Used by the VGA, only read
+  signal memoryPos : integer := 0;  -- Write
+  signal rmemoryPos : integer := 0; -- Read
 
   -- Control signals for the 20 block rams.
-  signal wRam : integer := 0; -- Selects ram to use for the GPU
-  signal rRam : integer := 0; -- Selctts ram to use for the VGA
-  signal wPos : integer := 0; -- Position in a block ram, GPU
-  signal rPos : integer := 0; -- Position in a block ram, VGA
+  signal wRam : integer := 0; -- Selects ram to use for writing
+  signal rRam : integer := 0; -- Selctts ram to use for reading
+  signal wPos : integer := 0; -- Position in a block ram, writing
+  signal rPos : integer := 0; -- Position in a block ram, reading
 
   signal test : integer := 0;
 
@@ -115,7 +115,7 @@ begin
   memoryPos <=  yaddress*320 + xaddress;
   rmemoryPos <= ryaddress*320 + rxaddress;
   
-  -- Select block ram to use for the GPU
+  -- Select block ram to use for writing
   wRam  <=  0 when memoryPos<ram_heigth   else
             1 when memoryPos<ram_heigth*2 else
             2 when memoryPos<ram_heigth*3 else
@@ -137,7 +137,7 @@ begin
             18 when memoryPos<ram_heigth*19 else
             19;
 
-  -- Select block ram to use for the VGA
+  -- Select block ram to use for reading
   test  <=  0 when rmemoryPos<ram_heigth   else
             1 when rmemoryPos<ram_heigth*2 else
             2 when rmemoryPos<ram_heigth*3 else
@@ -159,7 +159,7 @@ begin
             18 when rmemoryPos<ram_heigth*19 else
             19;
   
-  -- Convert memory position into positon in the block ram, GPU
+  -- Convert memory position into positon in the block ram
   wPos  <=  memoryPos-ram_heigth*wRam;
 
 -- Process write operation.
@@ -193,13 +193,9 @@ BEGIN
             end case;
         end if;
 
-        -- Select to read from GPU or VGA coordinates.
-        --if read_access = '1' then
-        --  rPos <= memoryPos-ram_heigth*wRam;
-        --else
-          rRam <= test;
-          rPos  <= rmemoryPos-ram_heigth*rRam;
-        --end if;
+        -- Read
+        rRam <= test;
+        rPos  <= rmemoryPos-ram_heigth*rRam;
     end if;
 END PROCESS;
 

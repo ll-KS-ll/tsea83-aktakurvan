@@ -28,17 +28,24 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 --
 -- When reading and writing to GPU Memory, the data on the bus is split into sections.
 -- 
+-- WRITING
 -- The last 4 bits is the data (color) to read or to be writen.
 -- Bit 11-4, 8 bits (256) is used to index rows in memory.
 -- Bit 20-12, 9 (512) is used to index columns in memory.
--- Bit 31 is used to signal read or write. 1 for read, 0 for write.
 --
 -- GM: [---- ---- ---x xxxx xxxx yyyy yyyy cccc] Write
--- GM: [---- ---- ---- ---x xxxx xxxx yyyy yyyy] Read
--- 
--- x: X position to write/read to/from.
--- y: Y position to write/read to/from.
+-- x: X position to write to.
+-- y: Y position to write to.
 -- c: Color to write to memory. 
+-- 
+-- READING
+-- Bit 7-0, 8 bits (256) is used to index rows in memory.
+-- Bit 16-8, 9 (512) is used to index columns in memory.
+--
+-- GM: [---- ---- ---- ---x xxxx xxxx yyyy yyyy] Read
+-- x: X position to read from.
+-- y: Y position to read from.
+-- 
 --
 --
 
@@ -67,7 +74,6 @@ architecture Behavioral of gpu is
           rxaddress  : in integer;
           ryaddress  : in integer;
           we        : in std_logic;
-          read_access : in std_logic;
           data_i    : in std_logic_vector(3 downto 0);
           data_o    : out std_logic_vector(3 downto 0)
           );
@@ -133,7 +139,6 @@ architecture Behavioral of gpu is
   signal to_ram : std_logic_vector(3 downto 0);   -- Write data to memory
   signal from_ram : std_logic_vector(3 downto 0); -- Read data from memory
   signal we : std_logic := '0';                   -- Write enable in ram
-  signal read_access : std_logic := '0';          -- Flag for read from memory
   
   -- Memory/Bus
   alias data : std_logic_vector(3 downto 0) is dbus(3 downto 0);
@@ -236,7 +241,6 @@ begin
                     yaddress <= conv_integer(dbus(11 downto 4));
                   else
                     -- Read
-                    --read_access <= '1';
                     rxaddress <= conv_integer(dbus(16 downto 8));
                     ryaddress <= conv_integer(dbus(7 downto 0));
                   end if;
@@ -261,8 +265,6 @@ begin
                 if conv_integer(kol)<320 then
                   rxaddress <= conv_integer(kol);
                 end if;
-                
-                --read_access <= '0';
       end case;
     end if;
   end process;
@@ -317,7 +319,6 @@ begin
       rxaddress  =>  rxaddress,
       ryaddress  =>  ryaddress,
       we        =>  we,
-      read_access => read_access,
       data_i    =>  to_ram,
       data_o    =>  from_ram
       );

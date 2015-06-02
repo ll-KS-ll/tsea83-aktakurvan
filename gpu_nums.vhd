@@ -69,8 +69,11 @@ architecture arch of gpu_display_numbers is
   alias selected_number : std_logic_vector(1 downto 0) is control_register(7 downto 6);
 
   -- Varibles used when converting binary number to binary coded decimal.
-  signal bcd : std_logic_vector(11 downto 0) := x"000";
-  signal temp : std_logic_vector(7 downto 0) := x"00";
+  signal bcd : std_logic_vector(11 downto 0) := x"000";   -- Number in BCD
+  signal temp : std_logic_vector(7 downto 0) := x"00";    -- Temp register for binary number
+  signal convert_to_bcd : std_logic := '0';               -- Convert temp to bcd
+  signal bcd_lc : std_logic_vector(2 downto 0) := "000";  -- Loop counter, 0 to 7
+  signal bcd_completed : std_logic := '0';                -- Convert has been completed
 
   -- Number tile constants.
   type number_tile_t is array(0 to 6) of std_logic_vector(0 to 3);
@@ -108,37 +111,62 @@ architecture arch of gpu_display_numbers is
   constant numbers : numbers_t := (zero, one, two, three, four, five, six, seven, eight, nine);
 
 begin 
-  
+
+  -- Number colors  
 	process(clk) begin
     if rising_edge(clk) then
       if rst = '1' then
         -- Reset
+        number_colors <= (others => x"F");
+      elsif FB_o="100" and num_flag = '1' and num_color_flag = '1' then
+        -- Write color of number
+        number_colors(conv_integer(selected_number)) <= dbus(3 downto 0); 
+      end if;
+    end if;
+  end process;
+
+  -- Number values
+  process(clk) begin
+    if rising_edge(clk) then
+      if rst = '1' then
+        -- Reset
         display_numbers <= (others => (others => '0'));
-      elsif FB_o="100" then
-        if num_flag = '1' then
-          if num_color_flag = '1' then 
-            -- Write color of number
-            number_colors(conv_integer(selected_number)) <= dbus(3 downto 0); 
-          else
-            -- Write number to display.
-            -- Convert binary number to bcd
-            bcd <= x"000";
-            temp <= dbus(7 downto 0);
-            for i in 0 to 7 loop
-              if bcd(3 downto 0) > 4 then
-                bcd(3 downto 0) <= bcd(3 downto 0) + 3;
-              end if;
-  
-              if bcd(7 downto 4) > 4 then
-                bcd(7 downto 4) <= bcd(7 downto 4) + 3;
-              end if;
-  
-              bcd <= bcd(10 downto 0) & temp(7);
-              temp <= temp(6 downto 0) & '0';
-            end loop;
-            -- Write bcd to displayed numbers.
-            display_numbers(conv_integer(selected_number)) <= bcd(7 downto 0);
+        convert_to_bcd <= '0';
+      elsif FB_o = "100" and num_flag = '1' and num_color_flag = '0' then
+        -- Load value from bus
+        if convert_to_bcd = '0' then -- No value currently converting 
+          bcd <= x"000";
+          temp <= dbus(7 downto 0);
+          convert_to_bcd <= '1';
+          bcd_lc <= "000";
+        end if;
+      else
+        -- Convert binary numbers to BCD
+        if convert_to_bcd = '1' then
+          -- ### Double Dabble! :D ###
+          if bcd(3 downto 0) > 4 then
+            bcd(3 downto 0) <= bcd(3 downto 0) + 3;
           end if;
+          if bcd(7 downto 4) > 4 then
+            bcd(7 downto 4) <= bcd(7 downto 4) + 3;
+          end if;
+
+          bcd <= bcd(10 downto 0) & temp(7);
+          temp <= temp(6 downto 0) & '0';
+          bcd_lc <= bcd_lc + 1;
+
+          if bcd_lc = "111" then
+            -- Finished converting
+            convert_to_bcd <= '0';
+            bcd_completed <= '1';
+          end if;
+          -- ##########################
+        end if;
+
+        if bcd_completed = '1' then
+          -- Number has been converted
+          display_numbers(conv_integer(selected_number)) <= bcd(7 downto 0);
+          bcd_completed <= '0';
         end if;
       end if;
     end if;
