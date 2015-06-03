@@ -55,6 +55,8 @@ architecture arch of areg is
             0018=>x"01F0_0280",   -- Game Speed
             0019=>x"0300_0008",   -- Loop  
 
+
+
             -- ###############################################
             -- ## Restart game if B-button has been pressed ##
             -- ###############################################
@@ -498,7 +500,7 @@ architecture arch of areg is
             0969=>x"0000_0002",   -- Player 2   gap     state
             0970=>x"0000_0023",   -- Distance Between holes
             0971=>x"0000_000D",   -- Player 1   hole    steps left to hole-time
-            0972=>x"0000_0008",   -- Player 2   hole    steps left to hole-time
+            0972=>x"0000_0000",   -- Player 2   hole    steps left to hole-time
             0973=>x"0000_0003",   -- Player 1   turn    state
             0974=>x"0000_0003",   -- Player 2   turn    state
             0975=>x"0000_0003",   -- Turn sharpness variable
